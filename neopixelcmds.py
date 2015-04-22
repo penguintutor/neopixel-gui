@@ -52,6 +52,10 @@ class NeoPixelCmds():
     
     def setCmdStatus(self, status):
         self.newCmdStatus = status
+        
+    def setDelay (self, delay):
+        self.cmdOptions['delay'] = delay
+        self.cmdOptions['wait'] = delay * 2
 
 
 

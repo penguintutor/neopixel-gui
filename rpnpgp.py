@@ -42,6 +42,8 @@ colourChoice = [
     ]
 
 
+DEFAULTSPEED = 50;
+
 class App(Frame):
 
 
@@ -54,9 +56,17 @@ class App(Frame):
             if (self.colourSelected[i].get() == 1) :
                 text, value = colourChoice[i]
                 coloursTicked.append(value)
+        # Handle speed - convert from String to int
+        try:
+            delay = int(self.speedLEDString.get())
+        except ValueError:
+            delay = DEFAULTSPEED
+        self.speedLEDString.set(delay)
+        self.command.setDelay(delay)
         self.command.setColours(coloursTicked)
-        # Set status to updated so they can exit during command
+        # Set status to updated so light sequence can stop during method execution
         self.command.setCmdStatus(True)
+
             
         
 
