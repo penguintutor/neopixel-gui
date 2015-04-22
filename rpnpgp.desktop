@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=NeoPixel Gui
+Comment=RGB LED NeoPixel GUI
+Icon=/usr/share/pixmaps/rpnpgpicon.png
+Path=/home/pi/neopixel
+Exec=gksudo /home/pi/neopixel/rpnpgp.py
+Terminal=false
+Categories=Accessories;Utility;
+
