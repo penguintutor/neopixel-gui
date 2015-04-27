@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-	
+
+import sys
 import random
-import tkinter
 import threading
-import queue
 from neopixelcmds import *
 from tkinter import *
 from neopixelseq import *
+from rgbconfig import *
 
 
 
@@ -14,7 +14,7 @@ from neopixelseq import *
 # load from config file in future
 
 settings = {
-    'ledcount': 150,
+    'ledcount': 16,
     'gpiopin': 18,
     'ledfreq': 800000,
     'leddma' : 5,
@@ -44,8 +44,80 @@ colourChoice = [
 
 DEFAULTSPEED = 50;
 
+
 class App(Frame):
 
+    # Track whether config window open to stop duplicate windows
+    configWindowOpen = False
+
+
+    # called from window manager handler or from Cancel button
+    def CloseConfig(self):
+        self.configWindowOpen = False
+        self.configTop.destroy()
+
+
+    def SaveConfig(self):
+        # Todo - valid and save config - and inform user to restart
+        
+        # If successful save then close window
+        self.CloseConfig()
+
+
+    def Config(self):
+        if (self.configWindowOpen) :
+            return
+        self.configWindowOpen = True
+        self.configTop = tk.Toplevel(self)
+        self.configTop.wm_title("RpNpGp - Configuration")
+        self.configTop.wm_geometry("400x300")
+        # set handler for close window using WM X
+        self.configTop.wm_protocol('WM_DELETE_WINDOW',  self.CloseConfig)
+        
+        self.numLEDString = StringVar()
+        self.numLEDString.set(settings['ledcount'])
+        self.numGPIOString = StringVar()
+        self.numGPIOString.set(settings['gpiopin'])
+        
+        configTitleLabel = Label(self.configTop,
+                text="RpNpGp - Configuration",
+                foreground="blue", font="Verdana 16 bold").grid(columnspan=3, sticky=W, pady=(4, 15), padx=5)
+                
+        numLEDLabel = Label(self.configTop,
+                    font="Verdana 14",
+                    text="Number LEDs").grid(row=1, column=1)
+                    
+        numLEDEntry = Entry(self.configTop,
+                    font="Verdana 14",
+                    width=5,
+                    textvariable=self.numLEDString).grid(row=1, column=2)
+                    
+        numGPIOLabel = Label(self.configTop,
+                    font="Verdana 14",
+                    text="GPIO pin number").grid(row=2, column=1)
+                    
+        numGPIOEntry = Entry(self.configTop,
+                    font="Verdana 14",
+                    width=5,
+                    textvariable=self.numGPIOString).grid(row=2, column=2)
+                    
+        cancelButton = Button(self.configTop, 
+                    text="Cancel",
+                    font="Verdana 14",
+                    width = 8,
+                    height = 1,
+                    command=self.CloseConfig)
+        cancelButton.grid(row=4, column=2, pady=(40, 10), padx=10)
+    
+    
+        saveButton = Button(self.configTop, 
+                    text="Save",
+                    font="Verdana 14",
+                    width = 8,
+                    height = 1,
+                    command=self.SaveConfig)
+        saveButton.grid(row=4, column=3, pady=(40, 10), padx=10)
+        
 
     def ApplyChange(self):
         # update command object to be passed to the 
@@ -167,7 +239,7 @@ class App(Frame):
 
         spacer1 = LabelFrame(optionFrame, width=100).pack(side=LEFT)
 
-        numLEDLabel = Label(optionFrame,
+        numSpeedLabel = Label(optionFrame,
                     font="Verdana 14",
                     text="Wait ms").pack(side=LEFT)
 
@@ -187,6 +259,15 @@ class App(Frame):
 
 
 
+        configButton = Button(self, 
+                    text="Config",
+                    font="Verdana 14",
+                    width = 10,
+                    height = 3,
+                    command=self.Config)
+        configButton.grid(row=currentRow, column=0, pady=20)
+
+
 
 #Thread for communicating with neopixels
 #Simple one-way communication with thread using globals
@@ -204,7 +285,7 @@ def main():
 
     # TODO
     # load settings during startup
-
+    config = RGBConfig()
     command = NeoPixelCmds()
     LEDs = NeoPixelSeq(settings, command)
     
