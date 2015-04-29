@@ -6,14 +6,21 @@ import threading
 from neopixelcmds import *
 from tkinter import *
 from neopixelseq import *
-from rgbconfig import *
+import configparser
+import time
 
 
+# File containing config
+configfile = 'rpnpgp.cfg'
+
+# Use to send a message to GUI - created during startup
+# eg. message = ("Warning", "Insert warning here")
+message = ("","")
 
 # Settings for neopixels
-# load from config file in future
+# load from config file - these are defaults if no config file found
 
-settings = {
+defaultLEDSettings = {
     'ledcount': 16,
     'gpiopin': 18,
     'ledfreq': 800000,
@@ -50,7 +57,6 @@ class App(Frame):
     # Track whether config window open to stop duplicate windows
     configWindowOpen = False
 
-
     # called from window manager handler or from Cancel button
     def CloseConfig(self):
         self.configWindowOpen = False
@@ -58,10 +64,18 @@ class App(Frame):
 
 
     def SaveConfig(self):
-        # Todo - valid and save config - and inform user to restart
+        self.config['LEDs']['ledcount'] = self.numLEDString.get()
+        self.config['LEDs']['gpiopin'] = self.numGPIOString.get()
+        # save config - and inform user to restart
+        try:
+            with open(configfile, 'w') as cfgfile:
+                self.config.write(cfgfile)
+                self.CloseConfig()
+                #messagebox.showinfo("Info", "Configuration saved\nRestart application to reload config")
+        except : 
+            self.CloseConfig()
+            #messagebox.showinfo("Error", "Error saving configuration file "+configfile)
         
-        # If successful save then close window
-        self.CloseConfig()
 
 
     def Config(self):
@@ -75,9 +89,9 @@ class App(Frame):
         self.configTop.wm_protocol('WM_DELETE_WINDOW',  self.CloseConfig)
         
         self.numLEDString = StringVar()
-        self.numLEDString.set(settings['ledcount'])
+        self.numLEDString.set(int(self.config['LEDs']['ledcount']))
         self.numGPIOString = StringVar()
-        self.numGPIOString.set(settings['gpiopin'])
+        self.numGPIOString.set(int(self.config['LEDs']['gpiopin']))
         
         configTitleLabel = Label(self.configTop,
                 text="RpNpGp - Configuration",
@@ -144,11 +158,16 @@ class App(Frame):
 
     def __del__(self):
         global cmdMessage
+        # When close window notify thread to terminate and then give 
+        # time for it to close properly before cleanup
         self.command.setCommand("STOP")
+        self.command.setCmdStatus(True)
+        time.wait(5)
     
-    def __init__(self, parent, command):
+    def __init__(self, parent, command, config):
         Frame.__init__(self, parent)
         self.command = command
+        self.config = config
         self.parent = parent
         self.initUI()
 
@@ -266,6 +285,11 @@ class App(Frame):
                     height = 3,
                     command=self.Config)
         configButton.grid(row=currentRow, column=0, pady=20)
+        
+        
+        ## Finished setting up GUI - now issue any message
+        #if (message[0] != ""):
+        #    messagebox.showinfo(message[0], message[1])
 
 
 
@@ -283,19 +307,42 @@ def runPixels(LEDs, command):
 
 def main():
 
-    # TODO
-    # load settings during startup
-    config = RGBConfig()
-    command = NeoPixelCmds()
-    LEDs = NeoPixelSeq(settings, command)
+
+    # load settings during startup    
+    config = configparser.ConfigParser()
+    # load from configfile
+    try :
+        config.read(configfile)
+        # Test that config entries loaded by looking at first entry
+        numLEDs = int(config['LEDs']['ledcount'])
+    except (configparser.Error, KeyError) :
+        # Can't display warning at this stage so save message for when gui loaded
+        global message
+        message = ("Warning", "No config file found\nUsing default values")
+        
+        # if load failed then use defaults
+        config.add_section('LEDs')
+        for key, value in defaultLEDSettings.items():
+            config.set('LEDs', key, str(value)) 
     
+    LEDSettings = {
+    'ledcount': int(config['LEDs']['ledcount']),
+    'gpiopin': int(config['LEDs']['gpiopin']),
+    'ledfreq': int(config['LEDs']['ledfreq']),
+    'leddma' : int(config['LEDs']['leddma']),
+    'ledmaxbrightness': int(config['LEDs']['ledmaxbrightness']),
+    'ledinvert': config['LEDs'].getboolean('ledinvert')
+    }
+    
+    command = NeoPixelCmds()
+    LEDs = NeoPixelSeq(LEDSettings, command)
     
     thread=threading.Thread(target=runPixels, args=(LEDs, command))
     thread.start()
     
     root = Tk()
     root.geometry("800x600+100+100")
-    app = App(root, command)
+    app = App(root, command, config)
     root.mainloop()
     
     
