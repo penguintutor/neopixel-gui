@@ -71,10 +71,10 @@ class App(Frame):
             with open(configfile, 'w') as cfgfile:
                 self.config.write(cfgfile)
                 self.CloseConfig()
-                #messagebox.showinfo("Info", "Configuration saved\nRestart application to reload config")
+                messagebox.showinfo("Info", "Configuration saved\nRestart application to reload config")
         except : 
             self.CloseConfig()
-            #messagebox.showinfo("Error", "Error saving configuration file "+configfile)
+            messagebox.showinfo("Error", "Error saving configuration file "+configfile)
         
 
 
@@ -162,7 +162,7 @@ class App(Frame):
         # time for it to close properly before cleanup
         self.command.setCommand("STOP")
         self.command.setCmdStatus(True)
-        time.wait(5)
+        #time.wait(5)
     
     def __init__(self, parent, command, config):
         Frame.__init__(self, parent)
@@ -287,9 +287,9 @@ class App(Frame):
         configButton.grid(row=currentRow, column=0, pady=20)
         
         
-        ## Finished setting up GUI - now issue any message
-        #if (message[0] != ""):
-        #    messagebox.showinfo(message[0], message[1])
+        # Finished setting up GUI - now issue any message
+        if (message[0] != ""):
+            messagebox.showinfo(message[0], message[1])
 
 
 
