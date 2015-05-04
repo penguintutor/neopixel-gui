@@ -18,7 +18,7 @@ The Apply button needs to be pressed for the changes to take effect, which allow
 ## Supported platform
 
 This is designed to run on a Raspberry Pi. 
-It has been tested with the mypifi.net neopixel board.
+It has been tested with the [MyPifi Neopixel board](http://smstextblog.blogspot.co.uk/2015/03/afirstly-thank-you-for-purchasing-this.html).
 
 ## Pre-requisites
 
@@ -33,6 +33,8 @@ sudo python3 setup.py install
 Download the relevant files into a new folder named /home/pi/neopixel
 Copy the file rpnpgp.desktop to the /usr/share/applications directory.
 The icon should now appear on the normal start menu.
+
+A more detailed install guide is provided in the file INSTALL.md
 
 
 ## More Information 

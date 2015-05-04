@@ -1,0 +1,12 @@
+<!DOCTYPE Menu PUBLIC "-//freedesktop//DTD Menu 1.0//EN" "http://www.freedesktop.org/standards/menu-spec/1.0/menu.dtd">
+<Menu>
+   <Name>DJ Menu Extension</Name>
+   <MergeFile type="parent">/etc/xdg/menus/lxde-pi-applications.menu</MergeFile>
+   <Menu>
+      <Name>DJ</Name>
+      <Directory>dj_menu.directory</Directory>
+      <Include>
+         <And><Category>DJ</Category></And>
+      </Include>
+   </Menu>
+</Menu>
