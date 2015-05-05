@@ -10,8 +10,12 @@ import configparser
 import time
 from configwindow import *
 
+# File containing sequences and colour options
+# Must exist and have valid entries
+sequencefile = 'sequences.cfg'
 
-# File containing config
+# File containing user config
+# If not exist then use defaults
 configfile = 'rpnpgp.cfg'
 
 # Use to send a message to GUI - created during startup
@@ -30,24 +34,30 @@ defaultLEDSettings = {
     'ledinvert': False
     }
 
-sequenceOptions = [
-    ("allOff", "All off"),                    
-    ("allOn", "All on"),
-    ("allOnSingleColour", "All on\nSingle Colour"),
-    ("chaser", "Chaser"),
-    ("chaserSingleColour", "Chaser\nSingle Colour"),
-    ("chaserBackground", "Chaser\nSolid background"),
-    ("colourWipe", "Colour Wipe"),
-    ("inOut", "In Out"),
-    ("outIn", "Out In"),    
-    ("rainbow", "Rainbow"),
-    ("rainbowCycle", "Rainbow Cycle\nFast"),
-    ("theatreChaseRainbow", "Rainbow Theatre Chase")
-    ]
 
-colourChoice = [
-    ('White', 0xffffff), ('Red', 0xff0000), ('Green', 0x00ff00), ('Blue', 0x0000ff)
-    ]
+# sequenceOptions = [
+    # ("allOff", "All off"),                    
+    # ("allOn", "All on"),
+    # ("allOnSingleColour", "All on\nSingle Colour"),
+    # ("chaser", "Chaser"),
+    # ("chaserSingleColour", "Chaser\nSingle Colour"),
+    # ("chaserBackground", "Chaser\nSolid background"),
+    # ("colourWipe", "Colour Wipe"),
+    # ("inOut", "In Out"),
+    # ("outIn", "Out In"),    
+    # ("rainbow", "Rainbow"),
+    # ("rainbowCycle", "Rainbow Cycle\nFast"),
+    # ("theatreChaseRainbow", "Rainbow Theatre Chase")
+    # ]
+
+#colourChoice = [
+#    ('White', 0xffffff), ('Red', 0xff0000), ('Green', 0x00ff00), ('Blue', 0x0000ff)
+#    ]
+
+# Grid for sequence buttons
+sequenceGridX = 3
+sequenceGridY = 4
+numsequenceButtons = sequenceGridX * sequenceGridY
 
 
 DEFAULTSPEED = 50;
@@ -59,25 +69,31 @@ class App(Frame):
 
     def ApplyChange(self):
         # update command object to be passed to the 
-        cmd, text = sequenceOptions[self.sequence.get()]
+        cmd, text = self.sequenceOptions[self.sequence.get()]
         self.command.setCommand(cmd)
         coloursTicked = []
         for i in range (len(self.colourSelected)):
             if (self.colourSelected[i].get() == 1) :
-                text, value = colourChoice[i]
-                coloursTicked.append(value)
+                text, value = self.colourChoice[i]
+                # value is from config which is string - so convert to int
+                coloursTicked.append(int(value, 16))
         # Handle speed - convert from String to int
         try:
             delay = int(self.speedLEDString.get())
         except ValueError:
-            delay = DEFAULTSPEED
-        self.speedLEDString.set(delay)
+            delay = DEFAULTSPEED, 
+        self.speedLEDString.set(delay), 
         self.command.setDelay(delay)
         self.command.setColours(coloursTicked)
         # Set status to updated so light sequence can stop during method execution
         self.command.setCmdStatus(True)
 
-            
+    
+    def moreSequences(self):
+        # Change the sequence buttons
+        # Todo
+        pass
+    
         
 
     def __del__(self):
@@ -88,9 +104,11 @@ class App(Frame):
         self.command.setCmdStatus(True)
         #time.wait(5)
     
-    def __init__(self, parent, command, config, cfgwindow):
+    def __init__(self, parent, command, sequenceOptions, colourChoice, config, cfgwindow):
         Frame.__init__(self, parent)
         self.command = command
+        self.sequenceOptions = sequenceOptions
+        self.colourChoice = colourChoice
         self.config = config
         self.parent = parent
         self.cfgwindow = cfgwindow
@@ -117,7 +135,7 @@ class App(Frame):
 
 
         # Use to set the selected colour
-        self.colourSelected = [0 for x in range(len(colourChoice))]
+        self.colourSelected = [0 for x in range(len(self.colourChoice))]
 
         # Store number of LEDs (as a string)
         self.speedLEDString = StringVar()
@@ -145,8 +163,8 @@ class App(Frame):
         currentColumn = 0
         numColumns = 6
 
-        for i in range(0, len(sequenceOptions)):
-            cmd, txt = sequenceOptions[i]
+        for i in range(0, numsequenceButtons):
+            cmd, txt = self.sequenceOptions[i]
             Radiobutton(self,
                     text=txt,
                     font="Verdana 14",
@@ -172,9 +190,9 @@ class App(Frame):
         currentRow += 1
         
 
-        for i in range(len(colourChoice)):
+        for i in range(len(self.colourChoice)):
             self.colourSelected[i] = IntVar()
-            colourWord, colourCode = colourChoice[i]
+            colourWord, colourCode = self.colourChoice[i]
             colourCheckBox = Checkbutton(optionFrame,
                     text=colourWord,
                     font="Verdana 14",
@@ -211,11 +229,24 @@ class App(Frame):
                     command=self.cfgwindow.windowClient)
         configButton.grid(row=currentRow, column=0, pady=20)
         
+        # Only display page button if we have more than 1 page of sequences
+        if (len(self.sequenceOptions) > numsequenceButtons) :
+            pageButton = Button(self, 
+                        text="Page 1 of " + str(numpages(len(self.sequenceOptions), numsequenceButtons)),
+                        font="Verdana 14",
+                        width = 10,
+                        height = 3,
+                        command=self.moreSequences)
+            pageButton.grid(row=currentRow, column=5, pady=20)
+        
         
         # Finished setting up GUI - now issue any message
         if (message[0] != ""):
             messagebox.showinfo(message[0], message[1])
 
+
+def numpages (numsequences, numbuttons) :
+    return int((numsequences-1) / numbuttons) + 1
 
 
 #Thread for communicating with neopixels
@@ -232,18 +263,36 @@ def runPixels(LEDs, command):
 
 def main():
 
+    global message
 
     # load settings during startup    
+    seqconfig = configparser.ConfigParser()
+    # configwriter keys are normally case insensitive - override as need case for method names
+    seqconfig.optionxform = str
+    # Load the sequences
+    try :
+        seqconfig.read(sequencefile)
+    except (configparser.Error, KeyError) :
+        # Can't display warning at this stage so save message for when gui loaded
+        message = ("Error", "Sequence.cfg does not exist\n or is missing important values")
+        
+    # iterate over sequences which allows handling of "\n" text to '\n' character
+    sequenceOptions = []
+    for key, value in seqconfig.items('Sequences') :
+        sequenceOptions.append ([key, value.replace('\\n', '\n')]) 
+    colourChoice = seqconfig.items('Colours')
+               
     config = configparser.ConfigParser()
-    # load from configfile
+    # load user settings from configfile
     try :
         config.read(configfile)
         # Test that config entries loaded by looking at first entry
         numLEDs = int(config['LEDs']['ledcount'])
     except (configparser.Error, KeyError) :
         # Can't display warning at this stage so save message for when gui loaded
-        global message
-        message = ("Warning", "No config file found\nUsing default values")
+        # Don't overwrite error message if there is one
+        if (message[0] == '') : 
+            message = ("Warning", "No config file found\nUsing default values")
         
         # if load failed then use defaults
         config.add_section('LEDs')
@@ -270,7 +319,7 @@ def main():
     
     root = Tk()
     root.geometry("800x600+100+100")
-    app = App(root, command, config, cfgwindow)
+    app = App(root, command, sequenceOptions, colourChoice, config, cfgwindow)
     root.mainloop()
     
     
