@@ -9,6 +9,8 @@ from neopixelseq import *
 import configparser
 import time
 from configwindow import *
+from helpwindow import *
+import webbrowser
 
 # File containing sequences and colour options
 # Must exist and have valid entries
@@ -17,6 +19,8 @@ sequencefile = 'sequences.cfg'
 # File containing user config
 # If not exist then use defaults
 configfile = 'rpnpgp.cfg'
+
+helpfile = 'help.html'
 
 # Use to send a message to GUI - created during startup
 # eg. message = ("Warning", "Insert warning here")
@@ -33,26 +37,6 @@ defaultLEDSettings = {
     'ledmaxbrightness': 255,
     'ledinvert': False
     }
-
-
-# sequenceOptions = [
-    # ("allOff", "All off"),                    
-    # ("allOn", "All on"),
-    # ("allOnSingleColour", "All on\nSingle Colour"),
-    # ("chaser", "Chaser"),
-    # ("chaserSingleColour", "Chaser\nSingle Colour"),
-    # ("chaserBackground", "Chaser\nSolid background"),
-    # ("colourWipe", "Colour Wipe"),
-    # ("inOut", "In Out"),
-    # ("outIn", "Out In"),    
-    # ("rainbow", "Rainbow"),
-    # ("rainbowCycle", "Rainbow Cycle\nFast"),
-    # ("theatreChaseRainbow", "Rainbow Theatre Chase")
-    # ]
-
-#colourChoice = [
-#    ('White', 0xffffff), ('Red', 0xff0000), ('Green', 0x00ff00), ('Blue', 0x0000ff)
-#    ]
 
 # Grid for sequence buttons
 sequenceGridX = 3
@@ -91,9 +75,23 @@ class App(Frame):
     
     def moreSequences(self):
         # Change the sequence buttons
-        # Todo
-        pass
-    
+        # The button is hidden if only one screen so always change when clicked
+        self.seqScreen += 1
+        if (self.seqScreen > numpages(len(self.sequenceOptions), numsequenceButtons)):
+                self.seqScreen = 1
+        # Update the page button
+        self.pageButton.config(text = "Page " + str(self.seqScreen) + " of " + str(numpages(len(self.sequenceOptions), numsequenceButtons)))
+        # Update the sequence radiobuttons
+        for i in range(0, numsequenceButtons):
+            seqNumber = ((self.seqScreen-1)*numsequenceButtons)+i
+            if (len(self.sequenceOptions) > seqNumber):
+                cmd, txt = self.sequenceOptions[seqNumber]
+                self.seqButtons[i].config(text=txt, value=seqNumber)
+                # add it back to grid
+                self.seqButtons[i].grid()
+            else:
+                self.seqButtons[i].grid_remove()
+            
         
 
     def __del__(self):
@@ -104,14 +102,16 @@ class App(Frame):
         self.command.setCmdStatus(True)
         #time.wait(5)
     
-    def __init__(self, parent, command, sequenceOptions, colourChoice, config, cfgwindow):
+    def __init__(self, parent, command, sequenceOptions, colourChoice, config, cfgwindow, helpwindow):
         Frame.__init__(self, parent)
+        self.seqScreen = 1                  # which screen of sequences we are displaying - starts at 1
         self.command = command
         self.sequenceOptions = sequenceOptions
         self.colourChoice = colourChoice
         self.config = config
         self.parent = parent
         self.cfgwindow = cfgwindow
+        self.helpwindow = helpwindow
         self.initUI()
 
     def initUI(self):
@@ -128,6 +128,10 @@ class App(Frame):
         self.columnconfigure(5, weight=1)
         self.columnconfigure(6, weight=1)                                                           
         
+        self.rowconfigure(2, minsize=85)
+        self.rowconfigure(3, minsize=85)
+        self.rowconfigure(4, minsize=85)
+        self.rowconfigure(5, minsize=85)
 
         self.sequence = IntVar()
         self.sequence.set(0)
@@ -145,38 +149,53 @@ class App(Frame):
         titleLabel = Label(self,
                 text="RpNpGp - Raspberry Pi Neopixel Gui Package",
                 foreground="blue", font="Verdana 16 bold").grid(columnspan=6, sticky=W, pady=4, padx=5)
-        
-        description = """Control NeoPixels (RGB LEDs)\nfrom the Raspberry Pi"""
-        text1 = Label(self, 
-                justify=LEFT,
-                font="Verdana 14",
-                text=description).grid(sticky=W, columnspan=4, ipadx=10)
+
 
 
         logo = PhotoImage(file="logo.gif")
         image1 = Label(self, image=logo, justify=RIGHT)
         # next line is required to stop the image from being garbage collected
         image1.image = logo
-        image1.grid(row=1, column=4, pady=10, columnspan=2)
+        image1.grid(row=1, column=0, pady=10, columnspan=1)
+
+        description = """Control NeoPixels (RGB LEDs)\nusing a Raspberry Pi"""
+        text1 = Label(self, 
+                justify=LEFT,
+                font="Verdana 14",
+                text=description).grid(row=1, column=1, sticky=W, columnspan=4, ipadx=10)
+                
+        helpButton = Button(self, 
+                    text="Help",
+                    font="Verdana 14",
+                    width = 10,
+                    height = 2,
+                    command=viewHelp)
+#                    command=self.helpwindow.windowClient)
+        helpButton.grid(row=1, column=5, pady=10)
+
+
 
         currentRow = 2
         currentColumn = 0
         numColumns = 6
+        
+        self.seqButtons = []
 
         for i in range(0, numsequenceButtons):
             cmd, txt = self.sequenceOptions[i]
-            Radiobutton(self,
+            self.seqButtons.append(Radiobutton(self,
                     text=txt,
                     font="Verdana 14",
                     variable=self.sequence,
                     height=3,
                     width=25,
                     indicatoron=0,
-                    value=i).grid(row=currentRow, column=currentColumn, columnspan=2, padx=10, pady=10)
+                    value=i))
+            self.seqButtons[i].grid(row=currentRow, column=currentColumn, columnspan=2, padx=10, pady=10)
             currentColumn += 2
             if currentColumn >= numColumns :
                 currentColumn = 0
-                currentRow += 2
+                currentRow += 1
 
         # If currentColumn is 0 then aready incremented since last button added
         # otherwise add new row
@@ -231,19 +250,28 @@ class App(Frame):
         
         # Only display page button if we have more than 1 page of sequences
         if (len(self.sequenceOptions) > numsequenceButtons) :
-            pageButton = Button(self, 
+            self.pageButton = Button(self, 
                         text="Page 1 of " + str(numpages(len(self.sequenceOptions), numsequenceButtons)),
                         font="Verdana 14",
                         width = 10,
                         height = 3,
                         command=self.moreSequences)
-            pageButton.grid(row=currentRow, column=5, pady=20)
+            self.pageButton.grid(row=currentRow, column=5, pady=20)
         
         
         # Finished setting up GUI - now issue any message
         if (message[0] != ""):
             messagebox.showinfo(message[0], message[1])
+            
+        #### Testing
+        #self.seqButtons[11].grid_remove()
+        #self.seqButtons[10].grid_remove()
+        #self.seqButtons[9].grid_remove()
 
+
+
+def viewHelp():
+    webbrowser.open_new(helpfile)
 
 def numpages (numsequences, numbuttons) :
     return int((numsequences-1) / numbuttons) + 1
@@ -267,7 +295,7 @@ def main():
 
     # load settings during startup    
     seqconfig = configparser.ConfigParser()
-    # configwriter keys are normally case insensitive - override as need case for method names
+    # configwriter keys are normally case insensitive (converted to lowercase) - override as need case of the keys to match method names
     seqconfig.optionxform = str
     # Load the sequences
     try :
@@ -311,7 +339,8 @@ def main():
     command = NeoPixelCmds()
     LEDs = NeoPixelSeq(LEDSettings, command)
     
-    # Create config Window
+    # Create config & help Windows
+    helpwindow = HelpWindow()
     cfgwindow = ConfigWindow(config, configfile)
     
     thread=threading.Thread(target=runPixels, args=(LEDs, command))
@@ -319,7 +348,7 @@ def main():
     
     root = Tk()
     root.geometry("800x600+100+100")
-    app = App(root, command, sequenceOptions, colourChoice, config, cfgwindow)
+    app = App(root, command, sequenceOptions, colourChoice, config, cfgwindow, helpwindow)
     root.mainloop()
     
     

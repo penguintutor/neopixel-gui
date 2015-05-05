@@ -84,8 +84,7 @@ class NeoPixelSeq():
             self.chaserStartPos += 1
             if (self.chaserStartPos >= colourPixelRange):
                 self.chaserStartPos = 0
-
-    
+   
     # colors is an array of colors to display
     # simple sequencer / shift
     def chaser(self):
