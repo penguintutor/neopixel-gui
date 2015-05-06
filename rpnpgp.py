@@ -11,6 +11,8 @@ import time
 from configwindow import *
 from helpwindow import *
 import webbrowser
+import ledsettings
+
 
 # File containing sequences and colour options
 # Must exist and have valid entries
@@ -170,7 +172,6 @@ class App(Frame):
                     width = 10,
                     height = 2,
                     command=viewHelp)
-#                    command=self.helpwindow.windowClient)
         helpButton.grid(row=1, column=5, pady=10)
 
 
@@ -263,12 +264,6 @@ class App(Frame):
         if (message[0] != ""):
             messagebox.showinfo(message[0], message[1])
             
-        #### Testing
-        #self.seqButtons[11].grid_remove()
-        #self.seqButtons[10].grid_remove()
-        #self.seqButtons[9].grid_remove()
-
-
 
 def viewHelp():
     webbrowser.open_new(helpfile)
@@ -326,22 +321,17 @@ def main():
         config.add_section('LEDs')
         for key, value in defaultLEDSettings.items():
             config.set('LEDs', key, str(value)) 
+
+
     
-    LEDSettings = {
-    'ledcount': int(config['LEDs']['ledcount']),
-    'gpiopin': int(config['LEDs']['gpiopin']),
-    'ledfreq': int(config['LEDs']['ledfreq']),
-    'leddma' : int(config['LEDs']['leddma']),
-    'ledmaxbrightness': int(config['LEDs']['ledmaxbrightness']),
-    'ledinvert': config['LEDs'].getboolean('ledinvert')
-    }
+    settings = ledsettings.LEDSettings(config)
     
     command = NeoPixelCmds()
-    LEDs = NeoPixelSeq(LEDSettings, command)
+    LEDs = NeoPixelSeq(settings.allSettings(), command)
     
     # Create config & help Windows
     helpwindow = HelpWindow()
-    cfgwindow = ConfigWindow(config, configfile)
+    cfgwindow = ConfigWindow(config, configfile, defaultLEDSettings, settings, LEDs)
     
     thread=threading.Thread(target=runPixels, args=(LEDs, command))
     thread.start()

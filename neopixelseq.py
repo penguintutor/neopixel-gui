@@ -1,6 +1,13 @@
 import time
 import tkinter as tk
 from neopixel import *
+from dynneopixel import *
+
+
+# Any methods that are long last need to check self.command.getCmdStatus()
+# preiodically and if true return 
+# this is not critical, but will cause updates to be unresponsive
+# Set it to False at the start of the method
 
 
 class NeoPixelSeq():
@@ -10,19 +17,27 @@ class NeoPixelSeq():
         # class variables to maintain between function calls
         self.chaserStartPos = 0  # can use across all chasers as only required when we don't restart chaser
 
-        
+        self.settings = settings
         self.command = command
         self.numPixels = settings['ledcount']
-        self.strip = Adafruit_NeoPixel(settings['ledcount'], settings['gpiopin'], settings['ledfreq'], settings['leddma'], settings['ledinvert'], settings['ledmaxbrightness'])
+        self.strip = Dynamic_NeoPixel(self.settings['ledcount'], self.settings['gpiopin'], self.settings['ledfreq'], self.settings['leddma'], self.settings['ledinvert'], self.settings['ledmaxbrightness'])
         # Intialize the library (must be called once before other functions).
         self.strip.begin()
-        #pass
+        self.disable = False
 
+
+    # Update settings by replacing existing led strip
+    def updSettings (self, settings):
+        self.settings = settings
+        self.numPixels = settings['ledcount']
+        self.strip.updSettings(self.settings)
+        self.disable = False
 
 
     # All on with a single colour (first colour is used)
     # Full intensity
     def allOnSingleColour(self):
+        if (self.disable): return
         colours = self.command.getColours()
         colour = colours[0]
         for i in range(self.numPixels):
@@ -34,6 +49,7 @@ class NeoPixelSeq():
     # All on with multiple colours (each colour used in cycle)
     # Full intensity
     def allOn(self):
+        if (self.disable): return
         colours = self.command.getColours()
         currentColour = 0
         for i in range(self.numPixels):
@@ -45,6 +61,7 @@ class NeoPixelSeq():
         time.sleep(self.command.getOptions()['delay']/1000)
 
     def allOff(self):
+        if (self.disable): return
         for i in range(self.numPixels):
             self.strip.setPixelColor(i, Color(0,0,0))
         self.strip.show()
@@ -53,6 +70,7 @@ class NeoPixelSeq():
     # chase colours across a background
     # if first colour is white then use white background - otherwise use black
     def chaserBackground(self):
+        if (self.disable): return
         options = self.command.getOptions()
         colours = self.command.getColours()
         backColour = self.command.getBackColour()
@@ -88,6 +106,7 @@ class NeoPixelSeq():
     # colors is an array of colors to display
     # simple sequencer / shift
     def chaser(self):
+        if (self.disable): return
         options = self.command.getOptions()
         colours = self.command.getColours()
         # colourNum tracks which colour in array we are showing
@@ -120,6 +139,7 @@ class NeoPixelSeq():
 
     # Chaser that turns pixels on and off 3 at a time
     def chaserSingleColour(self):
+        if (self.disable): return
         options = self.command.getOptions()
         colours = self.command.getColours()
         colour = colours[0]
@@ -136,6 +156,7 @@ class NeoPixelSeq():
 
     # Define functions which animate LEDs in various ways.
     def colourWipe(self):
+        if (self.disable): return
         self.command.setCmdStatus(False)
         options = self.command.getOptions()
         colours = self.command.getColours()
@@ -147,7 +168,7 @@ class NeoPixelSeq():
             if (colourNum >= len(colours)) :
                 colourNum = 0
             # Exit if new command
-            if (self.command.getCmdStatus()):
+            if (self.command.getCmdStatus()  or  self.disable):
                 return
             time.sleep(self.command.getOptions()['delay']/1000.0)
 
@@ -167,6 +188,7 @@ class NeoPixelSeq():
 
 
     def rainbow(self):
+        if (self.disable): return
         """Draw rainbow that fades across all pixels at once."""
         self.command.setCmdStatus(False)
         for j in range(256):
@@ -174,13 +196,14 @@ class NeoPixelSeq():
                 self.strip.setPixelColor(i, self.wheel((i+j) & 255))
             self.strip.show()
             # Exit if new command
-            if (self.command.getCmdStatus()):
+            if (self.command.getCmdStatus()  or  self.disable):
                 return
             time.sleep(self.command.getOptions()['delay']/1000.0)
 
 
 
     def rainbowCycle(self):
+        if (self.disable): return
         """Draw rainbow that uniformly distributes itself across all pixels."""
         for j in range(256):
             for i in range(self.strip.numPixels()):
@@ -191,6 +214,7 @@ class NeoPixelSeq():
 
 
     def theatreChaseRainbow(self):
+        if (self.disable): return
         self.command.setCmdStatus(False)
         """Rainbow movie theater light style chaser animation."""
         for j in range(256):
@@ -202,30 +226,33 @@ class NeoPixelSeq():
                 for i in range(0, self.strip.numPixels(), 3):
                     self.strip.setPixelColor(i+q, 0)
             # Exit if new command
-            if (self.command.getCmdStatus()):
+            if (self.command.getCmdStatus()  or  self.disable):
                 return
 
 
     def inOut(self):
+        if (self.disable): return
         self.outToIn()
-        if (self.command.getCmdStatus()):
+        if (self.command.getCmdStatus() or self.disable):
             return
         self.inToOutOff()
-        if (self.command.getCmdStatus()):
+        if (self.command.getCmdStatus() or self.disable):
             return
 
     def outIn(self):
+        if (self.disable): return
         self.inToOut()
-        if (self.command.getCmdStatus()):
+        if (self.command.getCmdStatus() or self.disable):
             return
         self.outToInOff()
-        if (self.command.getCmdStatus()):
+        if (self.command.getCmdStatus() or self.disable):
             return
         
         
         
     # outToIn -
     def outToIn(self):
+        if (self.disable): return
         self.command.setCmdStatus(False)
         colour = self.command.getSingleColour()
         """Wipe color across starting at both ends"""
@@ -233,7 +260,7 @@ class NeoPixelSeq():
             self.strip.setPixelColor(i, colour)
             self.strip.setPixelColor(self.strip.numPixels() - i, colour);
             self.strip.show()
-            if (self.command.getCmdStatus()):
+            if (self.command.getCmdStatus() or self.disable):
                 return
             time.sleep(self.command.getOptions()['delay']/1000.0)
 
@@ -248,7 +275,7 @@ class NeoPixelSeq():
             self.strip.setPixelColor((int)(self.strip.numPixels()/2) - i, colour)
             self.strip.setPixelColor((int)(self.strip.numPixels()/2) + i, colour);
             self.strip.show()
-            if (self.command.getCmdStatus()):
+            if (self.command.getCmdStatus() or self.disable):
                 return
             time.sleep(self.command.getOptions()['delay']/1000.0)
 
@@ -261,7 +288,7 @@ class NeoPixelSeq():
             self.strip.setPixelColor(i, colour)
             self.strip.setPixelColor(self.strip.numPixels() - i, colour);
             self.strip.show()
-            if (self.command.getCmdStatus()):
+            if (self.command.getCmdStatus() or self.disable):
                 return
             time.sleep(self.command.getOptions()['delay']/1000.0)
 
@@ -275,7 +302,7 @@ class NeoPixelSeq():
             self.strip.setPixelColor((int)(self.strip.numPixels()/2) - i, colour)
             self.strip.setPixelColor((int)(self.strip.numPixels()/2) + i, colour);
             self.strip.show()
-            if (self.command.getCmdStatus()):
+            if (self.command.getCmdStatus() or self.disable):
                 return
             time.sleep(self.command.getOptions()['delay']/1000.0)
 
