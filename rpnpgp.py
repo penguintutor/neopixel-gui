@@ -179,35 +179,45 @@ class App(Frame):
 
 
 
-        currentRow = 2
+        currentRow = 1
         currentColumn = 0
         numColumns = 6
         
         
+        
         self.tabFrame = ttk.Notebook(self)
         self.frames = []
-        
-        for (numframe in range (0, int(math.ceil(len(self.sequenceOptions)/numsequenceButtons)))):
-            = ttk.Frame(self.tabFrame)
-        
-        
         self.seqButtons = []
+        numtabs = int(math.ceil(len(self.sequenceOptions)/numsequenceButtons));
+        currentButton = 0;
+        
+        for numframe in range (numtabs):
+            self.frames.append(ttk.Frame(self.tabFrame))
+            self.tabFrame.add(self.frames[numframe], text="Sequences "+str(numframe+1))
+            for i in range(0, numsequenceButtons):
+                cmd, txt = self.sequenceOptions[currentButton]
+                self.seqButtons.append(Radiobutton(self.frames[numframe],
+                        text=txt,
+                        font="Verdana 14",
+                        variable=self.sequence,
+                        height=3,
+                        width=25,
+                        indicatoron=0,
+                        value=currentButton))
+                self.seqButtons[currentButton].grid(row=currentRow, column=currentColumn, columnspan=2, padx=10, pady=10)
+                currentColumn += 2
+                if currentColumn >= numColumns :
+                    currentColumn = 0
+                    currentRow += 1
+                currentButton += 1
+                if (currentButton >= len(self.sequenceOptions)):
+                    break;
+        self.tabFrame.grid(row=2, column=0, columnspan=6)
+       
 
-        for i in range(0, numsequenceButtons):
-            cmd, txt = self.sequenceOptions[i]
-            self.seqButtons.append(Radiobutton(self,
-                    text=txt,
-                    font="Verdana 14",
-                    variable=self.sequence,
-                    height=3,
-                    width=25,
-                    indicatoron=0,
-                    value=i))
-            self.seqButtons[i].grid(row=currentRow, column=currentColumn, columnspan=2, padx=10, pady=10)
-            currentColumn += 2
-            if currentColumn >= numColumns :
-                currentColumn = 0
-                currentRow += 1
+        currentRow = 3
+        currentColumn = 0
+
 
         # If currentColumn is 0 then aready incremented since last button added
         # otherwise add new row
@@ -332,11 +342,6 @@ def main():
             config.set('LEDs', key, str(value)) 
 
 
-    #ttk.Style().configure("TButton", relief="flat", background="#ccc") #font=('Helvetica', 14, 'bold'))
-    #ttk.Style().configure("TButton", font='Helvetica 14')
-
-
-    
     settings = ledsettings.LEDSettings(config)
     
     command = NeoPixelCmds()
