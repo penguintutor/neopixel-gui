@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 
 import sys
+import math
 import random
 import threading
 from neopixelcmds import *
 from tkinter import *
+from tkinter import ttk
 from neopixelseq import *
 import configparser
 import time
 from configwindow import *
 import webbrowser
 import ledsettings
+
 
 
 # File containing sequences and colour options
@@ -46,6 +49,8 @@ numsequenceButtons = sequenceGridX * sequenceGridY
 
 
 DEFAULTSPEED = 50;
+
+#buttonLargeFont = font.Font(family='Helvetica', size=14, weight='bold')
 
 
 class App(Frame):
@@ -178,6 +183,14 @@ class App(Frame):
         currentColumn = 0
         numColumns = 6
         
+        
+        self.tabFrame = ttk.Notebook(self)
+        self.frames = []
+        
+        for (numframe in range (0, int(math.ceil(len(self.sequenceOptions)/numsequenceButtons)))):
+            = ttk.Frame(self.tabFrame)
+        
+        
         self.seqButtons = []
 
         for i in range(0, numsequenceButtons):
@@ -229,13 +242,11 @@ class App(Frame):
                     textvariable=self.speedLEDString).pack(side=LEFT, padx=10)
 
 
-        applyButton = Button(self, 
+        applyButton = ttk.Button(self, 
                     text="Apply",
-                    font="Verdana 14",
                     width = 20,
-                    height = 3,
-                    command=self.ApplyChange)
-        applyButton.grid(row=currentRow, column=2, columnspan=2, pady=20)
+                    command=self.ApplyChange,)
+        applyButton.grid(row=currentRow, column=2, columnspan=2, pady=20, sticky='nesw')
 
 
 
@@ -245,7 +256,7 @@ class App(Frame):
                     width = 10,
                     height = 3,
                     command=self.cfgwindow.windowClient)
-        configButton.grid(row=currentRow, column=0, pady=20)
+        configButton.grid(row=currentRow, column=0, pady=20, padx=20)
         
         # Only display page button if we have more than 1 page of sequences
         if (len(self.sequenceOptions) > numsequenceButtons) :
@@ -321,6 +332,10 @@ def main():
             config.set('LEDs', key, str(value)) 
 
 
+    #ttk.Style().configure("TButton", relief="flat", background="#ccc") #font=('Helvetica', 14, 'bold'))
+    #ttk.Style().configure("TButton", font='Helvetica 14')
+
+
     
     settings = ledsettings.LEDSettings(config)
     
@@ -334,6 +349,9 @@ def main():
     thread.start()
     
     root = Tk()
+    
+    ttk.Style().configure("TButton", font='Helvetica 16 bold')
+    
     root.geometry("800x600+100+100")
     app = App(root, command, sequenceOptions, colourChoice, config, cfgwindow)
     root.mainloop()
