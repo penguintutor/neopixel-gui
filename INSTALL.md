@@ -12,7 +12,7 @@ It should work with all current versions of the Raspberry Pi. If using a Raspber
 
 Using the neopixel libarary the neopixels can be driven from the Raspberry Pi GPIO connector. It needs to use PWM which is available on *GPIO pin 18* (physically pin 12 on the board).
 
-The GPIO port works at 3.3V, but Neopixels require a 5v power supply and 5v signal. This can be done using a voltage level shifter circuit.
+The GPIO port works at 3.3V, but to run Neopixels at full brightness requires a 5v power supply and 5v data signal. This can be done using a voltage level shifter circuit.
 
 I used a [MyPifi Neopixel board](http://smstextblog.blogspot.co.uk/2015/03/afirstly-thank-you-for-purchasing-this.html) for testing the software.
 
@@ -60,7 +60,14 @@ sudo python setup.py install
 
 ## Install the Neopixel GUI software
 
-Install the software from git using 
+Download the latest stable version from
+
+[PenguinTutor.com](http://www.penguintutor.com)
+
+Change to the /home/pi directory and install using
+tar -xvzf neopixelgui-<i>versionnumber</i>.tar.gz
+
+Or for the latest version (which may have more bugs) install the software from git using 
 
 ```bash
 git clone https://github.com/penguintutor/neopixel-gui.git neopixel
@@ -75,17 +82,7 @@ gksudo python3 rpnpg.py
 
 To add to a new DJ Start Menu use:
 ```bash
-cd ~/neopixel
-mkdir -p ~/.config/menus
-cp lxde-pi-applications.menu ~/.config/menus/
-mkdir -p ~/.local/share/desktop-directories
-cp dj_menu.directory ~/.local/share/desktop-directories/
-mkdir -p ~/.local/share/pixmaps
-cp headphones.png ~/.local/share/pixmaps/
-cp rpnpgpicon.png ~/.local/share/pixmaps/
-mkdir -p ~/.local/share/applications/
-cp rpnpgp.desktop ~/.local/share/applications/
-lxpanelctl restart
+startmenu/setupmenu.sh
 ```
 
 ## gksudo warning message
@@ -94,8 +91,22 @@ When first running you will get a warning message that the application is runnin
 
 ## Initial configuration
 
-Once the application is running choose the Config option to set the number of LEDs in your Neopixel LED strip. You will then need to close and restart the application for the changes to take effect.
+Once the application is running choose the Config option to set the number of LEDs in your Neopixel LED strip. 
 
+## Corrupt configuration file
 
+If your configuration file has become corrupted, or you have chosen an invalid GPIO port number then the application may not start. In that case delete the file rpnpgp.cfg from the neopixel directory. The application should then start normally and you will be able to create a new configuration using the config option. 
 
+In rare circumstances you may also need to reboot the computer (or if you know what you are doing kill the existing rpnpngp processes), but that is not normally required.
+
+## Upgrade instructions
+
+If you installed the software from git then you can update to the latest version at any time by changing into the neopixel folder and issuing a 
+
+```bash
+git pull
+```
+Please make sure you check the README.md file in case of any major changes to the configuration.
+
+If you downloaded the package from [PenguinTutor.com](http://www.penguintutor.com) then check there for a new version and any upgrade instructions.
 
