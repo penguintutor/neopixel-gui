@@ -4,10 +4,28 @@ from neopixel import *
 from dynneopixel import *
 
 
-# Any methods that are long last need to check self.command.getCmdStatus()
+# Sequence method should change some LEDs and then return
+# If that sequence is still running then the method should resume
+# from where it left off. In the case of short sequences then the entire 
+# sequence can be run in a single run of the method.
+
+# All sequences must include a sleep delay, normally this is
+# time.sleep(self.command.getOptions()['delay']/1000)
+
+# Any sequences that are long lasting need to check self.command.getCmdStatus()
 # preiodically and if true return 
 # this is not critical, but will cause updates to be unresponsive
-# Set it to False at the start of the method
+# If used set it to False at the start of the method
+
+# The chaserStartPos variable can be used by sequences to provide a means
+# to return to the same point after checking if a configuration change has 
+# jas been made
+
+# Where a sequence is repeats over a set number of LEDs other than the number
+# of colours selected by the user then the preferred value is 4
+# The magic number of 4 is used as it is a factor of all the neopixels rings 
+# (12, 16, 24) and it is an easy number to integrate within sequences.
+
 
 
 class NeoPixelSeq():
@@ -61,10 +79,10 @@ class NeoPixelSeq():
         for i in range(self.numPixels):
             self.strip.setPixelColor(i, Color(0,0,0))
         self.strip.show()
-
+        time.sleep(self.command.getOptions()['delay']/1000)
     
     # chase colours across a background
-    # if first colour is white then use white background - otherwise use black
+    # uses getBackColour - normally black
     def chaserBackground(self):
         options = self.command.getOptions()
         colours = self.command.getColours()
@@ -77,7 +95,7 @@ class NeoPixelSeq():
         # Check we are within range (ie. number of leds selected reduced)
         if (self.chaserStartPos >= colourPixelRange):
                 self.chaserStartPos = 0
-        iterations = 5
+        iterations = 4
 
         for iter in range(iterations):
             #colourNum = colourNumStart
@@ -86,7 +104,7 @@ class NeoPixelSeq():
             for resetPixel in range(self.strip.numPixels()):
                 self.strip.setPixelColor (resetPixel, backColour)
             
-            for i in range(0, self.strip.numPixels()-colourPixelRange, colourPixelRange):
+            for i in range(0, self.strip.numPixels(), colourPixelRange):
                 for j in range(0, len(colours)):
                     if (i + j + self.chaserStartPos < self.strip.numPixels()) :
                         self.strip.setPixelColor (i + j + self.chaserStartPos, colours[j])
@@ -97,6 +115,7 @@ class NeoPixelSeq():
             self.chaserStartPos += 1
             if (self.chaserStartPos >= colourPixelRange):
                 self.chaserStartPos = 0
+   
    
     # colors is an array of colors to display
     # simple sequencer / shift
@@ -131,18 +150,18 @@ class NeoPixelSeq():
 
 
 
-    # Chaser that turns pixels on and off 3 at a time
+    # Chaser that turns pixels on and off 4 at a time
     def chaserSingleColour(self):
         options = self.command.getOptions()
         colours = self.command.getColours()
         colour = colours[0]
         
-        for q in range(3):
-            for i in range(0, self.strip.numPixels(), 3):
+        for q in range(4):
+            for i in range(0, self.strip.numPixels(), 4):
                self.strip.setPixelColor(i+q, colour)
             self.strip.show()
             time.sleep(options['delay']/1000.0)
-            for i in range(0, self.strip.numPixels(), 3):
+            for i in range(0, self.strip.numPixels(), 4):
                 self.strip.setPixelColor(i+q, 0)
 
 
@@ -298,12 +317,12 @@ class NeoPixelSeq():
         colours = self.command.getColours()
         colour = colours[0]
         
-        for q in range(3):
-            for i in range(0, self.strip.numPixels(), 3):
+        for q in range(4):
+            for i in range(0, self.strip.numPixels(), 4):
                self.strip.setPixelColor(i+q, 0)
             self.strip.show()
             time.sleep(options['delay']/1000.0)
-            for i in range(0, self.strip.numPixels(), 3):
+            for i in range(0, self.strip.numPixels(), 4):
                 self.strip.setPixelColor(i+q, colour)
 
 
