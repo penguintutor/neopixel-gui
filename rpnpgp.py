@@ -9,7 +9,6 @@ from neopixelseq import *
 import configparser
 import time
 from configwindow import *
-from helpwindow import *
 import webbrowser
 import ledsettings
 
@@ -104,7 +103,7 @@ class App(Frame):
         self.command.setCmdStatus(True)
         #time.wait(5)
     
-    def __init__(self, parent, command, sequenceOptions, colourChoice, config, cfgwindow, helpwindow):
+    def __init__(self, parent, command, sequenceOptions, colourChoice, config, cfgwindow):
         Frame.__init__(self, parent)
         self.seqScreen = 1                  # which screen of sequences we are displaying - starts at 1
         self.command = command
@@ -113,7 +112,6 @@ class App(Frame):
         self.config = config
         self.parent = parent
         self.cfgwindow = cfgwindow
-        self.helpwindow = helpwindow
         self.initUI()
 
     def initUI(self):
@@ -329,8 +327,7 @@ def main():
     command = NeoPixelCmds()
     LEDs = NeoPixelSeq(settings.allSettings(), command)
     
-    # Create config & help Windows
-    helpwindow = HelpWindow()
+    # Create config window
     cfgwindow = ConfigWindow(config, configfile, defaultLEDSettings, settings, LEDs)
     
     thread=threading.Thread(target=runPixels, args=(LEDs, command))
@@ -338,7 +335,7 @@ def main():
     
     root = Tk()
     root.geometry("800x600+100+100")
-    app = App(root, command, sequenceOptions, colourChoice, config, cfgwindow, helpwindow)
+    app = App(root, command, sequenceOptions, colourChoice, config, cfgwindow)
     root.mainloop()
     
     
