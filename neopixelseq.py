@@ -104,7 +104,7 @@ class NeoPixelSeq():
             for resetPixel in range(self.strip.numPixels()):
                 self.strip.setPixelColor (resetPixel, backColour)
             
-            for i in range(0, self.strip.numPixels(), colourPixelRange):
+            for i in range(0, self.strip.numPixels()+1, colourPixelRange):
                 for j in range(0, len(colours)):
                     if (i + j + self.chaserStartPos < self.strip.numPixels()) :
                         self.strip.setPixelColor (i + j + self.chaserStartPos, colours[j])
@@ -324,6 +324,45 @@ class NeoPixelSeq():
             time.sleep(options['delay']/1000.0)
             for i in range(0, self.strip.numPixels(), 4):
                 self.strip.setPixelColor(i+q, colour)
+
+
+    # Follow me
+    # uses two colours (or use white)
+    # uses getBackColour - normally black
+    def chaseMe(self):
+        options = self.command.getOptions()
+        colours = self.command.getColours()
+        backColour = self.command.getBackColour()
+        
+        # If we only have one colour then add white
+        if (len(colours) < 2) :
+            colours.append(0xffffff)
+
+        # number of times of the num colours the group occupies
+        groupsize = 8
+        colourPixelRange = 16
+
+        # Check we are within range (ie. number of leds selected reduced)
+        if (self.chaserStartPos >= colourPixelRange):
+                self.chaserStartPos = 0
+        iterations = 4
+
+        for iter in range(iterations):
+            # Set all pixels to the background - then we update those not
+            for resetPixel in range(self.strip.numPixels()):
+                self.strip.setPixelColor (resetPixel, backColour)
+            
+            for i in range(0, self.strip.numPixels(), colourPixelRange):
+                if (self.chaserStartPos + i < self.strip.numPixels()) :
+                    self.strip.setPixelColor (self.chaserStartPos + i, colours[0])
+                    if (self.chaserStartPos + i + 4 < self.strip.numPixels()) :
+                        self.strip.setPixelColor (self.chaserStartPos + i + 4, colours[1])
+            self.strip.show()
+            time.sleep(options['delay']/1000.0)
+            
+            self.chaserStartPos += 1
+            if (self.chaserStartPos >= colourPixelRange):
+                self.chaserStartPos = 0
 
 
 		
