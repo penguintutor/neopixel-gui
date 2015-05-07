@@ -94,14 +94,13 @@ class App(Frame):
                 self.seqButtons[i].grid_remove()
             
         
-
-    def __del__(self):
-        global cmdMessage
-        # When close window notify thread to terminate and then give 
-        # time for it to close properly before cleanup
+    # Moved from def __del__(self): to closeApp with WindowManager binding 
+    # as more reliable than needing to wait for __del__
+    def closeApp(self):
+        # When close window notify thread to terminate 
         self.command.setCommand("STOP")
         self.command.setCmdStatus(True)
-        #time.wait(5)
+        self.parent.destroy()
     
     def __init__(self, parent, command, sequenceOptions, colourChoice, config, cfgwindow):
         Frame.__init__(self, parent)
@@ -117,6 +116,7 @@ class App(Frame):
     def initUI(self):
 
         self.parent.title("RpNpGp - Raspberry Pi Neopixel Gui Package");
+        self.parent.wm_protocol('WM_DELETE_WINDOW',  self.closeApp)
 
         self.pack(fill=BOTH, expand=1)
 
@@ -337,7 +337,6 @@ def main():
     root.geometry("800x600+100+100")
     app = App(root, command, sequenceOptions, colourChoice, config, cfgwindow)
     root.mainloop()
-    
     
 if __name__ == "__main__":
 
