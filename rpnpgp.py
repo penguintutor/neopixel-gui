@@ -48,13 +48,59 @@ sequenceGridY = 4
 numsequenceButtons = sequenceGridX * sequenceGridY
 
 
-DEFAULTSPEED = 50;
-
-#buttonLargeFont = font.Font(family='Helvetica', size=14, weight='bold')
+DEFAULTSPEED = 50
+MAXCOLOURS = 10
+MINDELAY = 10.0
+MAXDELAY = 100.0
 
 
 class App(Frame):
 
+    # Adds colour from left to right
+    def addColour(self):
+        colours = self.coloursAvailBox.curselection()
+        if (len(colours)) < 1: return
+        #Add all colours to the tuple (need to replace tuple in the process)
+        for colourNum in colours:
+            if (len(self.chosenColours)>=MAXCOLOURS):
+                break
+            self.chosenColours += (self.tuple_colours[int(colourNum)],)
+        self.chosenColoursVar = StringVar(value=self.chosenColours)
+        self.coloursChosenBox.configure (listvariable=self.chosenColoursVar)
+
+        # Colour code the list
+        for i in range(len(self.chosenColours)):
+            self.coloursChosenBox.itemconfigure(i, background=hexColourToString(self.colourChoice[self.chosenColours[i]]), foreground=colourContrast(self.colourChoice[self.chosenColours[i]]))
+
+    def addColourEvent(self, event):
+        self.addColour()
+
+    def delColour(self):
+        colours = self.coloursChosenBox.curselection()
+        if (len(colours)) < 1: return
+        # Create a new tuple excluding colourNum
+        removeColours = []
+        for colourNum in colours:
+            # copy the position as int into a remove this colour list
+            removeColours.append(int(colourNum))
+        # now go over existing tuple
+        tuple_colours = tuple()
+        for i in range(len(self.chosenColours)):
+            # as long as not in list then add
+            if (i not in removeColours):
+                tuple_colours += (self.chosenColours[i],)
+        self.chosenColours = tuple_colours
+        self.chosenColoursVar = StringVar(value=self.chosenColours)
+        self.coloursChosenBox.configure (listvariable=self.chosenColoursVar)
+        # Reapply colour coding
+        # Colour code the list
+        for i in range(len(self.chosenColours)):
+            self.coloursChosenBox.itemconfigure(i, background=hexColourToString(self.colourChoice[self.chosenColours[i]]), foreground=colourContrast(self.colourChoice[self.chosenColours[i]]))
+    
+    def rstColour(self):
+        self.chosenColours = tuple()
+        self.chosenColoursVar = StringVar(value=self.chosenColours)
+        self.coloursChosenBox.configure (listvariable=self.chosenColoursVar)
 
 
     def ApplyChange(self):
@@ -62,42 +108,22 @@ class App(Frame):
         cmd, text = self.sequenceOptions[self.sequence.get()]
         self.command.setCommand(cmd)
         coloursTicked = []
-        for i in range (len(self.colourSelected)):
-            if (self.colourSelected[i].get() == 1) :
-                text, value = self.colourChoice[i]
-                # value is from config which is string - so convert to int
-                coloursTicked.append(int(value, 16))
+        for i in range (len(self.chosenColours)):
+            text = self.chosenColours[i]
+            value = self.colourChoice[text]
+            # value is from config which is string - so convert to int
+            coloursTicked.append(int(value, 16))
         # Handle speed - convert from String to int
         try:
-            delay = int(self.speedLEDString.get())
+            delay = int(self.speedLEDVar.get())
         except ValueError:
             delay = DEFAULTSPEED, 
-        self.speedLEDString.set(delay), 
+        self.speedLEDVar.set(delay), 
         self.command.setDelay(delay)
         self.command.setColours(coloursTicked)
         # Set status to updated so light sequence can stop during method execution
         self.command.setCmdStatus(True)
 
-    
-    def moreSequences(self):
-        # Change the sequence buttons
-        # The button is hidden if only one screen so always change when clicked
-        self.seqScreen += 1
-        if (self.seqScreen > numpages(len(self.sequenceOptions), numsequenceButtons)):
-                self.seqScreen = 1
-        # Update the page button
-        self.pageButton.config(text = "Page " + str(self.seqScreen) + " of " + str(numpages(len(self.sequenceOptions), numsequenceButtons)))
-        # Update the sequence radiobuttons
-        for i in range(0, numsequenceButtons):
-            seqNumber = ((self.seqScreen-1)*numsequenceButtons)+i
-            if (len(self.sequenceOptions) > seqNumber):
-                cmd, txt = self.sequenceOptions[seqNumber]
-                self.seqButtons[i].config(text=txt, value=seqNumber)
-                # add it back to grid
-                self.seqButtons[i].grid()
-            else:
-                self.seqButtons[i].grid_remove()
-            
         
     # Moved from def __del__(self): to closeApp with WindowManager binding 
     # as more reliable than needing to wait for __del__
@@ -123,6 +149,26 @@ class App(Frame):
         self.parent.title("RpNpGp - Raspberry Pi Neopixel Gui Package");
         self.parent.wm_protocol('WM_DELETE_WINDOW',  self.closeApp)
 
+                
+        menubar = Menu(self.parent)
+        self.parent['menu'] = menubar
+        menu_file = Menu(menubar)
+        menu_edit = Menu(menubar)
+        menu_hardware = Menu(menubar)
+        menu_help = Menu(menubar, name='help')
+        menubar.add_cascade(menu=menu_file, label='File')
+        menubar.add_cascade(menu=menu_edit, label='Edit')
+        menubar.add_cascade(menu=menu_hardware, label='Hardware')
+        menu_file.add_separator()
+        menubar.add_cascade(menu=menu_help, label='Help')
+        
+        menu_file.add_command(label='Quit', command=self.closeApp)
+        menu_edit.add_command(label='Settings', command=self.cfgwindow.windowClient)
+        menu_help.add_command(label='User Guide', command=viewHelp)
+        
+        
+        
+        
         self.pack(fill=BOTH, expand=1)
 
         self.columnconfigure(0, weight=1)
@@ -133,51 +179,32 @@ class App(Frame):
         self.columnconfigure(5, weight=1)
         self.columnconfigure(6, weight=1)                                                           
         
-        self.rowconfigure(2, minsize=85)
-        self.rowconfigure(3, minsize=85)
-        self.rowconfigure(4, minsize=85)
-        self.rowconfigure(5, minsize=85)
+        self.rowconfigure(1, minsize=20)    # Spacer at top
+        self.rowconfigure(2, minsize=85)    # Tab frame
+        self.rowconfigure(3, minsize=40)    # Speed slider
+        self.rowconfigure(4, minsize=60)    # Colours (also rowspan to 5)
+        self.rowconfigure(5, minsize=60)    # Apply button       
+        self.rowconfigure(6, minsize=40)    # Bottom padding / messages
 
         self.sequence = IntVar()
         self.sequence.set(0)
 
-
+        # The image is a massively oversized image of a strip of LEDs
+        # I like the effect of being zoomed in, but this will also help with large screens not having horrible borders 
+        backgroundImage = PhotoImage(file="neopixel2.gif")
+        backgroundImageLabel = Label(self, image=backgroundImage)
+        # next line is required to stop the image from being garbage collected
+        backgroundImage.image = backgroundImage
+        backgroundImageLabel.place(x=0, y=0, relwidth=1, relheight=1)
 
         # Use to set the selected colour
         self.colourSelected = [0 for x in range(len(self.colourChoice))]
 
-        # Store number of LEDs (as a string)
-        self.speedLEDString = StringVar()
+        # Store delay time for LEDs (as a string)
+        self.speedLEDVar = DoubleVar()
         # Set a default value
-        self.speedLEDString.set("50")
+        self.speedLEDVar.set("50")
         
-        titleLabel = Label(self,
-                text="RpNpGp - Raspberry Pi Neopixel Gui Package",
-                foreground="blue", font="Verdana 16 bold").grid(columnspan=6, sticky=W, pady=4, padx=5)
-
-
-
-        logo = PhotoImage(file="logo.gif")
-        image1 = Label(self, image=logo, justify=RIGHT)
-        # next line is required to stop the image from being garbage collected
-        image1.image = logo
-        image1.grid(row=1, column=0, pady=10, columnspan=1)
-
-        description = """Control NeoPixels (RGB LEDs)\nusing a Raspberry Pi"""
-        text1 = Label(self, 
-                justify=LEFT,
-                font="Verdana 14",
-                text=description).grid(row=1, column=1, sticky=W, columnspan=4, ipadx=10)
-                
-        helpButton = Button(self, 
-                    text="Help",
-                    font="Verdana 14",
-                    width = 10,
-                    height = 2,
-                    command=viewHelp)
-        helpButton.grid(row=1, column=5, pady=10)
-
-
 
         currentRow = 1
         currentColumn = 0
@@ -186,6 +213,8 @@ class App(Frame):
         
         
         self.tabFrame = ttk.Notebook(self)
+        # Allow CTRL-Tab between frames
+        self.tabFrame.enable_traversal()
         self.frames = []
         self.seqButtons = []
         numtabs = int(math.ceil(len(self.sequenceOptions)/numsequenceButtons));
@@ -193,6 +222,7 @@ class App(Frame):
         
         for numframe in range (numtabs):
             self.frames.append(ttk.Frame(self.tabFrame))
+            self.frames[numframe]['style'] = 'TabFrame.TFrame';
             self.tabFrame.add(self.frames[numframe], text="Sequences "+str(numframe+1))
             for i in range(0, numsequenceButtons):
                 cmd, txt = self.sequenceOptions[currentButton]
@@ -201,7 +231,7 @@ class App(Frame):
                         font="Verdana 14",
                         variable=self.sequence,
                         height=3,
-                        width=25,
+                        width=20,
                         indicatoron=0,
                         value=currentButton))
                 self.seqButtons[currentButton].grid(row=currentRow, column=currentColumn, columnspan=2, padx=10, pady=10)
@@ -214,75 +244,132 @@ class App(Frame):
                     break;
         self.tabFrame.grid(row=2, column=0, columnspan=6)
        
-
         currentRow = 3
-        currentColumn = 0
-
-
-        # If currentColumn is 0 then aready incremented since last button added
-        # otherwise add new row
-        if currentColumn != 0:
-            currentRow += 1
-
-        # Create a frame within the frame for checkbuttons
-        optionFrame = Frame(self)
-        optionFrame.grid(row=currentRow, column=0, columnspan=6)
-
-        currentRow += 1
+       
+        # Set to allow between 10 and 500 
         
+        speedLabel = Label(self,
+                    font="Verdana 14",
+                    text="Speed")
+        speedLabel.grid (row=currentRow, column=1, sticky='ew', padx=10)
+        
+        # default is 50mS
+        speedBar = ttk.Scale(self, orient=HORIZONTAL, from_=MINDELAY, to=MAXDELAY, variable=self.speedLEDVar)
+        speedBar.grid(row=currentRow, column=2, columnspan=3, sticky='ew')
 
+
+        currentRow = 4
+        currentColumn = 0
+        
+        # Frame to hold the colour selection options
+        colourSelectFrame = ttk.Frame(self)
+        colourSelectFrame.grid (column=1, row=currentRow, columnspan=3, rowspan=2, sticky='nsew')
+        
+        colourSelectFrame.columnconfigure(2, weight=10)
+        
+        #Title for frame
+        colourLabel = Label(colourSelectFrame,
+                    font="Verdana 14",
+                    text="Colours Available")
+        colourLabel.grid (row=0, column=0, columnspan=2, sticky='ews')
+        
+        colourLabel2 = Label(colourSelectFrame,
+                    font="Verdana 14",
+                    text="Colours Chosen")
+        colourLabel2.grid (row=0, column=3, sticky='ews')
+        
+        
+        list_colours = []
+        # temp to get from list of tuples to dict
+        for key in self.colourChoice:
+            list_colours.append(key)
+        
+        self.tuple_colours = tuple(list_colours)
+        
+        self.colourList = StringVar(value=self.tuple_colours)
+        colourSelectList = StringVar()
+                
+        self.coloursAvailBox = Listbox(colourSelectFrame, listvariable=self.colourList, height=10)
+        self.coloursAvailBox.grid(column=0, row=1, rowspan=6, sticky=(N,S,E,W))
+
+        # Colour code the list
         for i in range(len(self.colourChoice)):
-            self.colourSelected[i] = IntVar()
-            colourWord, colourCode = self.colourChoice[i]
-            colourCheckBox = Checkbutton(optionFrame,
-                    text=colourWord,
-                    font="Verdana 14",
-                    variable=self.colourSelected[i])
-            colourCheckBox.pack(side=LEFT)
+            self.coloursAvailBox.itemconfigure(i, background=hexColourToString(self.colourChoice[self.tuple_colours[i]]), foreground=colourContrast(self.colourChoice[self.tuple_colours[i]]))
 
-        spacer1 = LabelFrame(optionFrame, width=100).pack(side=LEFT)
 
-        numSpeedLabel = Label(optionFrame,
-                    font="Verdana 14",
-                    text="Wait ms").pack(side=LEFT)
+        # Set event bindings for when the selection in the listbox changes,
+        # when the user double clicks the list, and when they hit the Return key
+        self.coloursAvailBox.bind('<Double-1>', self.addColourEvent)
+        # Colorize alternating lines of the listbox
+        #for i in range(0,len(self.colourChoice),2):
+        #    coloursAvailBox.itemconfigure(i, background='#f0f0ff')
 
-        numSpeedEntry = Entry(optionFrame,
-                    font="Verdana 14",
-                    width=5,
-                    textvariable=self.speedLEDString).pack(side=LEFT, padx=10)
+        self.chosenColours = ()        
+        self.chosenColoursVar = StringVar(value=self.chosenColours)
 
+        self.coloursChosenBox = Listbox(colourSelectFrame, listvariable=self.chosenColoursVar, height=10)
+        self.coloursChosenBox.grid(column=3, row=1, rowspan=6, sticky=(N,S,E,W))
+        
+        
+        addColourButton = ttk.Button(colourSelectFrame, 
+                    text=">>",
+                    width = 5,
+                    style="ColButtons.TButton",
+                    command=self.addColour)
+        addColourButton.grid(row=1, column=2)
+        
+        
+        delColourButton = ttk.Button(colourSelectFrame, 
+                    text="<<",
+                    width = 5,
+                    style="ColButtons.TButton",
+                    command=self.delColour)
+        delColourButton.grid(row=4, column=2)
+        
+        
+        rstColourButton = ttk.Button(colourSelectFrame, 
+                    text="Clr",
+                    width = 5,
+                    style="ColButtons.TButton",
+                    command=self.rstColour)
+        rstColourButton.grid(row=6, column=2)
+        
+        
 
         applyButton = ttk.Button(self, 
                     text="Apply",
                     width = 20,
                     command=self.ApplyChange,)
-        applyButton.grid(row=currentRow, column=2, columnspan=2, pady=20, sticky='nesw')
+        applyButton.grid(row=currentRow+1, column=4, columnspan=2, pady=20, padx=40, sticky='nesw')
 
 
-
-        configButton = Button(self, 
-                    text="Config",
-                    font="Verdana 14",
-                    width = 10,
-                    height = 3,
-                    command=self.cfgwindow.windowClient)
-        configButton.grid(row=currentRow, column=0, pady=20, padx=20)
-        
-        # Only display page button if we have more than 1 page of sequences
-        if (len(self.sequenceOptions) > numsequenceButtons) :
-            self.pageButton = Button(self, 
-                        text="Page 1 of " + str(numpages(len(self.sequenceOptions), numsequenceButtons)),
-                        font="Verdana 14",
-                        width = 10,
-                        height = 3,
-                        command=self.moreSequences)
-            self.pageButton.grid(row=currentRow, column=5, pady=20)
         
         
         # Finished setting up GUI - now issue any message
         if (message[0] != ""):
             messagebox.showinfo(message[0], message[1])
-            
+
+# Designed for tkinter so handles strings
+# returns string #ffffff for white writing or #000000 for black 
+def colourContrast(colour):
+    blueValue = int(colour, 16) & 0xFF
+    greenValue = (int(colour, 16) >> 8) & 0xFF
+    redValue = (int(colour, 16) >> 16) & 0xFF
+    # Perceptive luminance based on human eye relativity 
+    lumValue = 1 - (( 0.299 * redValue) + (0.587 * greenValue) + (0.114 * blueValue))/255;
+
+    if (lumValue < 0.5):
+       return "#000000"
+    else:
+       return "#FFFFFF"
+       
+       
+def hexColourToString(colour):
+    blueValue = int(colour, 16) & 0xFF
+    greenValue = (int(colour, 16) >> 8) & 0xFF
+    redValue = (int(colour, 16) >> 16) & 0xFF
+    return "#%02x%02x%02x" % (redValue, greenValue, blueValue)
+
 
 def viewHelp():
     webbrowser.open_new(helpfile)
@@ -320,10 +407,14 @@ def main():
         
     # iterate over sequences which allows handling of "\n" text to '\n' character
     sequenceOptions = []
+    colourChoice = {}
+    
     for key, value in seqconfig.items('Sequences') :
         sequenceOptions.append ([key, value.replace('\\n', '\n')]) 
-    colourChoice = seqconfig.items('Colours')
-               
+    #colourChoice = seqconfig.items('Colours')
+    for key, value in seqconfig.items('Colours') :
+        colourChoice[key] = value
+    
     config = configparser.ConfigParser()
     # load user settings from configfile
     try :
@@ -355,8 +446,14 @@ def main():
     
     root = Tk()
     
-    ttk.Style().configure("TButton", font='Helvetica 16 bold')
+    root .option_add('*tearOff', FALSE)
     
+    ttk.Style().configure("TButton", font='Helvetica 16 bold')
+    ttk.Style().configure("TNotebook", background='#999999')
+    ttk.Style().configure('TabFrame.TFrame', background='#999999')
+    ttk.Style().configure('TNotebook.Tab', font='Helvetica 16 bold')
+    ttk.Style().configure('ColButtons.TButton', font='Helvetica 10 bold')
+                                                                          
     root.geometry("800x600+100+100")
     app = App(root, command, sequenceOptions, colourChoice, config, cfgwindow)
     root.mainloop()
