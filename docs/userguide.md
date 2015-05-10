@@ -57,7 +57,7 @@ Multiple segments can be daisy chained together as long as you have sufficient p
 
 The main application screen is shown in the screenshot below.
 
-![Screenshot of Raspberry Pi Neopixel GUI application](screenshot-v0-1.png "Neopixel GUI application")
+![Screenshot of Raspberry Pi Neopixel GUI application](screenlayout-arrows1.png "Neopixel GUI application")
 
 The buttons are intentionally oversized to allow the application to be used with a touchscreen in a disco DJ environment. 
 
@@ -149,7 +149,22 @@ The application can be exited by choosing File and Exit, or by clicking on the w
 
 If you require the LEDs be turned off then select All Off prior to closing the application.
 
+## Error messages and known pitfalls or problems
+
+#### Unable to save configuration
+If you receive an error that it's not possible to save the configuration then please check that you are running with sufficient permissions (gksudo is required) and that the disk drive is not full.
+
+#### gksudo warning message. 
+If you receive a warning about running with super user privilages then that is normal. It is required to allow sufficient permissions to send information on the GPIO port. This warning can be disabled by clicking on the appropriate checkbox on the warning message.
+
+#### Corrupt or invalid configuration file
+If your configuration file has become corrupted, or you have chosen an invalid GPIO port number then the application may not start. In that case delete the file rpnpgp.cfg from the neopixel directory. The application should then start normally and you will be able to create a new configuration using the config option. 
+
+
+
+
 ## Further information
 
 The application can be further customised by adding or removing some of the sequences. These are discussed in the customisation guide, which may require some Python programming.
 
+More information will also be provided on [www.penguintutor.com](http://www.penguintutor.com)

@@ -11,7 +11,7 @@ The user interface is intentionally basic in appearance using large buttons. Thi
 
 The Apply button needs to be pressed for the changes to take effect, which allows the user to choose all the appropriate settings prior to applying them.
 
-![NeoPixel GUI screenshot](docs/screenshot1.png "Screenshot")
+![NeoPixel GUI screenshot](docs/screenshot-v0-1.png "Screenshot of NeoPixel GUI Version 0.1")
 
 
 
