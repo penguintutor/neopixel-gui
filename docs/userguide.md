@@ -7,7 +7,7 @@ The Neopixel GUI application is a simple graphical interface for controlling neo
 The user interface is designed to be mainly functional, but with an attractive background. Large buttons have been used for most screens so that it is suitable for use in a disco environment using a touchscreen (eg. using VNC from a touchscreen laptop).
 
 
-![NeoPixel GUI screenshot](docs/screenshot-v0-1.png "Screenshot of NeoPixel GUI Version 0.1")
+![NeoPixel GUI screenshot](screenshot-v0-1.png "Screenshot of NeoPixel GUI Version 0.1")
 
 
 ## Installing neopixel GUI
