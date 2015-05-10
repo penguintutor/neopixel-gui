@@ -4,7 +4,7 @@
 
 The Neopixel GUI application is a simple graphical interface for controlling neopixel RGB LEDs on a Raspberry Pi. 
 
-The user interface is intentionally basic in appearance using large buttons. This is so that it is suitable for use in a disco environment using a touchscreen (eg. using VNC from a touchscreen laptop).
+The user interface is designed to be mainly functional, but with an attractive background. Large buttons have been used for most screens so that it is suitable for use in a disco environment using a touchscreen (eg. using VNC from a touchscreen laptop).
 
 
 ## Installing neopixel GUI
@@ -34,9 +34,10 @@ When first running you will get a warning message that the application is runnin
 
 ## Initial configuration
 
-Once the application is running choose the Config option to set the number of LEDs in your Neopixel LED strip. You will then need to close and restart the application for the changes to take effect.
+Once the application is running choose the Config option to set the number of LEDs in your Neopixel LED strip. The changes will be applied and saved once the Save button is clicked.
 
-When first run the first step is to configure the application with the number of LEDs in your LED strip. Click on the config button, update the "Number LEDs" field with the number matching your LED strip and click Save. You will then be prompted to restart the application which you should do by clicking on the application close button (normally an X in the top right) and then restart the application.
+When first run it is recommended that the first step is to configure the application with the number of LEDs in your LED strip. If not then you'll be limited to a small number of LEDs using the default values. 
+The configuration screen is accessed using the pull down menu click the Edit menu and then Settings. Update the "Number LEDs" field with the number matching your LED strip and click Save. You will then be prompted to restart the application which you should do by clicking on the application close button (normally an X in the top right) and then restart the application.
 
 Example LED quantities
 
@@ -50,13 +51,13 @@ Example LED quantities
 | 1m extra LEDs  | 60          |
 | 5m             | 150         |
 
-Multiple segments can be daisy chained together as long as you have sufficient power (and beware of voltage drop across longer configurations).
+Multiple segments can be daisy chained together as long as you have sufficient power (and beware of voltage drop across longer distance runs).
 
 ## GUI application
 
 The main application screen is shown in the screenshot below.
 
-![Screenshot of Raspberry Pi Neopixel GUI application](screenshot1.png "Neopixel GUI application")
+![Screenshot of Raspberry Pi Neopixel GUI application](screenshot-v0-1.png "Neopixel GUI application")
 
 The buttons are intentionally oversized to allow the application to be used with a touchscreen in a disco DJ environment. 
 
