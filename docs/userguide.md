@@ -34,10 +34,10 @@ When first running you will get a warning message that the application is runnin
 
 ## Initial configuration
 
-Once the application is running choose the Config option to set the number of LEDs in your Neopixel LED strip. The changes will be applied and saved once the Save button is clicked.
-
 When first run it is recommended that the first step is to configure the application with the number of LEDs in your LED strip. If not then you'll be limited to a small number of LEDs using the default values. 
-The configuration screen is accessed using the pull down menu click the Edit menu and then Settings. Update the "Number LEDs" field with the number matching your LED strip and click Save. You will then be prompted to restart the application which you should do by clicking on the application close button (normally an X in the top right) and then restart the application.
+The configuration screen is accessed using the pull down menu click the Edit menu and then Settings. Update the "Number LEDs" field with the number matching your LED strip and click Save. 
+
+It is not normally neccessary to restart the application. It may be neccessary to restart if the number of LEDs has been reduced (and you want to turn off those higher up the chain) or if an LED has got "stuck" on a previous setting (preventing subsequent LEDs from changing colour). In this case the application should be closed (using the X button or choosing File -> Exit) and then restarted.
 
 Example LED quantities
 
@@ -51,7 +51,7 @@ Example LED quantities
 | 1m extra LEDs  | 60          |
 | 5m             | 150         |
 
-Multiple segments can be daisy chained together as long as you have sufficient power (and beware of voltage drop across longer distance runs).
+Multiple segments can be daisy chained together as long as you have sufficient power. You should also beware of voltage drop across longer distance runs which can result in LEDs showing a yellow colour. It may be possible to fix this by running additional power cables to other points in the chain or by adding an additional power supply.
 
 ## GUI application
 
@@ -61,19 +61,27 @@ The main application screen is shown in the screenshot below.
 
 The buttons are intentionally oversized to allow the application to be used with a touchscreen in a disco DJ environment. 
 
-There are 12 buttons which determine the type of light sequence to display, a choice of 4 colours for the LED output and a delay value (in milliseconds) to determine the speed of the sequences. These values can be changed through the screen and then the change is applied by using the Apply button. The way that the settings are interpretted are based upon the individual sequence chosen.
+The screen is split into a number of areas, relating to different aspects of the LEDs. Most changes will not take effect until the Apply button is pressed, which allows you to set the LEDs using the various settings first.
 
-There is also a configuration button to make changes to the RGB LED settings. Most changes to the configuration need a restart of the application for the LED driver to be reloaded.
+There is space for 12 buttons which are used to select the light sequence to display. This can be augmented by additional tabs which appear if there are more than 12 sequences available (whichi includes the default configuration). There is a speed controller bar which is used to vary the delay between each step in the LED sequence and the ability to choose between a selection of up to ten colours for output sequence. These values can be changed through the screen and then the change is applied by using the Apply button. The way that the settings are interpretted are based upon the individual sequence chosen.
+
+There is also a settings option on the menu which allows changes to the RGB LED driver settings. Most changes to the settings can be made dynamically, although it may be neccessary to restart the application during certain conditions.
 
 ### Colour options
 
-The colour options can be used to set the colour of the LEDs or LED sequence. The colour options are used by most sequences except all off and the rainbow sequences. Some of the sequences use a single colour only in which case the left-most colour is used, otherwise the sequence will consist of all the selected colours. If no colours are selected then the default is white.
+The colour options can be used to set the colour of the LEDs or LED sequence. There can be up to ten colours defined including white (the entire LED fully on) and black (LED off). The actual colours are defined in the sequences.cfg file. Please see the customisation guide for more details.
 
-### Delay setting
+The colours being used in the current sequence are copied from the available colours double-clicking the colour, or by selecting a colour before clicking on the ">>" button. The selected colour will then be added to the bottom of the list.
 
-The delay setting is in milliseconds, which relates to the time to pause between each sequence change. This is used in most of the sequences (except all on and all off). A smaller value results in a faster sequence. The value should generally be be 20ms or higher.
+Colours can also be removed from the selected colours by first clicking on the colour and then clicking on the "<<" button, or by clicking the "clr" button to clear all colours from the list.
 
-Whilst the use of a delay value is not considered to be particularly user-friendly the aim is to provide an optional physical speed controller in future which will make changing the speed of the LEDs more intuitive.
+The colour options are used by most sequences except all off and the rainbow sequences. Some of the sequences use a single colour only in which case the top-most colour is used, otherwise the sequence will consist of all the selected colours. If no colours are selected then the default white is used.
+
+### Speed setting
+
+The speed slider is used to increase or reduce the delay setting which causes a pause between each change of the LED sequence. Moving the slider to the left will increase the delay and hence slow down the sequence. Moving to the right will make the LEDs change colour faster. 
+
+This is used in most of the sequences (except all on and all off). 
 
 ### Apply button
 
@@ -84,7 +92,7 @@ After the apply button is pressed there may be a small delay before the next seq
 
 ## Sequence buttons
 
-The sequence buttons are used to select from pre-programmed sequences. It is possible to create your own custom sequences using python programming. 
+The sequence buttons are used to select from pre-programmed sequences. It is possible to create your own custom sequences using python programming (see the customisation guide). The sequence buttons are split across one or more tabs, clicking on a later tab will provide an additional page of sequences.
 
 The best way to learn how the sequences work is to try them, but here is a brief explanation for each of the standard sequences.
 
@@ -124,9 +132,24 @@ This sequence shows the full rainbow across the available LEDs. The variation be
 ### Rainbow theatre chase
 This is a colour change sequence similar to the standard Rainbow sequnce but with a chaser effect with the LEDs flashing on and off in sequence. The colour options are not used in this sequence. 
 
+### Twinkle Chase Single Colour
+This turns on the LEDS on, but then makes the appear to twinkle in a sequential pattern by turning the LEDs in turn off and then back on in a chase sequence.
+
+Only the first colour (or white if not set) is used.
+
+### 2 Colour Chase
+This consists of two LEDs chasing each other with a gap in between. The sequence is repeated elsewhere down the chain (if sufficient LEDs on the strip).
+
+Only the first two colours are used in this sequence.
+
 
 ## Exiting the application
 
-The application can be exited by clicking on the window manager 'X' button which on Raspbian is normally in the top right hand corner. The sequence will stop running, but the LEDs will continue to display the last setting (which may be mid-sequence). 
+The application can be exited by choosing File and Exit, or by clicking on the window manager 'X' button which on Raspbian is normally in the top right hand corner. The sequence will stop running, but the LEDs will continue to display the last setting (which may be mid-sequence). 
 
 If you require the LEDs be turned off then select All Off prior to closing the application.
+
+## Further information
+
+The application can be further customised by adding or removing some of the sequences. These are discussed in the customisation guide, which may require some Python programming.
+
