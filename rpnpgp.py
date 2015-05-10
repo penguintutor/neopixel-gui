@@ -254,7 +254,7 @@ class App(Frame):
         speedLabel.grid (row=currentRow, column=1, sticky='ew', padx=10)
         
         # default is 50mS
-        speedBar = ttk.Scale(self, orient=HORIZONTAL, from_=MINDELAY, to=MAXDELAY, variable=self.speedLEDVar)
+        speedBar = ttk.Scale(self, orient=HORIZONTAL, from_=MAXDELAY, to=MINDELAY, variable=self.speedLEDVar)
         speedBar.grid(row=currentRow, column=2, columnspan=3, sticky='ew')
 
 
