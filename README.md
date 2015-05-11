@@ -30,9 +30,8 @@ sudo python3 setup.py install
 
 ## Install
 
-Download the relevant files into a new folder named /home/pi/neopixel
-Copy the file rpnpgp.desktop to the /usr/share/applications directory.
-The icon should now appear on the normal start menu.
+Download and extrat files into a new folder named /home/pi/neopixel
+Copy the appropriate desktop and startmenu files as listed in the INSTALL.md guide. Restart the lxpanel and then the icon should appear on the normal start menu.
 
 A more detailed install guide is provided in the file INSTALL.md
 
