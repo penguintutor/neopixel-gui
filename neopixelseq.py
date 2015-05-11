@@ -19,7 +19,7 @@ from dynneopixel import *
 
 # The chaserStartPos variable can be used by sequences to provide a means
 # to return to the same point after checking if a configuration change has 
-# jas been made
+# has been made
 
 # Where a sequence is repeats over a set number of LEDs other than the number
 # of colours selected by the user then the preferred value is 4

@@ -4,13 +4,13 @@ Guide to installing the neopixel gui application.
 
 ## Hardware requirements
 
-*WARNING: Read carefully before connecting Neopixels to your Raspberry Pi*
+**WARNING: Read carefully before connecting Neopixels to your Raspberry Pi**
 
 The neopixel gui application is designed for use with a Raspberry Pi. It controls a strip of RGB LEDs with integrated controller IC such as WS2811 or WS2812. Adafruit products are named Neopixels, but other suppliers may refer to these as RGB LEDs, WS2811, WS2812 or WS281x LEDs.
 
 It should work with all current versions of the Raspberry Pi. If using a Raspberry Pi 2 then it is important that the neopixel library is installed from the link provided in this guide earlier versions of the library do not work with the Raspberry Pi 2.
 
-Using the neopixel libarary the neopixels can be driven from the Raspberry Pi GPIO connector. It needs to use PWM which is available on *GPIO pin 18* (physically pin 12 on the board).
+Using the neopixel libarary the neopixels can be driven from the Raspberry Pi GPIO connector. It needs to use PWM which is available on **GPIO pin 18** (physically pin 12 on the board).
 
 The GPIO port works at 3.3V, but to run Neopixels at full brightness requires a 5v power supply and 5v data signal. This can be done using a voltage level shifter circuit.
 

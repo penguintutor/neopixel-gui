@@ -163,8 +163,16 @@ If you receive a warning about running with super user privilages then that is n
 #### Corrupt or invalid configuration file
 If your configuration file has become corrupted, or you have chosen an invalid GPIO port number then the application may not start. In that case delete the file rpnpgp.cfg from the neopixel directory. The application should then start normally and you will be able to create a new configuration using the config option. 
 
+#### All LEDs come on bright and won't change
+Check that the "Invert Output" setting is correct. It should normally be ticked if using an inverting buffer / transistor switch, otherwise it should be unticked.
 
+#### Program crashes and then all LEDs start flashing
+If the program crashes then it may leave a running thread which is still trying to control the LEDs. If you are familiar with the Linux kill command then you can kill all the rpnpgp processes, otherwise you may need to reboot the computer. This should not happen if you close the application normally. 
 
+This is particularly important when creating your own custom sequences which may cause the program to fail, but leave the neopixel thread running.
+
+#### Colours look the same
+There is a difference in the colours that are shown on a computer screen and those on the LED sequence. It may be hard to distinguish between certain colours such as pink and purple; and green and light-green.
 
 ## Further information
 
