@@ -13,6 +13,7 @@ import time
 from configwindow import *
 import webbrowser
 import ledsettings
+from collections import OrderedDict
 
 
 
@@ -56,7 +57,7 @@ MAXDELAY = 100.0
 
 class App(Frame):
 
-    # Adds colour from left to right
+    # Adds colour from left (colours avail) to right (colours chosen)
     def addColour(self):
         colours = self.coloursAvailBox.curselection()
         if (len(colours)) < 1: return
@@ -279,15 +280,13 @@ class App(Frame):
         colourLabel2.grid (row=0, column=3, sticky='ews')
         
         
-        list_colours = []
+        self.tuple_colours = ()
         # temp to get from list of tuples to dict
         for key in self.colourChoice:
-            list_colours.append(key)
+            self.tuple_colours += (key,)
         
-        self.tuple_colours = tuple(list_colours)
         
         self.colourList = StringVar(value=self.tuple_colours)
-        colourSelectList = StringVar()
                 
         self.coloursAvailBox = Listbox(colourSelectFrame, listvariable=self.colourList, height=10)
         self.coloursAvailBox.grid(column=0, row=1, rowspan=6, sticky=(N,S,E,W))
@@ -300,9 +299,7 @@ class App(Frame):
         # Set event bindings for when the selection in the listbox changes,
         # when the user double clicks the list, and when they hit the Return key
         self.coloursAvailBox.bind('<Double-1>', self.addColourEvent)
-        # Colorize alternating lines of the listbox
-        #for i in range(0,len(self.colourChoice),2):
-        #    coloursAvailBox.itemconfigure(i, background='#f0f0ff')
+
 
         self.chosenColours = ()        
         self.chosenColoursVar = StringVar(value=self.chosenColours)
@@ -407,11 +404,11 @@ def main():
         
     # iterate over sequences which allows handling of "\n" text to '\n' character
     sequenceOptions = []
-    colourChoice = {}
+    # colourChoice is ordered to maintain order of colours 
+    colourChoice = OrderedDict()
     
     for key, value in seqconfig.items('Sequences') :
         sequenceOptions.append ([key, value.replace('\\n', '\n')]) 
-    #colourChoice = seqconfig.items('Colours')
     for key, value in seqconfig.items('Colours') :
         colourChoice[key] = value
     
