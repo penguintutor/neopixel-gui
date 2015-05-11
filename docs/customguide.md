@@ -106,10 +106,11 @@ methodName = User friendly name
 
 ## Adding new sequences to the project
 
-If you have created your own sequences then please consider adding them to the official source code. This is best achieved by creating a fork from the GitHub repository and sending a pull request.
+If you have created your own sequences then please consider adding them to the official source code. This is best achieved by creating a fork from the [NeoPixel-GUI GitHub](https://github.com/penguintutor/neopixel-gui) repository and sending a pull request.
 
 Alternatively you can send the details through the submit form on the website.
 
+Any code submitted must be your own work or based upon source code compatible with GPL version 3 license. Submitting code to this project may result in your code being included in any software compatible with GPL version 3. If you do not agree with your source code being used in this manner then please do not submit any code to the project.
 
 ## Further information
 

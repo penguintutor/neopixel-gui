@@ -1,0 +1,40 @@
+<h1>neopixel-gui</h1>
+
+<p>Simple graphical interface for controlling neopixel RGB LEDs on a Raspberry Pi</p>
+
+<h2>Introduction</h2>
+
+<p>This project is currently work in progress. More documentation will be provided in future.</p>
+
+<h2>GUI Layout</h2>
+
+<p>The user interface is intentionally basic in appearance using large buttons. This is so that it is suitable for use in a disco environment using a touchscreen (eg. using VNC from a touchscreen laptop).</p>
+
+<p>The Apply button needs to be pressed for the changes to take effect, which allows the user to choose all the appropriate settings prior to applying them.</p>
+
+<p><img src="screenshot-v0-1.png" alt="NeoPixel GUI screenshot" title="Screenshot of NeoPixel GUI Version 0.1" /></p>
+
+<h2>Supported platform</h2>
+
+<p>This is designed to run on a Raspberry Pi. 
+It has been tested with the <a href="http://smstextblog.blogspot.co.uk/2015/03/afirstly-thank-you-for-purchasing-this.html">MyPifi Neopixel board</a>.</p>
+
+<h2>Pre-requisites</h2>
+
+<p>Install the neopixel library from: https://github.com/richardghirst/rpi_ws281x.git </p>
+
+<p>This needs to be installed for python3 
+The final step should be:
+sudo python3 setup.py install</p>
+
+<h2>Install</h2>
+
+<p>Download the relevant files into a new folder named /home/pi/neopixel
+Copy the file rpnpgp.desktop to the /usr/share/applications directory.
+The icon should now appear on the normal start menu.</p>
+
+<p>A more detailed install guide is provided in the file INSTALL.md</p>
+
+<h2>More Information</h2>
+
+<p>More information will be provided on <a href="http://www.penguintutor.com">www.penguintutor.com</a></p>

@@ -7,6 +7,7 @@ import threading
 from neopixelcmds import *
 from tkinter import *
 from tkinter import ttk
+from tkinter import messagebox
 from neopixelseq import *
 import configparser
 import time
@@ -16,6 +17,7 @@ import ledsettings
 from collections import OrderedDict
 
 
+VERSION = '0.1 beta'
 
 # File containing sequences and colour options
 # Must exist and have valid entries
@@ -25,7 +27,9 @@ sequencefile = 'sequences.cfg'
 # If not exist then use defaults
 configfile = 'rpnpgp.cfg'
 
-helpfile = 'help.html'
+readmefile = 'docs/readme.html'
+userfile = 'docs/userguide.html'
+customfile = 'docs/customguide.html'
 
 # Use to send a message to GUI - created during startup
 # eg. message = ("Warning", "Insert warning here")
@@ -133,7 +137,8 @@ class App(Frame):
         self.command.setCommand("STOP")
         self.command.setCmdStatus(True)
         self.parent.destroy()
-    
+
+
     def __init__(self, parent, command, sequenceOptions, colourChoice, config, cfgwindow):
         Frame.__init__(self, parent)
         self.seqScreen = 1                  # which screen of sequences we are displaying - starts at 1
@@ -165,9 +170,10 @@ class App(Frame):
         
         menu_file.add_command(label='Quit', command=self.closeApp)
         menu_edit.add_command(label='Settings', command=self.cfgwindow.windowClient)
-        menu_help.add_command(label='User Guide', command=viewHelp)
-        
-        
+        menu_help.add_command(label='Readme', command=viewReadme)
+        menu_help.add_command(label='User Guide', command=viewUserGuide)
+        menu_help.add_command(label='Customisation Guide', command=viewCustom)
+        menu_help.add_command(label='About', command=aboutBox)
         
         
         self.pack(fill=BOTH, expand=1)
@@ -368,8 +374,22 @@ def hexColourToString(colour):
     return "#%02x%02x%02x" % (redValue, greenValue, blueValue)
 
 
-def viewHelp():
-    webbrowser.open_new(helpfile)
+def viewReadme():
+    webbrowser.open_new(readmefile)
+
+def viewUserGuide():
+    webbrowser.open_new(userfile)
+
+def viewCustom():
+    webbrowser.open_new(customfile)
+
+
+def aboutBox(): 
+    messagebox.showinfo(
+            "About",
+            "Neopixel GUI\nVersion %s\nBy Stewart Watkiss @penguintutor" % VERSION
+        )
+
 
 def numpages (numsequences, numbuttons) :
     return int((numsequences-1) / numbuttons) + 1
