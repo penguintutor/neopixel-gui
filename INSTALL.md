@@ -6,25 +6,27 @@ Guide to installing the neopixel gui application.
 
 **WARNING: Read carefully before connecting Neopixels to your Raspberry Pi**
 
-The neopixel gui application is designed for use with a Raspberry Pi. It controls a strip of RGB LEDs with integrated controller IC such as WS2811 or WS2812. Adafruit products are named Neopixels, but other suppliers may refer to these as RGB LEDs, WS2811, WS2812 or WS281x LEDs.
+The neopixel gui application is designed for use with a Raspberry Pi. It controls a strip of RGB LEDs with integrated controller IC such as WS2811 or WS2812. Adafruit products are named NeoPixels, but other suppliers may refer to these as RGB LEDs, WS2811, WS2812 or WS281x LEDs.
 
-It should work with all current versions of the Raspberry Pi. If using a Raspberry Pi 2 then it is important that the neopixel library is installed from the link provided in this guide earlier versions of the library do not work with the Raspberry Pi 2.
+It should work with all current versions of the Raspberry Pi. It is recommended that the version of the neopixel library is installed from the link provided in this guide earlier versions of the library do not work with the Raspberry Pi 2.
 
 Using the neopixel libarary the neopixels can be driven from the Raspberry Pi GPIO connector. It needs to use PWM which is available on **GPIO pin 18** (physically pin 12 on the board).
 
-The GPIO port works at 3.3V, but to run Neopixels at full brightness requires a 5v power supply and 5v data signal. This can be done using a voltage level shifter circuit.
+The GPIO port works at 3.3V, but to run Neopixels at full brightness requires a 5v power supply and as a result a 5V data signal. This needs a voltage level shifter circuit to convert the 3.3V output from the Raspberry Pi to 5V.
 
 I used a [MyPifi Neopixel board](http://smstextblog.blogspot.co.uk/2015/03/afirstly-thank-you-for-purchasing-this.html) for testing the software.
 
+I have also tested this using a simple MOSFET switch circuit using a 2N7000 MOS-FET.
+
 ## Raspberry Pi with Raspbian
 
-These instructions are based on Raspbian provided with NOOBS version 1.4. It should work with any recent version of Raspbian. 
+These instructions are based on Raspbian Jesse using the November 2015 version of NOOBS. It should work with any recent version of Raspbian. 
 
 [Download the latest version of NOOBS](https://www.raspberrypi.org/downloads/)
 
 ## Pre-requisites
 
-The software is written for Python version 3 and needs the NeoPixel library to be installed for Python 3. To work with Raspberry Pi then the updated version needs to be installed (this can be installed on the older Raspberry Pi as well).
+The software is written for Python version 3 and needs the NeoPixel library to be installed for Python 3. To work with the Raspberry Pi then the updated version of the NeoPixel needs to be installed (this can be installed on the older Raspberry Pi as well).
 
 First install the developer libraries using
 `sudo apt-get install build-essential python-dev python3-dev git scons swig`
@@ -32,10 +34,11 @@ First install the developer libraries using
 (this includes the Python 2 developer libraries which are not required but are useful to install anyway)
 
 Download the neopixel code from github
-`git clone https://github.com/richardghirst/rpi_ws281x.git`
+`git clone https://github.com/jgarff/rpi_ws281x.git`
 
 ```bash
 cd rpi_ws281x
+checkout rpi2
 scons
 ```
 
@@ -101,7 +104,7 @@ In rare circumstances you may also need to reboot the computer (or if you know w
 
 ## Upgrade instructions
 
-If you installed the software from git then you can update to the latest version at any time by changing into the neopixel folder and issuing a 
+If you installed the software from git then you can update to the latest version at any time by changing into the neopixel folder and issuing
 
 ```bash
 git pull
