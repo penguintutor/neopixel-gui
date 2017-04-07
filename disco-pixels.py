@@ -17,15 +17,15 @@ import ledsettings
 from collections import OrderedDict
 
 
-VERSION = '0.1 beta'
+VERSION = '0.2'
 
 # File containing sequences and colour options
 # Must exist and have valid entries
 sequencefile = 'sequences.cfg'
 
 # File containing user config
-# If not exist then use defaults
-configfile = 'rpnpgp.cfg'
+# If it does not exist then use defaults
+configfile = 'd.cfg'
 
 readmefile = 'docs/readme.html'
 userfile = 'docs/userguide.html'

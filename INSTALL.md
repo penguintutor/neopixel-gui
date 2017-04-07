@@ -18,6 +18,7 @@ I used a [MyPifi Neopixel board](http://smstextblog.blogspot.co.uk/2015/03/afirs
 
 I have also tested this using a simple MOSFET switch circuit using a 2N7000 MOS-FET.
 
+
 ## Raspberry Pi with Raspbian
 
 These instructions are based on Raspbian Jesse using the November 2015 version of NOOBS. It should work with any recent version of Raspbian. 
@@ -38,7 +39,6 @@ Download the neopixel code from github
 
 ```bash
 cd rpi_ws281x
-checkout rpi2
 scons
 ```
 
@@ -111,5 +111,11 @@ git pull
 ```
 Please make sure you check the README.md file in case of any major changes to the configuration.
 
-If you downloaded the package from [PenguinTutor.com](http://www.penguintutor.com) then check there for a new version and any upgrade instructions.
+If you downloaded the package from [PenguinTutor.com](http://www.penguintutor.com) then check there for a new version and install that in place of the existing files.
 
+### Extra steps for upgrading from 0.1
+
+If you have an version 0.1 installed then the program file names have changed.
+Delete any existing icons from the start menu or desktop. Rename the rpnpgp.cfg file
+
+`mv rpnpgp.cfg disco-pixels.cfg`

@@ -3,7 +3,6 @@ import tkinter as tk
 from neopixel import *
 from dynneopixel import *
 
-
 # Sequence method should change some LEDs and then return
 # If that sequence is still running then the method should resume
 # from where it left off. In the case of short sequences then the entire 
@@ -21,11 +20,10 @@ from dynneopixel import *
 # to return to the same point after checking if a configuration change has 
 # has been made
 
-# Where a sequence is repeats over a set number of LEDs other than the number
+# Where a sequence is repeated over a set number of LEDs other than the number
 # of colours selected by the user then the preferred value is 4
 # The magic number of 4 is used as it is a factor of all the neopixels rings 
 # (12, 16, 24) and it is an easy number to integrate within sequences.
-
 
 
 class NeoPixelSeq():

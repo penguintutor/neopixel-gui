@@ -1,6 +1,18 @@
 #!/usr/bin/pgzrun
-from neopixel import *
+from neopixel_debug import *
 import time
+
+VERSION = '0.2'
+
+# File containing sequences and colour options
+# Must exist and have valid entries
+sequencefile = 'sequences.cfg'
+
+# File containing user config
+# If it does not exist then use defaults
+configfile = 'mood-pixels.cfg'
+
+
 
 LEDCOUNT = 10
 GPIOPIN = 18
