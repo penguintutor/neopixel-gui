@@ -1,7 +1,5 @@
 # Class to provide settings from configwriter config
 
-
-
 class LEDSettings():
     
     def __init__(self, config):

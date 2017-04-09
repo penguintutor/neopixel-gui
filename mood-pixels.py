@@ -1,20 +1,75 @@
 #!/usr/bin/pgzrun
-from neopixel_debug import *
-import time
+from neopixel import *
+import .home.git.neopixel-gui.ledsettings
+import time       
+import threading
+import configparser
+
+from neopixelcmds import *
+from neopixelseq import *
+
 
 VERSION = '0.2'
-
-# File containing sequences and colour options
-# Must exist and have valid entries
-sequencefile = 'sequences.cfg'
 
 # File containing user config
 # If it does not exist then use defaults
 configfile = 'mood-pixels.cfg'
 
 
+# File containing sequences and colour options
+# Must exist and have valid entries
+sequencefile = 'sequences.cfg'
 
-LEDCOUNT = 10
+# default settings if none loaded
+defaultLEDSettings = {
+    'ledcount': 16,
+    'gpiopin': 18,
+    'ledfreq': 800000,
+    'leddma' : 5,
+    'ledmaxbrightness': 255,
+    'ledinvert': False
+    }
+
+config = configparser.ConfigParser()
+# load user settings from configfile
+try :
+    config.read(configfile)
+    # Test that config entries loaded by looking at first entry
+    numLEDs = int(config['LEDs']['ledcount'])
+except (configparser.Error, KeyError) :
+    # Can't display warning at this stage so save message for when gui loaded
+    # Don't overwrite error message if there is one
+    if (message[0] == '') : 
+        message = ("Warning", "No config file found\nUsing default values")
+    
+    # if load failed then use defaults
+    config.add_section('LEDs')
+    for key, value in defaultLEDSettings.items():
+        config.set('LEDs', key, str(value)) 
+
+
+# load sequence config    
+seqconfig = configparser.ConfigParser()
+# configwriter keys are normally case insensitive (converted to lowercase) - override as need case of the keys to match method names
+seqconfig.optionxform = str
+# Load the sequences
+try :
+    seqconfig.read(sequencefile)
+except (configparser.Error, KeyError) :
+    # Can't display warning at this stage so save message for when gui loaded
+    message = ("Error", "Sequence.cfg does not exist\n or is missing important values")
+
+
+settings = ledsettings.LEDSettings(config)
+
+command = NeoPixelCmds()
+LEDs = NeoPixelSeq(settings.allSettings(), command)
+
+#
+thread=threading.Thread(target=runPixels, args=(LEDs, command))
+thread.start()
+
+LEDCOUNT = 96
 GPIOPIN = 18
 FREQ = 800000
 DMA = 5
