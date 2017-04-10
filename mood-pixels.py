@@ -1,10 +1,16 @@
 #!/usr/bin/pgzrun
 from neopixel import *
-import .home.git.neopixel-gui.ledsettings
+import os
+import sys
 import time       
 import threading
 import configparser
 
+
+# Local imports must come after adding current path to command path
+sys.path.append(os.getcwd())
+
+import ledsettings
 from neopixelcmds import *
 from neopixelseq import *
 
