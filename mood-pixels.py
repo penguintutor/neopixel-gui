@@ -1,11 +1,10 @@
 #!/usr/bin/pgzrun
-from neopixel import *
+#from neopixel import *
 import os
 import sys
 import time       
 import threading
 import configparser
-
 
 # Local imports must come after adding current path to command path
 sys.path.append(os.getcwd())
@@ -25,6 +24,10 @@ configfile = 'mood-pixels.cfg'
 # File containing sequences and colour options
 # Must exist and have valid entries
 sequencefile = 'sequences.cfg'
+
+# Use to send a message to GUI - created during startup
+# eg. message = ("Warning", "Insert warning here")
+message = ("","")
 
 # default settings if none loaded
 defaultLEDSettings = {
@@ -54,6 +57,22 @@ except (configparser.Error, KeyError) :
         config.set('LEDs', key, str(value)) 
 
 
+
+
+
+#Thread for communicating with neopixels
+#Simple one-way communication with thread using globals
+#checks variables or updates (cmdMessage, cmdColours)
+def runPixels(LEDs, command):
+    while command.getCommand() != "STOP":
+        # run appropriate script
+        method = getattr (LEDs, command.getCommand())
+        method() 
+        
+
+
+
+
 # load sequence config    
 seqconfig = configparser.ConfigParser()
 # configwriter keys are normally case insensitive (converted to lowercase) - override as need case of the keys to match method names
@@ -75,12 +94,12 @@ LEDs = NeoPixelSeq(settings.allSettings(), command)
 thread=threading.Thread(target=runPixels, args=(LEDs, command))
 thread.start()
 
-LEDCOUNT = 96
-GPIOPIN = 18
-FREQ = 800000
-DMA = 5
-INVERT = True       # Invert required when using inverting buffer
-BRIGHTNESS = 255
+#LEDCOUNT = 96
+#GPIOPIN = 18
+#FREQ = 800000
+#DMA = 5
+#INVERT = True       # Invert required when using inverting buffer
+#BRIGHTNESS = 255
 
 WIDTH = 760
 HEIGHT = 380
@@ -116,9 +135,9 @@ timer = 0
 
 
 # Setup NeoPixel Strip
-strip = Adafruit_NeoPixel(LEDCOUNT, GPIOPIN, FREQ, DMA, INVERT, BRIGHTNESS)
+#strip = Adafruit_NeoPixel(LEDCOUNT, GPIOPIN, FREQ, DMA, INVERT, BRIGHTNESS)
 # Intialize the library (must be called once before other functions).
-strip.begin()
+#strip.begin()
 
 
 def draw():
@@ -198,19 +217,23 @@ def update():
 
 def updseq () :
     global sequence
-    if (sequence == "All On"):
-        seq_all_on()
-    if (sequence == "All Off"):
-        seq_all_off()
-    if (sequence == "Flash Alt"):
-        seq_flash_alt ()
-    if (sequence == "Chaser"):
-        seq_chaser ()
-    if (sequence == "Multi Chaser"):
-        seq_multi_chaser ()
-    if (sequence == "Color Cycle"):
-        seq_color_cycle()
+    #cmd, text = sequenceOptions[sequence.get()]
+    #command.setCommand(cmd)
+    command.setCommand('rainbow');
+#    if (sequence == "All On"):
+#        seq_all_on()
+#    if (sequence == "All Off"):
+#        seq_all_off()
+#    if (sequence == "Flash Alt"):
+#        seq_flash_alt ()
+#    if (sequence == "Chaser"):
+#        seq_chaser ()
+#    if (sequence == "Multi Chaser"):
+#        seq_multi_chaser ()
+#    if (sequence == "Color Cycle"):
+#        seq_color_cycle()
     
+
 
 
 

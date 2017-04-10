@@ -37,7 +37,14 @@ message = ("","")
 
 # Settings for neopixels
 # load from config file - these are defaults if no config file found
-
+defaultLEDSettings = {
+    'ledcount': 16,
+    'gpiopin': 18,
+    'ledfreq': 800000,
+    'leddma' : 5,
+    'ledmaxbrightness': 255,
+    'ledinvert': False
+    }
 
 # Grid for sequence buttons
 sequenceGridX = 3
