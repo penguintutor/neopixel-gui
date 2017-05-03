@@ -36,7 +36,7 @@ defaultLEDSettings = {
     'ledfreq': 800000,
     'leddma' : 5,
     'ledmaxbrightness': 255,
-    'ledinvert': False
+    'ledinvert': True 
     }
 
 config = configparser.ConfigParser()
