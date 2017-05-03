@@ -1,0 +1,5 @@
+Pre-requistes
+
+NeoPixel libraries
+Python3 Botle
+sudo apt-get install python3-bottle
