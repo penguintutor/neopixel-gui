@@ -70,6 +70,9 @@ PORT = 80
 # The index.html file is exposed to the webserver as well as any files in a subdirectory called public (ie. /home/pi/neopixel-gui/public) 
 DOCUMENT_ROOT = '/home/pi/git/neopixel-gui'
 
+# Create the bottle web server
+app = bottle.Bottle()
+
 
 # public files
 # *** WARNING ANYTHING STORED IN THE PUBLIC FOLDER WILL BE AVAILABLE TO DOWNLOAD BY ANYONE CONNECTED TO THE SAME NETWORK ***
@@ -162,11 +165,6 @@ def main():
         
     thread=threading.Thread(target=runPixels, args=(LEDs, command))
     thread.start()
-    
-    
-    
-    # Create the bottle web server
-    app = bottle.Bottle()
 
     app.run(host=HOST, port=PORT)    
                                                                           
