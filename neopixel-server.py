@@ -86,7 +86,7 @@ def server_public (filename):
 @app.route ('/allon')
 def allon():
     colour = int(request.query.colour)
-    print "Colour " + colour
+    print ("Colour " + colour)
     self.command.setCommand("allOn")
       
         
