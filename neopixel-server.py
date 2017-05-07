@@ -31,6 +31,8 @@ import time
 import ledsettings
 from collections import OrderedDict
 
+global command
+
 # New version number for client server architecture
 VERSION = '0.3'
 
@@ -50,12 +52,12 @@ message = ("","")
 # load from config file or get from client
 # these are defaults if no config file found
 defaultLEDSettings = {
-    'ledcount': 16,
+    'ledcount': 150,
     'gpiopin': 18,
     'ledfreq': 800000,
     'leddma' : 5,
     'ledmaxbrightness': 255,
-    'ledinvert': False
+    'ledinvert': True
     }
 
 DEFAULTSPEED = 50
@@ -85,17 +87,46 @@ def server_public (filename):
 # Handle switch on request
 @app.route ('/allon')
 def allon():
-    colour = int(request.query.colour)
-    print ("Colour " + colour)
-    self.command.setCommand("allOn")
+    colour = request.query.colour
+    # Only limited colours defined
+    if (colour == "white"):
+        command.setColours([Color(255,255,255)])
+    elif (colour == "red"):
+        command.setColours([Color(0,255,0)])
+    elif (colour == "green"):
+        command.setColours([Color(255,0,0)])
+    elif (colour == "blue"):
+        command.setColours([Color(0,0,255)])
+    command.setCommand("allOn")
+    command.setCmdStatus(True)
       
-        
+# Handle switch on request
+@app.route ('/rainbow')
+def rainbow():
+    command.setCommand("rainbow")
+    command.setCmdStatus(True)
+    
+# Handle switch on request
+@app.route ('/chaser')
+def chaser():
+    command.setCommand("chaser")
+    command.setCmdStatus(True)
+   
+# Handle switch on request
+@app.route ('/disco')
+def disco():
+    command.setCommand("rainbowCycle")
+    command.setCmdStatus(True)
+   
 @app.route ('/alloff')
 def alloff():
-    self.command.setCommand("allOff")
-    self.command.setCmdStatus(True)
+    command.setCommand("allOff")
+    command.setCmdStatus(True)
 
-        
+@app.route ('/status')
+def status():
+    pass
+
 
 # Serve up the default index.html page
 @app.route ('/')
@@ -120,7 +151,7 @@ def runPixels(LEDs, command):
 
 def main():
 
-    global message
+    global message, command
 
     # load settings during startup    
     seqconfig = configparser.ConfigParser()
