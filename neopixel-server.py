@@ -85,9 +85,10 @@ def server_public (filename):
 # Handle switch on request
 @app.route ('/allon')
 def allon():
-    query = int(request.query.option)
+    colour = int(request.query.colour)
+    print "Colour " + colour
     self.command.setCommand("allOn")
-            
+      
         
 @app.route ('/alloff')
 def alloff():
