@@ -31,6 +31,8 @@ import time
 import ledsettings
 from collections import OrderedDict
 
+# Command is defined globally so that it is retained and accessible from the 
+# webserver code
 global command
 
 # New version number for client server architecture
@@ -51,8 +53,11 @@ message = ("","")
 # Settings for neopixels
 # load from config file or get from client
 # these are defaults if no config file found
+# Default of ledinvert is True for compatibility with the
+# FET based NeoPixel circuit provided at http://www.penguintutor.com/electronics/neopixels
+# If using a non-inverting buffer then that should be set to False
 defaultLEDSettings = {
-    'ledcount': 150,
+    'ledcount': 16,
     'gpiopin': 18,
     'ledfreq': 800000,
     'leddma' : 5,
@@ -100,24 +105,17 @@ def allon():
     command.setCommand("allOn")
     command.setCmdStatus(True)
       
-# Handle switch on request
-@app.route ('/rainbow')
+# Handle sequence request
+# eg /sequence?seq=rainbow - or other sequence from sequence.cfg
+# eg chaser / disco 
+@app.route ('/sequence')
 def rainbow():
-    command.setCommand("rainbow")
+    seq = request.query.seq
+    command.setCommand(seq)
     command.setCmdStatus(True)
     
-# Handle switch on request
-@app.route ('/chaser')
-def chaser():
-    command.setCommand("chaser")
-    command.setCmdStatus(True)
-   
-# Handle switch on request
-@app.route ('/disco')
-def disco():
-    command.setCommand("rainbowCycle")
-    command.setCmdStatus(True)
-   
+
+# Handle switch off
 @app.route ('/alloff')
 def alloff():
     command.setCommand("allOff")
@@ -141,6 +139,7 @@ def server_home ():
 #Simple one-way communication with thread using globals
 #checks variables or updates (cmdMessage, cmdColours)
 def runPixels(LEDs, command):
+    global command
     while command.getCommand() != "STOP":
         # run appropriate script
         method = getattr (LEDs, command.getCommand())

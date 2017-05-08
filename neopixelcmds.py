@@ -14,7 +14,8 @@ class NeoPixelCmds():
         "intensity":100     # intensity as % of colour
     }
 
-    # Change to True when there is a new command allows to breakout during a slow command.
+    # Change to True when there is a new command issued
+    # This allows the program to breakout during a slow command, otherwise waits until the end of the cycle
     newCmdStatus = False;
 
     def setCommand(self, command):
