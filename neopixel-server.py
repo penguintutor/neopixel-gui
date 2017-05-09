@@ -139,7 +139,6 @@ def server_home ():
 #Simple one-way communication with thread using globals
 #checks variables or updates (cmdMessage, cmdColours)
 def runPixels(LEDs, command):
-    global command
     while command.getCommand() != "STOP":
         # run appropriate script
         method = getattr (LEDs, command.getCommand())
