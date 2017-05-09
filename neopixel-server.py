@@ -35,6 +35,14 @@ from collections import OrderedDict
 # New version number for client server architecture
 VERSION = '0.3'
 
+# Level of debugging shown on the console 
+# 1 = normal - errors only
+# 3 = detailed debugging (any malformed requests show)
+# 5 = very detailed debugging includes allowed operations
+# Note this does not change the level of debugging from Bottle, only those
+# from this code
+DEBUG = 5
+
 # Command is defined globally as it provides the main interface to the NeoPixels
 # which needs to be accessible from the webserver code as well as being passed
 # as a parameter to the thread for handling the update of the NeoPixels
@@ -110,6 +118,8 @@ def allon():
         command.setColours([Color(255,0,0)])
     elif (colour == "blue"):
         command.setColours([Color(0,0,255)])
+    elif (colour != ""):
+        debugMsg (5, "Warning: Invalid colour provided for allon")
     command.setCommand("allOn")
     command.setCmdStatus(True)
       
@@ -121,6 +131,7 @@ def rainbow():
     seq = request.query.seq
     # For security reasons check that it is a valid sequence
     if not seq in sequenceOptions.keys(): 
+        debugMsg (3, "Warning: Invalid sequence requested")
         return
     command.setCommand(seq)
     command.setCmdStatus(True)
@@ -148,13 +159,14 @@ def setcolours():
     # If any are not valid then quit without changing any colours
     
     #for (thiscolour: colourlist):
-    for (i =0; i< colourlist.size(); i++)
+    for i in range(colourlist.size()):
         try:
             intcolours[i] = (int(colourlist[i], 16))
         except ValueError as err:
+            debugMsg (3, "Warning: Invalid colour provided in setcolour")
             return
         except Exception as e:
-            print "Unknown exception has occurred setting colours"
+            debugMsg (1, "Warning: Unknown exception has occurred setting colours")
             return
 
     # Now have an array of int values 
@@ -182,6 +194,11 @@ def runPixels(LEDs, command):
         
 
 
+def debugMsg(priority, message) :
+    if (DEBUG >= priority):
+        print (message)
+
+
 
 def main():
 
@@ -204,7 +221,7 @@ def main():
     colourChoice = OrderedDict()
     
     for key, value in seqconfig.items('Sequences') :
-        sequenceOptions.append ([key, value.replace('\\n', '\n')]) 
+        sequenceOptions[key] = value.replace('\\n', '\n') 
     for key, value in seqconfig.items('Colours') :
         colourChoice[key] = value
     
