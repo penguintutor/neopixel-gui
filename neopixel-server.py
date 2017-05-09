@@ -4,7 +4,7 @@
 # Copyright Stewart Watkiss 2015-2017
 
 
-# web-power is free software: you can redistribute it and/or modify
+# This code is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
@@ -31,12 +31,15 @@ import time
 import ledsettings
 from collections import OrderedDict
 
-# Command is defined globally so that it is retained and accessible from the 
-# webserver code
-global command
 
 # New version number for client server architecture
 VERSION = '0.3'
+
+# Command is defined globally as it provides the main interface to the NeoPixels
+# which needs to be accessible from the webserver code as well as being passed
+# as a parameter to the thread for handling the update of the NeoPixels
+# This is an alternative to using a singleton, but without the extra overhead 
+global command, settings
 
 # File containing sequences and colour options
 # Must exist and have valid entries
@@ -45,10 +48,6 @@ sequencefile = 'sequences.cfg'
 # File containing user config
 # If it does not exist then use defaults
 configfile = 'neopixel-server.cfg'
-
-# Use to send a message to Back - created during startup
-# eg. message = ("Warning", "Insert warning here")
-message = ("","")
 
 # Settings for neopixels
 # load from config file or get from client
@@ -79,6 +78,14 @@ PORT = 80
 # The index.html file is exposed to the webserver as well as any files in a subdirectory called public (ie. /home/pi/neopixel-gui/public) 
 DOCUMENT_ROOT = '/home/pi/git/neopixel-gui'
 
+
+# These are used to provide settings to the NeoPixels and the web interface
+# This is the list of sequences that can be selected, key = methodname, value = user friendly string
+sequenceOptions = dict()
+config = configparser.ConfigParser()
+
+
+
 # Create the bottle web server
 app = bottle.Bottle()
 
@@ -94,6 +101,7 @@ def server_public (filename):
 def allon():
     colour = request.query.colour
     # Only limited colours defined
+    # For other colours then use /setcolour instead
     if (colour == "white"):
         command.setColours([Color(255,255,255)])
     elif (colour == "red"):
@@ -111,6 +119,9 @@ def allon():
 @app.route ('/sequence')
 def rainbow():
     seq = request.query.seq
+    # For security reasons check that it is a valid sequence
+    if not seq in sequenceOptions.keys(): 
+        return
     command.setCommand(seq)
     command.setCmdStatus(True)
     
@@ -124,6 +135,31 @@ def alloff():
 @app.route ('/status')
 def status():
     pass
+
+# provide a comma separated list of rgb colours eg. /setcolours?colours=000000,ffffff 
+# Note that # isn't used in the url as that has a different use to jump to a part of the page
+@app.route ('/setcolours')
+def setcolours():
+    colours = request.query.colours
+    colourlist = colours.split(",")
+    intcolours = []
+    
+    # Check that all colours are valid and convert them into Colors 
+    # If any are not valid then quit without changing any colours
+    
+    #for (thiscolour: colourlist):
+    for (i =0; i< colourlist.size(); i++)
+        try:
+            intcolours[i] = (int(colourlist[i], 16))
+        except ValueError as err:
+            return
+        except Exception as e:
+            print "Unknown exception has occurred setting colours"
+            return
+
+    # Now have an array of int values 
+    command.setColours(intcolours)
+
 
 
 # Serve up the default index.html page
@@ -149,7 +185,7 @@ def runPixels(LEDs, command):
 
 def main():
 
-    global message, command
+    global command, settings
 
     # load settings during startup    
     seqconfig = configparser.ConfigParser()
@@ -159,12 +195,12 @@ def main():
     try :
         seqconfig.read(sequencefile)
     except (configparser.Error, KeyError) :
-        # Can't display warning at this stage so save message for when gui loaded
-        message = ("Error", "Sequence.cfg does not exist\n or is missing important values")
+        # Error loading the sequences
+        sys.exit ("Error Sequence.cfg does not exist\n or is missing important values")
         
     # iterate over sequences which allows handling of "\n" text to '\n' character
-    sequenceOptions = []
     # colourChoice is ordered to maintain order of colours 
+    # legacy option - not needed if using colour wheel chooser
     colourChoice = OrderedDict()
     
     for key, value in seqconfig.items('Sequences') :
@@ -172,17 +208,15 @@ def main():
     for key, value in seqconfig.items('Colours') :
         colourChoice[key] = value
     
-    config = configparser.ConfigParser()
+    
     # load user settings from configfile
     try :
         config.read(configfile)
         # Test that config entries loaded by looking at first entry
         numLEDs = int(config['LEDs']['ledcount'])
     except (configparser.Error, KeyError) :
-        # Can't display warning at this stage so save message for when gui loaded
-        # Don't overwrite error message if there is one
-        if (message[0] == '') : 
-            message = ("Warning", "No config file found\nUsing default values")
+        # Give warning message
+        print ("Warning: No config file found\nUsing default values")
         
         # if load failed then use defaults
         config.add_section('LEDs')
@@ -194,10 +228,12 @@ def main():
     
     command = NeoPixelCmds()
     LEDs = NeoPixelSeq(settings.allSettings(), command)
-        
+    
+    # Spawn separate thread for handling the updates to the Pixels
     thread=threading.Thread(target=runPixels, args=(LEDs, command))
     thread.start()
 
+    # Start the Bottle web server 
     app.run(host=HOST, port=PORT)    
                                                                           
     
