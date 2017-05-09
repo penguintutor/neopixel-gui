@@ -30,6 +30,7 @@ import configparser
 import time
 import ledsettings
 from collections import OrderedDict
+from neopixelhtmlgen import *
 
 
 # New version number for client server architecture
@@ -177,7 +178,8 @@ def setcolours():
 # Serve up the default index.html page
 @app.route ('/')
 def server_home ():
-    return static_file ('index.html', root=DOCUMENT_ROOT)
+    #return static_file ('index.html', root=DOCUMENT_ROOT)
+    return indexPage(sequenceOptions)
 
 
 
