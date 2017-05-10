@@ -13,13 +13,13 @@ class ConfigWindow():
     # Track whether config window open to stop duplicate windows
     configWindowOpen = False
 
-    def __init__ (self, config, configfile, defaults, settings, ledseq):
+    def __init__ (self, config, configfile, defaults, settings, command):
         self.config = config
         self.configfile = configfile
         self.defaults = defaults
         self.settings = settings
         # ledseq is the instance of the NeoPixelSeq class provide here to allow  updates without restarting
-        self.ledseq = ledseq
+        self.command = command
 
 
     # called from window manager handler or from Cancel button

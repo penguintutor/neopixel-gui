@@ -10,25 +10,33 @@ import urllib.request
 
 
 class ClientController():
-	
+    
     def __init__(self, hostname, port):
-		self.urlpost = 'http://'+hostname+":"+port+'/neopixel'	
+        self.urlpost = 'http://'+hostname+":"+str(port)+'/neopixel'  
     
 
-	def setSequence(self, sequence):
-		parmsdict = {"request":"command", "sequence":sequence}
-		data = fetchPage(parmsdict)
-    	
+    def setSequence(self, sequence):
+        parmsdict = {"request":"command", "sequence":sequence}
+        data = self.fetchPage(parmsdict)
+        
     def getConfig(self):
-    	parmsdict = {"request":"query", "type":"config"}
-    	data = fetchPage(parmsdict)
-    	
-    	
+        parmsdict = {"request":"query", "type":"config"}
+        data = self.fetchPage(parmsdict)
+        
+        
     def fetchPage(self, parmsdict):
-    	params = json.dumps(parmsdict).encode('utf8')
-		req = urllib.request.Request(self.urlpost, data=params, headers={'content-type': 'application/json'})
-		response = urllib.request.urlopen(req)
-		replydata = response.read().decode('utf8'))
-		return replydata
-		
-	
+        params = json.dumps(parmsdict).encode('utf8')
+        req = urllib.request.Request(self.urlpost, data=params, headers={'content-type': 'application/json'})
+        response = urllib.request.urlopen(req)
+        replydata = response.read().decode('utf8')
+        return replydata
+       
+    #Todo
+    def setColours(self, colours):
+        pass
+    
+    def setDelay(self, delay):
+        pass
+    
+    
+    

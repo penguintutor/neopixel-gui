@@ -22,17 +22,16 @@ import sys
 import math
 import random
 import threading
-from neopixelcmds import *
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
-from neopixelseq import *
 import configparser
 import time
 from configwindow import *
 import webbrowser
 import ledsettings
 from collections import OrderedDict
+from clientcontroller import *
 
 
 
@@ -52,7 +51,9 @@ VERSION = '0.3'
 sequencefile = 'sequences.cfg'
 
 # default hostnames and ports
-serverhostname = '127.0.0.1'
+#todo remove test
+#serverhostname = '127.0.0.1'
+serverhostname = '192.168.0.106'
 serverport = 80
 
 # File containing user config
@@ -147,7 +148,7 @@ class App(Frame):
     def ApplyChange(self):
         # update command object to be passed to the 
         cmd, text = self.sequenceOptions[self.sequence.get()]
-        self.command.setCommand(cmd)
+        self.command.setSequence(cmd)
         coloursTicked = []
         for i in range (len(self.chosenColours)):
             text = self.chosenColours[i]
@@ -162,16 +163,14 @@ class App(Frame):
         self.speedLEDVar.set(delay), 
         self.command.setDelay(delay)
         self.command.setColours(coloursTicked)
-        # Set status to updated so light sequence can stop during method execution
-        self.command.setCmdStatus(True)
 
         
     # Moved from def __del__(self): to closeApp with WindowManager binding 
     # as more reliable than needing to wait for __del__
     def closeApp(self):
         # When close window notify thread to terminate 
-        self.command.setCommand("STOP")
-        self.command.setCmdStatus(True)
+#todo update this
+#        self.command.setCommand("STOP")
         self.parent.destroy()
 
 
@@ -188,7 +187,7 @@ class App(Frame):
 
     def initUI(self):
 
-        self.parent.title("RpNpGp - Raspberry Pi Neopixel Gui Package");
+        self.parent.title("Disco Pixels - Raspberry Pi Neopixel Disco Lighting");
         self.parent.wm_protocol('WM_DELETE_WINDOW',  self.closeApp)
 
                 
@@ -431,16 +430,6 @@ def numpages (numsequences, numbuttons) :
     return int((numsequences-1) / numbuttons) + 1
 
 
-#Thread for communicating with neopixels
-#Simple one-way communication with thread using globals
-#checks variables or updates (cmdMessage, cmdColours)
-def runPixels(LEDs, command):
-    while command.getCommand() != "STOP":
-        # run appropriate script
-        method = getattr (LEDs, command.getCommand())
-        method() 
-        
-
 
 
 def main():
@@ -488,14 +477,13 @@ def main():
 
     settings = ledsettings.LEDSettings(config)
     
-    command = NeoPixelCmds()
-    LEDs = NeoPixelSeq(settings.allSettings(), command)
+    #command = NeoPixelCmds()
+    command = ClientController(serverhostname, serverport)
+    #LEDs = NeoPixelSeq(settings.allSettings(), command)
     
     # Create config window
-    cfgwindow = ConfigWindow(config, configfile, defaultLEDSettings, settings, LEDs)
+    cfgwindow = ConfigWindow(config, configfile, defaultLEDSettings, settings, command)
     
-    thread=threading.Thread(target=runPixels, args=(LEDs, command))
-    thread.start()
     
     root = Tk()
     

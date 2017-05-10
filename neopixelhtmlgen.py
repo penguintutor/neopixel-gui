@@ -3,12 +3,12 @@
 def header(title):
     output = """<html>
         <head>
-        <title>"+title+"</title>
+        <title>"""+title+"""</title>
         <!-- uses jpicker colour picker from http://www.digitalmagicpro.com/jPicker/ -->
         <script language="JavaScript" src="public/jquery-3.2.1.slim.min.js"></script>
         <script language="JavaScript" src="public/jpicker-1.1.6/jpicker-1.1.6.min.js"></script>
         </head>"""
-    output += "<body><h1>"+title+"</h1>"
+    output += "<body>"
     return output
 
     

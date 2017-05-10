@@ -116,6 +116,16 @@ def server_public (filename):
 @app.route('/neopixel', method='POST')
 def server_json ():
 	data = request.json
+	if (data['request'] == 'command'):
+	    if 'sequence' in data:
+	        # check it's a valid sequence
+	        if not data['sequence'] in sequenceOptions.keys():
+	            error = {'reply' : 'failure', 'error' : 'Sequence not valid'}
+	            return error
+	        command.setCommand(data['sequence'])
+	        command.setCmdStatus(True)
+	        
+	return "test"
     
     
 # Handle switch on request
