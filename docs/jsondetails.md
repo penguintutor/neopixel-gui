@@ -19,5 +19,12 @@ Set sequence, returns success
 
 #reply:code
 Where code is success, failure (or warning), error description is provided using:
-error:"***"
+cmd:"***"
+eg.
+reply:error
+sequence:Unable to set sequence
 
+or
+reply:warning
+sequence:Sequence set to allon
+colours:Unable to set colour

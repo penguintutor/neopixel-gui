@@ -7,6 +7,7 @@
 
 import json
 import urllib.request
+from urllib.error import *
 
 
 class ClientController():
@@ -17,19 +18,26 @@ class ClientController():
 
     def setSequence(self, sequence):
         parmsdict = {"request":"command", "sequence":sequence}
-        data = self.fetchPage(parmsdict)
+        response = self.fetchPage(parmsdict)
+        return response
         
     def getConfig(self):
         parmsdict = {"request":"query", "type":"config"}
-        data = self.fetchPage(parmsdict)
-        
+        response = self.fetchPage(parmsdict)
+        return response
         
     def fetchPage(self, parmsdict):
         params = json.dumps(parmsdict).encode('utf8')
-        req = urllib.request.Request(self.urlpost, data=params, headers={'content-type': 'application/json'})
-        response = urllib.request.urlopen(req)
-        replydata = response.read().decode('utf8')
-        return replydata
+        try:
+            req = urllib.request.Request(self.urlpost, data=params, headers={'content-type': 'application/json'})
+            response = urllib.request.urlopen(req)
+            reply = response.read().decode('utf8')
+            replydata = json.loads(reply)
+        except (HTTPError, URLError) as error:
+            return "Error communicating with server"
+        if (replydata['reply'] == 'success'):
+            return 'success'
+        return replydata['error']
        
     #Todo
     def setColours(self, colours):

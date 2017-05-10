@@ -31,6 +31,7 @@ import time
 import ledsettings
 from collections import OrderedDict
 from neopixelhtmlgen import *
+from response import Response
 
 
 # New version number for client server architecture
@@ -116,16 +117,21 @@ def server_public (filename):
 @app.route('/neopixel', method='POST')
 def server_json ():
 	data = request.json
+	# response is our reply - stored by utility class
+	response = Response()
+	
 	if (data['request'] == 'command'):
 	    if 'sequence' in data:
 	        # check it's a valid sequence
 	        if not data['sequence'] in sequenceOptions.keys():
-	            error = {'reply' : 'failure', 'error' : 'Sequence not valid'}
-	            return error
-	        command.setCommand(data['sequence'])
-	        command.setCmdStatus(True)
+	            response.addStatus ("error", "sequence", "Sequence not valid")
+	        else:
+	            command.setCommand(data['sequence'])
+	            command.setCmdStatus(True)
+	            response.addStatus ("success", "sequence", "Sequence set to "+data['sequence'])
 	        
-	return "test"
+	# Reach here then unknown request
+	return response.getStatus()
     
     
 # Handle switch on request
