@@ -1,5 +1,23 @@
 #!/usr/bin/env python3
 
+# Client for the NeoPixel GUI - Disco Mode
+# see http://www.penguintutor.com/
+# Copyright Stewart Watkiss 2015-2017
+
+
+# This code is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This software is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this software.  If not, see <http://www.gnu.org/licenses/>
+
 import sys
 import math
 import random
@@ -17,15 +35,29 @@ import ledsettings
 from collections import OrderedDict
 
 
-VERSION = '0.2'
+
+### This is work in progress migrating to client server technology
+# Initially this still uses the sequence file etc (so must be installed on
+# the same machine as the server (or at least have the same configuration
+# files copied over - in future this will be completely separated so
+# can be run on a different server
+###
+
+
+
+VERSION = '0.3'
 
 # File containing sequences and colour options
 # Must exist and have valid entries
 sequencefile = 'sequences.cfg'
 
+# default hostnames and ports
+serverhostname = '127.0.0.1'
+serverport = 80
+
 # File containing user config
 # If it does not exist then use defaults
-configfile = 'd.cfg'
+configfile = 'neopixel-disco.cfg'
 
 readmefile = 'docs/readme.html'
 userfile = 'docs/userguide.html'
@@ -35,7 +67,12 @@ customfile = 'docs/customguide.html'
 # eg. message = ("Warning", "Insert warning here")
 message = ("","")
 
-# Settings for neopixels
+### ToDo
+### These are no longer needed as they are on the server instead
+### when managing this should first connect to the server, get the current
+### settings, get any requested changes and then push that back to the server
+
+# Settings for neopixels 
 # load from config file - these are defaults if no config file found
 defaultLEDSettings = {
     'ledcount': 16,

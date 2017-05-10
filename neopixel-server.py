@@ -105,6 +105,19 @@ app = bottle.Bottle()
 def server_public (filename):
     return static_file (filename, root=DOCUMENT_ROOT+"/public")
     
+    
+## Can accept two types of request
+# preferred /neopixel which is used by the client applications 
+# this uses json to exchange messages between client and server
+
+# The alternative are some "user friendly" url links that can be used for calling
+# basic functions without needing to worry about converting to json
+
+@app.route('/neopixel', method='POST')
+def server_json ():
+	data = request.json
+    
+    
 # Handle switch on request
 @app.route ('/allon')
 def allon():
@@ -144,6 +157,7 @@ def alloff():
     command.setCommand("allOff")
     command.setCmdStatus(True)
 
+## Todo
 @app.route ('/status')
 def status():
     pass
