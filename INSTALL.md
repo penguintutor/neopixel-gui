@@ -14,9 +14,8 @@ Using the neopixel libarary the neopixels can be driven from the Raspberry Pi GP
 
 The GPIO port works at 3.3V, but to run Neopixels at full brightness requires a 5v power supply and as a result a 5V data signal. This needs a voltage level shifter circuit to convert the 3.3V output from the Raspberry Pi to 5V.
 
-I used a [MyPifi Neopixel board](http://smstextblog.blogspot.co.uk/2015/03/afirstly-thank-you-for-purchasing-this.html) for testing the software.
+The recommendation is for a simple MOSFET level shift circuit as explained on the [Penguintutor NeoPixel page](http://www.penguintutor.com/electronics/neopixels)
 
-I have also tested this using a simple MOSFET switch circuit using a 2N7000 MOS-FET.
 
 
 ## Raspberry Pi with Raspbian
@@ -60,6 +59,30 @@ sudo python setup.py install
 ```
 (this last step is not required for this software, but may be useful if you install any other Neopixel software that uses Python version 2).
 
+## Add Python tk
+The client interface does not need to be run on the Raspberry Pi. If you are installing onto a Ubuntu computer then you will need to install the Python TK libraries (used for the graphics application). This is done by running
+
+```bash
+sudo apt install python3-tk
+```
+
+## Disable audio on the Raspberry Pi
+
+There is a conflict between the sound driver and the PCM used to control the NeoPixels. 
+
+To disable the sound driver create a new blacklist file using
+
+```bash
+sudo nano /etc/modprobe.d/snd-blacklist.conf
+```
+
+Add an entry
+
+```
+blacklist snd_bcm2835
+```
+
+Then save and exit (Ctrl-O Ctrl-X). You will need to reboot for this to take effect which youc an do just prior to running the program.
 
 ## Install the Neopixel GUI software
 
