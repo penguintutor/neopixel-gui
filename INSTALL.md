@@ -136,6 +136,16 @@ Please make sure you check the README.md file in case of any major changes to th
 
 If you downloaded the package from [PenguinTutor.com](http://www.penguintutor.com) then check there for a new version and install that in place of the existing files.
 
+
+### Using a web proxy
+
+The program uses the default system proxies.
+To enable proxies then use the following command prior to running the client program.
+
+```bash
+export http_proxy='http://myproxy.example.com:1234'
+```
+
 ### Extra steps for upgrading from 0.1
 
 If you have an version 0.1 installed then the program file names have changed.
