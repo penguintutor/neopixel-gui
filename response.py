@@ -10,25 +10,32 @@
 class Response():
     response = dict()
     
-    def __init__(self):
+    def __init__(self, debug):
+        self.debug = debug
         self.response['reply'] = "none"
         
     def addStatus (self, status, field, message):
         if (status == "success"):
             if (self.response['reply']=="none") :
                 self.response['reply'] = 'success'
-            elif (self.reponse['reply']=="error") :
+            elif (self.response['reply']=="error") :
                 self.response['reply'] = 'warning'
             # Otherwise we already have either warning or success so no need to change
+            if (self.debug >= 5):
+                print ("Info: success for "+ field +" "+message)
         elif (status == "error"):
             if (self.response['reply'] == 'success'):
                 self.response['reply'] = 'warning'
             # warning we leave unchanged (so anything that's not warning is error)
             elif (self.response['reply'] != 'warning'):
                 self.response['reply'] = 'error'
+            if (self.debug >= 3):
+                print ("Error: error for "+ field +" "+message)
         # if status is warning then set to warning regardless
         elif (status == "warning"):
             self.response['reply']= 'warning'
+            if (self.debug >= 5):
+                print ("Warning: warning for "+ field +" "+message)
                 
             
             

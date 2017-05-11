@@ -14,17 +14,28 @@ class ClientController():
     
     def __init__(self, hostname, port):
         self.urlpost = 'http://'+hostname+":"+str(port)+'/neopixel'  
+        self.config = {}
     
+    def setConfigNeopixels(self, config):
+        config['request']='update'
+        config['type']='config'
+        config['value']='neopixels'
+        response = self.fetchPage(config)
+        return response
 
     def setSequence(self, sequence):
         parmsdict = {"request":"command", "sequence":sequence}
         response = self.fetchPage(parmsdict)
         return response
         
-    def getConfig(self):
-        parmsdict = {"request":"query", "type":"config"}
+    def getConfigNeopixels(self):
+        parmsdict = {"request":"query", "type":"config", "value":"neopixels"}
         response = self.fetchPage(parmsdict)
         return response
+        
+    #Todo
+    def getConfigServer(self):
+        pass
         
     def fetchPage(self, parmsdict):
         params = json.dumps(parmsdict).encode('utf8')
@@ -34,10 +45,11 @@ class ClientController():
             reply = response.read().decode('utf8')
             replydata = json.loads(reply)
         except (HTTPError, URLError) as error:
-            return "Error communicating with server"
-        if (replydata['reply'] == 'success'):
-            return 'success'
-        return replydata['error']
+            replydata = {"reply":"fail","error":"Error communicating with server"}
+        #if (replydata['reply'] == 'success'):
+        #    return 'success'
+        #return replydata['error']
+        return replydata
        
     #Todo
     def setColours(self, colours):

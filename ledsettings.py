@@ -5,7 +5,6 @@ class LEDSettings():
     def __init__(self, config):
         self.config = config
         
-        
     def allSettings(self):
         settings = {
         'ledcount': int(self.config['LEDs']['ledcount']),

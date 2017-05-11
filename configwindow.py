@@ -3,6 +3,8 @@ from tkinter import messagebox
 import ledsettings
 import sys
 
+# This pop-up window is used for the hardware configuration of the NeoPixels
+
 # All pwm GPIO ports on Raspberry Pi (used as additional check, but not enforced)
 # Note these are strings as that's how the are edited / stored
 GPIOpwm = ['12', '13', '18', '19', '40', '41', '45']
@@ -14,12 +16,13 @@ class ConfigWindow():
     configWindowOpen = False
 
     def __init__ (self, config, configfile, defaults, settings, command):
-        self.config = config
+        #self.config = config
         self.configfile = configfile
         self.defaults = defaults
         self.settings = settings
         # ledseq is the instance of the NeoPixelSeq class provide here to allow  updates without restarting
         self.command = command
+        self.config={}
 
 
     # called from window manager handler or from Cancel button
@@ -77,30 +80,43 @@ class ConfigWindow():
             self.config['LEDs']['ledinvert'] = "False"
             
         
-        # pass updated config to the NeoPixelSeq class
-        self.ledseq.updSettings(self.settings.allSettings())
-        
         # save config
-        try:
-            with open(self.configfile, 'w') as cfgfile:
-                self.config.write(cfgfile)
-                self.closeConfig()
-                messagebox.showinfo("Info", "Configuration saved")
-        except : 
+        response = self.command.setConfigNeopixels(self.config['LEDs'])
+        if (response['reply'] == 'success'):
             self.closeConfig()
-            messagebox.showinfo("Error", "Error saving configuration file "+configfile)
-            
+            messagebox.showinfo("Info", "Configuration updated")
+        else : 
+            self.closeConfig()
+            # It's not enough to just add response['error'] as need to iterate
+            # through all the values to check individually 
+            # if there is an 'error' then display it (comms error), but the 
+            # individual errors should have been caught by checking within
+            # this prior to attempting to send to the server
+            if ('error' in response) :
+                messagebox.showinfo("Error", "Error updating configuration" + response['error'])
+            else :
+                messagebox.showinfo("Error", "Error updating configuration")
             
         
     def windowClient (self):
         if (self.configWindowOpen) :
             return
+            
+        # load config from server
+        self.config['LEDs'] = self.command.getConfigNeopixels()
+        #print (self.config)
+        # Check we have a valid response
+        if (self.config['LEDs']['reply'] != "success") :
+            messagebox.showinfo("Error", "Unable to retrieve config from server\nPlease check network configuration");
+            return
+            
         self.configWindowOpen = True
         self.configTop = Toplevel()
-        self.configTop.wm_title("RpNpGp - Configuration")
-        self.configTop.wm_geometry("400x300")
+        self.configTop.wm_title("Neopixel - Configuration")
+        self.configTop.wm_geometry("450x300")
         # set handler for close window using WM X
         self.configTop.wm_protocol('WM_DELETE_WINDOW',  self.closeConfig)
+
         
         self.numLEDString = StringVar()
         self.numLEDString.set(int(self.config['LEDs']['ledcount']))
@@ -109,13 +125,13 @@ class ConfigWindow():
         self.maxBrightnessString = StringVar()
         self.maxBrightnessString.set(int(self.config['LEDs']['ledmaxbrightness']))
         self.invertVar = IntVar()
-        if (self.config['LEDs']['ledinvert'] == "True"):
+        if (self.config['LEDs']['ledinvert'] == True):
             self.invertVar.set(1)
         else:
             self.invertVar.set(0)
         
         configTitleLabel = Label(self.configTop,
-                text="RpNpGp - Configuration",
+                text="NeoPixel - Configuration",
                 foreground="blue", font="Verdana 16 bold").grid(columnspan=3, sticky=W, pady=(4, 15), padx=5)
                 
         numLEDLabel = Label(self.configTop,

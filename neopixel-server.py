@@ -32,6 +32,8 @@ import ledsettings
 from collections import OrderedDict
 from neopixelhtmlgen import *
 from response import Response
+import numbers
+import securitychecks
 
 
 # New version number for client server architecture
@@ -50,6 +52,7 @@ DEBUG = 5
 # as a parameter to the thread for handling the update of the NeoPixels
 # This is an alternative to using a singleton, but without the extra overhead 
 global command, settings
+
 
 # File containing sequences and colour options
 # Must exist and have valid entries
@@ -113,25 +116,103 @@ def server_public (filename):
 
 # The alternative are some "user friendly" url links that can be used for calling
 # basic functions without needing to worry about converting to json
-
+# Can have multiple commands, but not query and command at same time
+# and not multiple queries
 @app.route('/neopixel', method='POST')
 def server_json ():
-	data = request.json
-	# response is our reply - stored by utility class
-	response = Response()
-	
-	if (data['request'] == 'command'):
-	    if 'sequence' in data:
-	        # check it's a valid sequence
-	        if not data['sequence'] in sequenceOptions.keys():
-	            response.addStatus ("error", "sequence", "Sequence not valid")
-	        else:
-	            command.setCommand(data['sequence'])
-	            command.setCmdStatus(True)
-	            response.addStatus ("success", "sequence", "Sequence set to "+data['sequence'])
-	        
-	# Reach here then unknown request
-	return response.getStatus()
+    data = request.json
+    # response is our reply - stored by utility class
+    response = Response(DEBUG)
+    
+    ### Command
+    if (data['request'] == 'command'):
+        if 'sequence' in data:
+            # check it's a valid sequence
+            if not data['sequence'] in sequenceOptions.keys():
+                response.addStatus ("error", "sequence", "Sequence not valid")
+            else:
+                command.setCommand(data['sequence'])
+                command.setCmdStatus(True)
+                response.addStatus ("success", "sequence", "success")
+                
+    ### Queries
+    elif (data['request'] == 'query'):
+        ## Config - current saved configs (eg. neopixel / server)
+        if (data['type'] == 'config'):
+            if (data['value'] == "neopixels"):
+                returnvalue = settings.allSettings()
+                returnvalue['reply'] = "success"
+                return returnvalue
+            ##Todo add server settings
+    
+    ### Updates
+    ### Need to doubly make sure that all values are valid
+    elif (data['request'] == 'update'):
+        if (data['type']=='config'):
+            if (data['value'] == 'neopixels'):
+                # update the neopixel settings individually - checking for valid settings
+                # I don't know how many NeoPixels could be supported, but clearly 1M is going to be too large
+                if ('ledcount' in data):
+                    try:
+                        thisvalue = int(data['ledcount'])
+                    except (TypeError, ValueError):
+                        # This is a serious error - not even sending correct
+                        # value type so don't even try the other values
+                        response = {'reply':'error', 'error':'Invalid type in ledcount'}
+                        return response
+                    validate = securitychecks.validateIntegerResponse(thisvalue, "ledcount", 0, 1000000, response)
+                    if validate:
+                        config['LEDs']['ledcount'] = data['ledcount']
+                # Don't check it's a valid pwm pin (that should be checked first), just that it's a sensible number ie between 0 and 128 
+                if ('gpiopin' in data):
+                    try:
+                        thisvalue = int(data['gpiopin'])
+                    except (TypeError, ValueError):
+                        # This is a serious error - not even sending correct
+                        # value type so don't even try the other values
+                        response = {'reply':'error', 'error':'Invalid type in gpiopin'}
+                        return response
+                    validate = securitychecks.validateIntegerResponse(thisvalue, "gpiopin", 0, 128, response)
+                    if validate:
+                        config['LEDs']['gpiopin'] = data['gpiopin']
+                if ('ledmaxbrightness' in data):
+                    try:
+                        thisvalue = int(data['ledmaxbrightness'])
+                    except (TypeError, ValueError):
+                        # This is a serious error - not even sending correct
+                        # value type so don't even try the other values
+                        response = {'reply':'error', 'error':'Invalid type in ledmaxbrightness'}
+                        return response
+                    validate = securitychecks.validateIntegerResponse(thisvalue, "ledmaxbrightness", 0, 255, response)
+                    if validate:
+                        config['LEDs']['ledmaxbrightness'] = data['ledmaxbrightness']
+                if ('ledinvert' in data):
+                    if (data['ledinvert'] == 'True'):
+                        response.addStatus ("success", "ledinvert", "success")
+                        config['LEDs']['ledinvert'] = "True"
+                    elif (data['ledinvert'] == 'False'):
+                        response.addStatus ("success", "ledinvert", "success")
+                        config['LEDs']['ledinvert'] = "False"
+                    # if not true or false then serious error
+                    else:
+                        response = {'reply':'error', 'error':'Invalid type in ledinvert'}
+                        return response
+                ## Now save the config
+                # save config
+                try:
+                    with open(configfile, 'w') as cfgfile:
+                        config.write(cfgfile)
+                        response.addStatus ("success", "saveconfig", "success")
+                        if (DEBUG >= 3) : print ("Info: Updated configuration saved "+configfile)
+                except Exception as e:
+                        response = {'reply':'error', 'error':'Error saving configuration'}
+                        if (DEBUG >= 1) : print ("Error: saving configuration file "+configfile+"::"+str(e))
+                        return response
+                
+                
+
+    # Reach here then unknown request
+    return response.getStatus()
     
     
 # Handle switch on request
