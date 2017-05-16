@@ -485,8 +485,7 @@ def main():
     #LEDs = NeoPixelSeq(settings.allSettings(), command)
     
     # Create config windows
-    cfglocal = ConfigLocal(config, configfile, defaultLEDSettings, settings, command)
-    #cfgneopixel = ConfigNeopixel(config, configfile, defaultLEDSettings, settings, command)
+    cfglocal = ConfigLocal(config, configfile, settings)
     cfgneopixel = ConfigNeopixel(config, settings, command)
     
     root = Tk()

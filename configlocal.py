@@ -3,25 +3,16 @@ from tkinter import messagebox
 import ledsettings
 import sys
 
-# This pop-up window is used for the hardware configuration of the NeoPixels
-
-# All pwm GPIO ports on Raspberry Pi (used as additional check, but not enforced)
-# Note these are strings as that's how the are edited / stored
-GPIOpwm = ['12', '13', '18', '19', '40', '41', '45']
-
+# This pop-up window is used for the client server configuration of the client
 
 class ConfigLocal():
     
     # Track whether config window open to stop duplicate windows
     configWindowOpen = False
 
-    def __init__ (self, config, configfile, defaults, settings, command):
-        #self.config = config
+    def __init__ (self, config, configfile, settings):
         self.configfile = configfile
-        self.defaults = defaults
         self.settings = settings
-        # ledseq is the instance of the NeoPixelSeq class provide here to allow  updates without restarting
-        self.command = command
         self.config={}
 
 
