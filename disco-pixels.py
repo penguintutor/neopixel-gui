@@ -27,7 +27,8 @@ from tkinter import ttk
 from tkinter import messagebox
 import configparser
 import time
-from configwindow import *
+from configneopixel import *
+from configlocal import *
 import webbrowser
 import ledsettings
 from collections import OrderedDict
@@ -174,7 +175,7 @@ class App(Frame):
         self.parent.destroy()
 
 
-    def __init__(self, parent, command, sequenceOptions, colourChoice, config, cfgwindow):
+    def __init__(self, parent, command, sequenceOptions, colourChoice, config, cfglocal, cfgneopixel):
         Frame.__init__(self, parent)
         self.seqScreen = 1                  # which screen of sequences we are displaying - starts at 1
         self.command = command
@@ -182,7 +183,8 @@ class App(Frame):
         self.colourChoice = colourChoice
         self.config = config
         self.parent = parent
-        self.cfgwindow = cfgwindow
+        self.cfglocal = cfglocal
+        self.cfgneopixel = cfgneopixel
         self.initUI()
 
     def initUI(self):
@@ -200,11 +202,12 @@ class App(Frame):
         menubar.add_cascade(menu=menu_file, label='File')
         menubar.add_cascade(menu=menu_edit, label='Edit')
         menubar.add_cascade(menu=menu_hardware, label='Hardware')
-        menu_file.add_separator()
+        #menu_file.add_separator()
         menubar.add_cascade(menu=menu_help, label='Help')
         
         menu_file.add_command(label='Quit', command=self.closeApp)
-        menu_edit.add_command(label='Settings', command=self.cfgwindow.windowClient)
+        menu_edit.add_command(label='Settings', command=self.cfglocal.windowClient)
+        menu_hardware.add_command(label='NeoPixels', command=self.cfgneopixel.windowClient)
         menu_help.add_command(label='Readme', command=viewReadme)
         menu_help.add_command(label='User Guide', command=viewUserGuide)
         menu_help.add_command(label='Customisation Guide', command=viewCustom)
@@ -481,9 +484,10 @@ def main():
     command = ClientController(serverhostname, serverport)
     #LEDs = NeoPixelSeq(settings.allSettings(), command)
     
-    # Create config window
-    cfgwindow = ConfigWindow(config, configfile, defaultLEDSettings, settings, command)
-    
+    # Create config windows
+    cfglocal = ConfigLocal(config, configfile, defaultLEDSettings, settings, command)
+    #cfgneopixel = ConfigNeopixel(config, configfile, defaultLEDSettings, settings, command)
+    cfgneopixel = ConfigNeopixel(config, settings, command)
     
     root = Tk()
     
@@ -496,7 +500,7 @@ def main():
     ttk.Style().configure('ColButtons.TButton', font='Helvetica 10 bold')
                                                                           
     root.geometry("800x600+100+100")
-    app = App(root, command, sequenceOptions, colourChoice, config, cfgwindow)
+    app = App(root, command, sequenceOptions, colourChoice, config, cfglocal, cfgneopixel)
     root.mainloop()
     
 if __name__ == "__main__":

@@ -10,15 +10,13 @@ import sys
 GPIOpwm = ['12', '13', '18', '19', '40', '41', '45']
 
 
-class ConfigWindow():
+class ConfigNeopixel():
     
     # Track whether config window open to stop duplicate windows
     configWindowOpen = False
 
-    def __init__ (self, config, configfile, defaults, settings, command):
-        #self.config = config
-        self.configfile = configfile
-        self.defaults = defaults
+    def __init__ (self, config, settings, command):
+        #self.defaults = defaults
         self.settings = settings
         # ledseq is the instance of the NeoPixelSeq class provide here to allow  updates without restarting
         self.command = command
@@ -112,7 +110,7 @@ class ConfigWindow():
             
         self.configWindowOpen = True
         self.configTop = Toplevel()
-        self.configTop.wm_title("Neopixel - Configuration")
+        self.configTop.wm_title("Neopixel Configuration")
         self.configTop.wm_geometry("450x300")
         # set handler for close window using WM X
         self.configTop.wm_protocol('WM_DELETE_WINDOW',  self.closeConfig)
