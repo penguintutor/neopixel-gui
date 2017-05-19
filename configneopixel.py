@@ -28,6 +28,7 @@ class ConfigNeopixel():
         self.configWindowOpen = False
         self.configTop.destroy()
         
+    #Todo - handle reset
     def restoreDefaults(self): 
         self.numLEDString.set(self.defaults['ledcount'])
         self.numGPIOString.set(self.defaults['gpiopin'])

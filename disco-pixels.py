@@ -51,7 +51,16 @@ VERSION = '0.3'
 # Must exist and have valid entries
 sequencefile = 'sequences.cfg'
 
+
+
+
 # default hostnames and ports
+defaultLocalSettings = {
+    'hostname': '127.0.0.1',
+    'port' : 80
+    }
+
+
 #todo remove test
 #serverhostname = '127.0.0.1'
 serverhostname = '192.168.0.106'
@@ -465,7 +474,7 @@ def main():
     try :
         config.read(configfile)
         # Test that config entries loaded by looking at first entry
-        numLEDs = int(config['LEDs']['ledcount'])
+        hostname = config['Server']['hostname']
     except (configparser.Error, KeyError) :
         # Can't display warning at this stage so save message for when gui loaded
         # Don't overwrite error message if there is one
@@ -473,16 +482,14 @@ def main():
             message = ("Warning", "No config file found\nUsing default values")
         
         # if load failed then use defaults
-        config.add_section('LEDs')
-        for key, value in defaultLEDSettings.items():
-            config.set('LEDs', key, str(value)) 
+        config.add_section('Server')
+        for key, value in defaultLocalSettings.items():
+            config.set('Server', key, str(value)) 
 
 
-    settings = ledsettings.LEDSettings(config)
+    settings = localsettings.LocalSettings(config)
     
-    #command = NeoPixelCmds()
     command = ClientController(serverhostname, serverport)
-    #LEDs = NeoPixelSeq(settings.allSettings(), command)
     
     # Create config windows
     cfglocal = ConfigLocal(config, configfile, settings)
