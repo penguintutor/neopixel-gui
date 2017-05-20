@@ -78,25 +78,27 @@ class ConfigLocal():
         
         configTitleLabel = Label(self.configTop,
                 text="NeoPixel - Local Configuration",
-                foreground="blue", font="Verdana 16 bold").grid(columnspan=3, sticky=W, pady=(4, 15), padx=5)
+                foreground="blue", font="Verdana 16 bold").grid(columnspan=4, sticky=W, pady=(4, 15), padx=5)
                 
         hostnameLabel = Label(self.configTop,
                     font="Verdana 14",
-                    text="Hostname").grid(row=1, column=1, columnspan=2, sticky=W, padx=(15,2))
+                    #text="Hostname").grid(row=1, column=1, columnspan=2, sticky=W, padx=(15,2))
+                    text="Hostname").grid(row=1, column=1, columnspan=1, sticky=W, padx=(15,2))
                     
         hostnameEntry = Entry(self.configTop,
                     font="Verdana 14",
-                    width=5,
-                    textvariable=self.hostnameString).grid(row=1, column=3, sticky=W)
+                    width=15,
+                    #textvariable=self.hostnameString).grid(row=1, column=3, sticky=W)
+                    textvariable=self.hostnameString).grid(row=1, column=2, columnspan=2, sticky=W)
                     
         portLabel = Label(self.configTop,
                     font="Verdana 14",
-                    text="Port").grid(row=2, column=1, columnspan=2, sticky=W, padx=(15,2))
+                    text="Port").grid(row=2, column=1, columnspan=1, sticky=W, padx=(15,2))
                     
         portEntry = Entry(self.configTop,
                     font="Verdana 14",
                     width=5,
-                    textvariable=self.portString).grid(row=2, column=3, sticky=W)
+                    textvariable=self.portString).grid(row=2, column=2, sticky=W)
 
         buttonRow = 6
 
@@ -106,7 +108,7 @@ class ConfigLocal():
                     width = 8,
                     height = 2,
                     command=self.restoreDefaults)
-        restoreButton.grid(row=buttonRow, column=1, pady=(40, 10), padx=10)
+        restoreButton.grid(row=buttonRow, column=1, pady=(40, 10), padx=5)
 
 
         cancelButton = Button(self.configTop, 
@@ -115,7 +117,7 @@ class ConfigLocal():
                     width = 8,
                     height = 1,
                     command=self.closeConfig)
-        cancelButton.grid(row=buttonRow, column=2, pady=(40, 10), padx=10)
+        cancelButton.grid(row=buttonRow, column=2, pady=(40, 10), padx=5)
     
     
         saveButton = Button(self.configTop, 
@@ -124,7 +126,7 @@ class ConfigLocal():
                     width = 8,
                     height = 1,
                     command=self.saveConfig)
-        saveButton.grid(row=buttonRow, column=3, pady=(40, 10), padx=10)
+        saveButton.grid(row=buttonRow, column=3, pady=(40, 10), padx=5)
         
     
     # return true if a valid integer - otherwise false
@@ -145,3 +147,10 @@ class ConfigLocal():
             return False
         return True
         
+        
+        
+    # Warning this is for user of a local hostname and has no checking
+    # at the moment, provided as a stub if further checking required in 
+    # future (eg. to pass hostname to server)
+    def _validateHostname (self, string, errormsg):
+        return True
