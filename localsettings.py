@@ -11,3 +11,9 @@ class LocalSettings():
         'port': int(self.config['Server']['port']),
         }
         return settings
+        
+    def hostname(self):
+        return self.config['Server']['hostname']
+
+    def port(self):
+        return self.config['Server']['port']

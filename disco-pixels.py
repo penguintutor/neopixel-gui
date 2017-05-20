@@ -24,7 +24,7 @@ import random
 import threading
 from tkinter import *
 from tkinter import ttk
-from tkinter import messagebox
+from tkinter import messagebox  
 import configparser
 import time
 from configneopixel import *
@@ -51,20 +51,12 @@ VERSION = '0.3'
 # Must exist and have valid entries
 sequencefile = 'sequences.cfg'
 
-
-
-
 # default hostnames and ports
 defaultLocalSettings = {
     'hostname': '127.0.0.1',
     'port' : 80
     }
 
-
-#todo remove test
-#serverhostname = '127.0.0.1'
-serverhostname = '192.168.0.106'
-serverport = 80
 
 # File containing user config
 # If it does not exist then use defaults
@@ -77,22 +69,6 @@ customfile = 'docs/customguide.html'
 # Use to send a message to GUI - created during startup
 # eg. message = ("Warning", "Insert warning here")
 message = ("","")
-
-### ToDo
-### These are no longer needed as they are on the server instead
-### when managing this should first connect to the server, get the current
-### settings, get any requested changes and then push that back to the server
-
-# Settings for neopixels 
-# load from config file - these are defaults if no config file found
-defaultLEDSettings = {
-    'ledcount': 16,
-    'gpiopin': 18,
-    'ledfreq': 800000,
-    'leddma' : 5,
-    'ledmaxbrightness': 255,
-    'ledinvert': False
-    }
 
 # Grid for sequence buttons
 sequenceGridX = 3
@@ -258,13 +234,10 @@ class App(Frame):
         self.speedLEDVar = DoubleVar()
         # Set a default value
         self.speedLEDVar.set("50")
-        
-
+ 
         currentRow = 1
         currentColumn = 0
         numColumns = 6
-        
-        
         
         self.tabFrame = ttk.Notebook(self)
         # Allow CTRL-Tab between frames
@@ -392,9 +365,7 @@ class App(Frame):
                     command=self.ApplyChange,)
         applyButton.grid(row=currentRow+1, column=4, columnspan=2, pady=20, padx=40, sticky='nesw')
 
-
-        
-        
+       
         # Finished setting up GUI - now issue any message
         if (message[0] != ""):
             messagebox.showinfo(message[0], message[1])
@@ -489,7 +460,7 @@ def main():
 
     settings = localsettings.LocalSettings(config)
     
-    command = ClientController(serverhostname, serverport)
+    command = ClientController(settings.hostname(), settings.port())
     
     # Create config windows
     cfglocal = ConfigLocal(config, configfile, settings)
@@ -497,7 +468,7 @@ def main():
     
     root = Tk()
     
-    root .option_add('*tearOff', FALSE)
+    root.option_add('*tearOff', FALSE)
     
     ttk.Style().configure("TButton", font='Helvetica 16 bold')
     ttk.Style().configure("TNotebook", background='#999999')

@@ -53,7 +53,7 @@ class ConfigLocal():
             with open(self.configfile, 'w') as cfgfile:
                 self.config.write(cfgfile)
                 self.closeConfig()
-                messagebox.showinfo("Info", "Configuration saved")
+                messagebox.showinfo("Info", "Configuration saved.\nPlease restart the application.")
         except : 
             self.closeConfig()
             messagebox.showinfo("Error", "Error saving configuration file "+configfile)
