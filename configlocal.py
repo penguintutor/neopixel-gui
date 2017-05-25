@@ -23,13 +23,10 @@ class ConfigLocal():
         self.configWindowOpen = False
         self.configTop.destroy()
         
-    #Todo handle reset
     def restoreDefaults(self): 
         self.hostnameString.set(self.defaults['hostname'])
         self.portString.set(self.defaults['port'])
         
-
-
 
     def saveConfig(self):
         # Check for valid entries - if not restore previous value and give error message

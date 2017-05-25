@@ -49,17 +49,17 @@ class ClientController():
             replydata = json.loads(reply)
         except (OSError, HTTPError) as e:
             replydata = {"reply":"fail","error":"Error communicating with server"}
-        #if (replydata['reply'] == 'success'):
-        #    return 'success'
-        #return replydata['error']
         return replydata
        
-    #Todo
     def setColours(self, colours):
-        pass
+        parmsdict = {'request':'command','colours':colours}
+        response = self.fetchPage(parmsdict)
+        return response
     
     def setDelay(self, delay):
-        pass
+        parmsdict = {'request':'command','delay':delay}
+        response = self.fetchPage(parmsdict)
+        return response
     
     
     

@@ -9,6 +9,12 @@ Controlled using POST method on
 ### sequence:sequence
 Set sequence, returns success
 
+### colours:colours
+Set colours, returns success
+
+### delay:delay
+Set delay, returns success
+
 
 ## Queries - 'request':'query'
 type:config / status

@@ -134,6 +134,29 @@ def server_json ():
                 command.setCommand(data['sequence'])
                 command.setCmdStatus(True)
                 response.addStatus ("success", "sequence", "success")
+        if 'colours' in data:
+            selectedColours = data['colours']
+            intcolours = []
+            for i in range(len(selectedColours)):
+                try:
+                    if (securitychecks.validateIntegerResponse(selectedColours[i], "colour", 0, 16777215, response)) :
+                            intcolours.append(selectedColours[i])
+                            response.addStatus("success", "colours", "success")
+                    else:
+                        return response
+                except ValueError as err:
+                    response.addStatus ("error", "colours", "Colour not valid")
+                    return response
+                except Exception as e:
+                    response.addStatus ("error", "colours", "Unknown error in setting colour" + str(e))
+                    return response
+            command.setColours(intcolours)
+        if 'delay' in data:
+            if (securitychecks.validateIntegerResponse(data['delay'], "delay", MINDELAY, MAXDELAY, response)) :
+                command.setDelay(data['delay'])
+                response.addStatus("success", "delay", "success")
+            else :
+                return response
                 
     ### Queries
     elif (data['request'] == 'query'):
@@ -273,7 +296,7 @@ def setcolours():
     #for (thiscolour: colourlist):
     for i in range(colourlist.size()):
         try:
-            intcolours[i] = (int(colourlist[i], 16))
+            intcolours.append(int(colourlist[i], 16))
         except ValueError as err:
             debugMsg (3, "Warning: Invalid colour provided in setcolour")
             return

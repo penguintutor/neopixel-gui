@@ -12,10 +12,10 @@ from response import Response
 def validateIntegerResponse (intval, parameter, min, max, response):
 
     if (intval < min):
-        response.addStatus ("error", parameter, "Value of"+parameter+"is too small")
+        response.addStatus ("error", parameter, "Value of "+parameter+" is too small")
         return False
     elif (intval > max):
-        response.addStatus ("error", parameter, "Value of"+parameter+"is too large")
+        response.addStatus ("error", parameter, "Value of "+parameter+" is too large")
         return False
     # Set status to success - if it fails to save then that will be in 'error' so the status is overridden by that
     else:
