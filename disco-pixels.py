@@ -134,7 +134,10 @@ class App(Frame):
     def ApplyChange(self):
         # update command object to be passed to the 
         cmd, text = self.sequenceOptions[self.sequence.get()]
-        self.command.setSequence(cmd)
+        response = self.command.setSequence(cmd)
+        if (response['reply'] == "fail"):
+            messagebox.showinfo("Error", "Unable to connect to server.\nCheck server is started and address matches\n")
+            return
         coloursTicked = []
         for i in range (len(self.chosenColours)):
             text = self.chosenColours[i]
@@ -463,7 +466,7 @@ def main():
     command = ClientController(settings.hostname(), settings.port())
     
     # Create config windows
-    cfglocal = ConfigLocal(config, configfile, settings, command)
+    cfglocal = ConfigLocal(config, configfile, settings, defaultLocalSettings, command)
     cfgneopixel = ConfigNeopixel(config, settings, command)
     
     root = Tk()

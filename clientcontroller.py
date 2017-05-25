@@ -47,7 +47,7 @@ class ClientController():
             response = urllib.request.urlopen(req)
             reply = response.read().decode('utf8')
             replydata = json.loads(reply)
-        except (HTTPError, URLError) as error:
+        except (OSError, HTTPError) as e:
             replydata = {"reply":"fail","error":"Error communicating with server"}
         #if (replydata['reply'] == 'success'):
         #    return 'success'

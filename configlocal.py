@@ -10,10 +10,11 @@ class ConfigLocal():
     # Track whether config window open to stop duplicate windows
     configWindowOpen = False
 
-    def __init__ (self, config, configfile, settings, command):
+    def __init__ (self, config, configfile, settings, defaults, command):
         self.config = config
         self.configfile = configfile
         self.settings = settings
+        self.defaults = defaults
         self.command = command              # Used to update current ClientController
 
 
@@ -24,13 +25,9 @@ class ConfigLocal():
         
     #Todo handle reset
     def restoreDefaults(self): 
-        self.hostname.set(self.defaults['hostname'])
-        self.numGPIOString.set(self.defaults['gpiopin'])
-        self.maxBrightnessString.set(self.defaults['ledmaxbrightness'])
-        if (bool(self.defaults['ledinvert'])):
-            self.invertVar.set(1)
-        else :
-            self.invertVar.set(0)
+        self.hostnameString.set(self.defaults['hostname'])
+        self.portString.set(self.defaults['port'])
+        
 
 
 
