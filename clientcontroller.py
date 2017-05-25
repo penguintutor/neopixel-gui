@@ -15,7 +15,10 @@ class ClientController():
     def __init__(self, hostname, port):
         self.urlpost = 'http://'+hostname+":"+str(port)+'/neopixel'  
         self.config = {}
-    
+
+    def chgServer (self, hostname, port):
+        self.urlpost = 'http://'+hostname+":"+str(port)+'/neopixel'
+
     def setConfigNeopixels(self, config):
         config['request']='update'
         config['type']='config'

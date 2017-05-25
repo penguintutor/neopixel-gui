@@ -463,7 +463,7 @@ def main():
     command = ClientController(settings.hostname(), settings.port())
     
     # Create config windows
-    cfglocal = ConfigLocal(config, configfile, settings)
+    cfglocal = ConfigLocal(config, configfile, settings, command)
     cfgneopixel = ConfigNeopixel(config, settings, command)
     
     root = Tk()

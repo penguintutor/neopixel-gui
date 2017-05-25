@@ -10,10 +10,11 @@ class ConfigLocal():
     # Track whether config window open to stop duplicate windows
     configWindowOpen = False
 
-    def __init__ (self, config, configfile, settings):
+    def __init__ (self, config, configfile, settings, command):
         self.config = config
         self.configfile = configfile
         self.settings = settings
+        self.command = command              # Used to update current ClientController
 
 
     # called from window manager handler or from Cancel button
@@ -53,7 +54,9 @@ class ConfigLocal():
             with open(self.configfile, 'w') as cfgfile:
                 self.config.write(cfgfile)
                 self.closeConfig()
-                messagebox.showinfo("Info", "Configuration saved.\nPlease restart the application.")
+                # Change server info dynamically
+                self.command.chgServer (self.config['Server']['hostname'], self.config['Server']['port']) 
+                messagebox.showinfo("Info", "Configuration saved.")
         except : 
             self.closeConfig()
             messagebox.showinfo("Error", "Error saving configuration file "+configfile)
