@@ -479,7 +479,7 @@ def main():
     ttk.Style().configure('TNotebook.Tab', font='Helvetica 16 bold')
     ttk.Style().configure('ColButtons.TButton', font='Helvetica 10 bold')
                                                                           
-    root.geometry("800x600+100+100")
+    root.geometry("800x400+100+100")
     app = App(root, command, sequenceOptions, colourChoice, config, cfglocal, cfgneopixel)
     root.mainloop()
     
