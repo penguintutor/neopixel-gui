@@ -25,6 +25,7 @@ import threading
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox  
+from tkinter.colorchooser import *
 import configparser
 import time
 from configneopixel import *
@@ -99,6 +100,25 @@ class App(Frame):
         # Colour code the list
         for i in range(len(self.chosenColours)):
             self.coloursChosenBox.itemconfigure(i, background=hexColourToString(self.colourChoice[self.chosenColours[i]]), foreground=colourContrast(self.colourChoice[self.chosenColours[i]]))
+
+
+    # Adds custom colour using colorchooser
+    # todo - modify to match required colour selection
+    def customColour(self):
+        thiscolour = askcolor()
+        print (thiscolour)
+        self.chosenColours += thiscolour[1]
+        #chosenColoursVar = StringVar(value=thiscolour[1])
+
+        self.chosenColoursVar = StringVar(value=self.chosenColours)
+        self.coloursChosenBox.configure (listvariable=self.chosenColoursVar)
+
+        # Colour code the list
+        for i in range(len(self.chosenColours)):
+            self.coloursChosenBox.itemconfigure(i, background=hexColourToString(self.colourChoice[self.chosenColours[i]]), foreground=colourContrast(self.colourChoice[self.chosenColours[i]]))
+
+
+
 
     def addColourEvent(self, event):
         self.addColour()
@@ -366,8 +386,11 @@ class App(Frame):
                     command=self.rstColour)
         rstColourButton.grid(row=6, column=2)
         
+        # todo - enable custom colour button
+        #customColourButton = ttk.Button(self, text="Custom colour", command=self.customColour)
+        #customColourButton.grid(row=currentRow, column=4, columnspan=2, pady=10,padx=10)
         
-
+                        
         applyButton = ttk.Button(self, 
                     text="Apply",
                     width = 10,
@@ -476,6 +499,8 @@ def main():
     cfgneopixel = ConfigNeopixel(config, settings, command)
     
     root = Tk()
+    
+    root.iconbitmap('@disco-pixels.xbm')
     
     root.option_add('*tearOff', FALSE)
     
