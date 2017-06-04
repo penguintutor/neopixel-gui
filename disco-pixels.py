@@ -212,23 +212,28 @@ class App(Frame):
         self.columnconfigure(5, weight=1)
         self.columnconfigure(6, weight=1)                                                           
         
-        self.rowconfigure(1, minsize=20)    # Spacer at top
-        self.rowconfigure(2, minsize=85)    # Tab frame
-        self.rowconfigure(3, minsize=40)    # Speed slider
+        self.rowconfigure(1, minsize=5)    # Spacer at top
+        self.rowconfigure(2, minsize=65)    # Tab frame
+        self.rowconfigure(3, minsize=25)    # Speed slider
         self.rowconfigure(4, minsize=60)    # Colours (also rowspan to 5)
-        self.rowconfigure(5, minsize=60)    # Apply button       
-        self.rowconfigure(6, minsize=40)    # Bottom padding / messages
+        self.rowconfigure(5, minsize=25)    # Apply button       
+        self.rowconfigure(6, minsize=5)    # Bottom padding / messages
 
         self.sequence = IntVar()
         self.sequence.set(0)
 
+        
+        #s = ttk.Style();
+        #s.configure ('TNotebook.Tab', font=("Verdana",  11));
+
         # The image is a massively oversized image of a strip of LEDs
         # I like the effect of being zoomed in, but this will also help with large screens not having horrible borders 
-        backgroundImage = PhotoImage(file="neopixel2.gif")
-        backgroundImageLabel = Label(self, image=backgroundImage)
+        # These are created as self. to prevent them being garbage collected
+        self.backgroundImage = PhotoImage(file="neopixel2.gif")
+        self.backgroundImageLabel = Label(self, image=self.backgroundImage)
         # next line is required to stop the image from being garbage collected
-        backgroundImage.image = backgroundImage
-        backgroundImageLabel.place(x=0, y=0, relwidth=1, relheight=1)
+        self.backgroundImage.image = self.backgroundImage
+        self.backgroundImageLabel.place(x=0, y=0, relwidth=1, relheight=1)
 
         # Use to set the selected colour
         self.colourSelected = [0 for x in range(len(self.colourChoice))]
@@ -241,7 +246,7 @@ class App(Frame):
         currentRow = 1
         currentColumn = 0
         numColumns = 6
-        
+
         self.tabFrame = ttk.Notebook(self)
         # Allow CTRL-Tab between frames
         self.tabFrame.enable_traversal()
@@ -249,6 +254,7 @@ class App(Frame):
         self.seqButtons = []
         numtabs = int(math.ceil(len(self.sequenceOptions)/numsequenceButtons));
         currentButton = 0;
+        
         
         for numframe in range (numtabs):
             self.frames.append(ttk.Frame(self.tabFrame))
@@ -258,13 +264,13 @@ class App(Frame):
                 cmd, txt = self.sequenceOptions[currentButton]
                 self.seqButtons.append(Radiobutton(self.frames[numframe],
                         text=txt,
-                        font="Verdana 14",
+                        font="Verdana 11",
                         variable=self.sequence,
-                        height=3,
+                        height=2,
                         width=20,
                         indicatoron=0,
                         value=currentButton))
-                self.seqButtons[currentButton].grid(row=currentRow, column=currentColumn, columnspan=2, padx=10, pady=10)
+                self.seqButtons[currentButton].grid(row=currentRow, column=currentColumn, columnspan=2, padx=5, pady=1)
                 currentColumn += 2
                 if currentColumn >= numColumns :
                     currentColumn = 0
@@ -279,7 +285,7 @@ class App(Frame):
         # Set to allow between 10 and 500 
         
         speedLabel = Label(self,
-                    font="Verdana 14",
+                    font="Verdana 11",
                     text="Speed")
         speedLabel.grid (row=currentRow, column=1, sticky='ew', padx=10)
         
@@ -299,12 +305,12 @@ class App(Frame):
         
         #Title for frame
         colourLabel = Label(colourSelectFrame,
-                    font="Verdana 14",
+                    font="Verdana 8",
                     text="Colours Available")
         colourLabel.grid (row=0, column=0, columnspan=2, sticky='ews')
         
         colourLabel2 = Label(colourSelectFrame,
-                    font="Verdana 14",
+                    font="Verdana 8",
                     text="Colours Chosen")
         colourLabel2.grid (row=0, column=3, sticky='ews')
         
@@ -364,7 +370,7 @@ class App(Frame):
 
         applyButton = ttk.Button(self, 
                     text="Apply",
-                    width = 20,
+                    width = 10,
                     command=self.ApplyChange,)
         applyButton.grid(row=currentRow+1, column=4, columnspan=2, pady=20, padx=40, sticky='nesw')
 
@@ -473,10 +479,10 @@ def main():
     
     root.option_add('*tearOff', FALSE)
     
-    ttk.Style().configure("TButton", font='Helvetica 16 bold')
+    ttk.Style().configure("TButton", font='Helvetica 11 bold')
     ttk.Style().configure("TNotebook", background='#999999')
     ttk.Style().configure('TabFrame.TFrame', background='#999999')
-    ttk.Style().configure('TNotebook.Tab', font='Helvetica 16 bold')
+    ttk.Style().configure('TNotebook.Tab', font='Helvetica 10 bold')
     ttk.Style().configure('ColButtons.TButton', font='Helvetica 10 bold')
                                                                           
     root.geometry("800x400+100+100")
