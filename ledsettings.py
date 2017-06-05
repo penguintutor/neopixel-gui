@@ -12,6 +12,7 @@ class LEDSettings():
         'ledfreq': int(self.config['LEDs']['ledfreq']),
         'leddma' : int(self.config['LEDs']['leddma']),
         'ledmaxbrightness': int(self.config['LEDs']['ledmaxbrightness']),
-        'ledinvert': self.config['LEDs'].getboolean('ledinvert')
+        'ledinvert': self.config['LEDs'].getboolean('ledinvert'),
+        'rgb': self.config['LEDs'].getboolean('rgb')
         }
         return settings

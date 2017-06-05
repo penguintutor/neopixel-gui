@@ -61,6 +61,6 @@ class NeoPixelCmds():
 
 
 if __name__ == "__main__":
-    print ("This file is not executable - please run rpnpgp.py\nOr import this into your own code")
+    print ("This file is not executable - please run neopixel-server.py and appropriate client")
 
 

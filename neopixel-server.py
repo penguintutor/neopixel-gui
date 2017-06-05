@@ -47,11 +47,15 @@ VERSION = '0.3'
 # from this code
 DEBUG = 5
 
-# Command is defined globally as it provides the main interface to the NeoPixels
-# which needs to be accessible from the webserver code as well as being passed
-# as a parameter to the thread for handling the update of the NeoPixels
+## Command is defined globally as it provides the main interface to the 
+# NeoPixels which needs to be accessible from the webserver code as well as 
+# being passed as a parameter to the thread for handling the update of the 
+# NeoPixels
 # This is an alternative to using a singleton, but without the extra overhead 
-global command, settings
+## Settings is used to hold the settings so that they can be read / updated by 
+# the webserver - similar to the command
+## LEDs allows us to call updSettings from the web server 
+global command, settings, LEDs
 
 
 # File containing sequences and colour options
@@ -68,13 +72,15 @@ configfile = 'neopixel-server.cfg'
 # Default of ledinvert is True for compatibility with the
 # FET based NeoPixel circuit provided at http://www.penguintutor.com/electronics/neopixels
 # If using a non-inverting buffer then that should be set to False
+# RGB True indicates red first on LED sequence, RGB False indicates Green first (ie GRB) 
 defaultLEDSettings = {
     'ledcount': 16,
     'gpiopin': 18,
     'ledfreq': 800000,
     'leddma' : 5,
     'ledmaxbrightness': 255,
-    'ledinvert': True
+    'ledinvert': True,
+    'rgb': False
     }
 
 DEFAULTSPEED = 50
@@ -120,6 +126,7 @@ def server_public (filename):
 # and not multiple queries
 @app.route('/neopixel', method='POST')
 def server_json ():
+    global command, settings, LEDs
     data = request.json
     # response is our reply - stored by utility class
     response = Response(DEBUG)
@@ -166,7 +173,6 @@ def server_json ():
                 returnvalue = settings.allSettings()
                 returnvalue['reply'] = "success"
                 return returnvalue
-            ##Todo add server settings
     
     ### Updates
     ### Need to doubly make sure that all values are valid
@@ -220,6 +226,17 @@ def server_json ():
                     else:
                         response = {'reply':'error', 'error':'Invalid type in ledinvert'}
                         return response
+                if ('rgb' in data):
+                    if (data['rgb'] == 'True'):
+                        response.addStatus ("success", "rgb", "success")
+                        config['LEDs']['rgb'] = "True"
+                    elif (data['rgb'] == 'False'):
+                        response.addStatus ("success", "rgb", "success")
+                        config['LEDs']['rgb'] = "False"
+                    # if not true or false then serious error
+                    else:
+                        response = {'reply':'error', 'error':'Invalid type in rgb'}
+                        return response
                 ## Now save the config
                 # save config
                 try:
@@ -231,6 +248,9 @@ def server_json ():
                         response = {'reply':'error', 'error':'Error saving configuration'}
                         if (DEBUG >= 1) : print ("Error: saving configuration file "+configfile+"::"+str(e))
                         return response
+                # Reread in settings (always use the saved config - if can't update then settings don't get updated
+                settings = ledsettings.LEDSettings(config)
+                LEDs.updSettings(settings.allSettings())
                 
                 
 
@@ -338,7 +358,7 @@ def debugMsg(priority, message) :
 
 def main():
 
-    global command, settings
+    global command, settings, LEDs
 
     # load settings during startup    
     seqconfig = configparser.ConfigParser()

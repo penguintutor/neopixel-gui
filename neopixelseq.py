@@ -36,15 +36,29 @@ class NeoPixelSeq():
         self.settings = settings
         self.command = command
         self.numPixels = settings['ledcount']
+        self.rgb = settings['rgb']
         self.strip = Dynamic_NeoPixel(self.settings['ledcount'], self.settings['gpiopin'], self.settings['ledfreq'], self.settings['leddma'], self.settings['ledinvert'], self.settings['ledmaxbrightness'])
+        
         # Intialize the library (must be called once before other functions).
         self.strip.begin()
 
 
+    # Wrapper around strip.setPixelColor
+    # This will check self.rgb to determine if the colour needs to be changed first
+    def setPixel (self, i, colour):
+        # if not then need to change colour from RGB to GRB
+        if (self.rgb == False) :
+            blueValue = (colour & 0xFF)
+            greenValue = (colour >> 8) & 0xFF
+            redValue = (colour >> 16) & 0xFF
+            colour = Color(greenValue, redValue, blueValue)
+        self.strip.setPixelColor(i, colour)
+        
 
     # Update settings by replacing existing led strip
     def updSettings (self, settings):
         self.settings = settings
+        self.rgb = settings['rgb']
         self.numPixels = settings['ledcount']
         self.strip.updSettings(self.settings)
 
@@ -55,7 +69,7 @@ class NeoPixelSeq():
         colours = self.command.getColours()
         colour = colours[0]
         for i in range(self.numPixels):
-            self.strip.setPixelColor(i, colour)
+            self.setPixel(i, colour)
         self.strip.show()
         time.sleep(self.command.getOptions()['delay']/1000)
 
@@ -66,7 +80,7 @@ class NeoPixelSeq():
         colours = self.command.getColours()
         currentColour = 0
         for i in range(self.numPixels):
-            self.strip.setPixelColor(i, colours[currentColour])
+            self.setPixel(i, colours[currentColour])
             currentColour += 1
             if (currentColour >= len(colours)):
                 currentColour = 0
@@ -75,7 +89,7 @@ class NeoPixelSeq():
 
     def allOff(self):
         for i in range(self.numPixels):
-            self.strip.setPixelColor(i, Color(0,0,0))
+            self.setPixel(i, Color(0,0,0))
         self.strip.show()
         time.sleep(self.command.getOptions()['delay']/1000)
     
@@ -100,12 +114,12 @@ class NeoPixelSeq():
             
             # Set all pixels to the background - then we update those not
             for resetPixel in range(self.strip.numPixels()):
-                self.strip.setPixelColor (resetPixel, backColour)
+                self.setPixel (resetPixel, backColour)
             
             for i in range(0, self.strip.numPixels()+1, colourPixelRange):
                 for j in range(0, len(colours)):
                     if (i + j + self.chaserStartPos < self.strip.numPixels()) :
-                        self.strip.setPixelColor (i + j + self.chaserStartPos, colours[j])
+                        self.setPixel (i + j + self.chaserStartPos, colours[j])
             
             self.strip.show()
             time.sleep(options['delay']/1000.0)
@@ -135,7 +149,7 @@ class NeoPixelSeq():
             colourNum = self.chaserStartPos
             
             for i in range(self.strip.numPixels()):
-                self.strip.setPixelColor (i, colours[colourNum])
+                self.setPixel (i, colours[colourNum])
                 colourNum = colourNum +1
                 if (colourNum >= len(colours)):
                     colourNum = 0
@@ -156,11 +170,11 @@ class NeoPixelSeq():
         
         for q in range(4):
             for i in range(0, self.strip.numPixels(), 4):
-               self.strip.setPixelColor(i+q, colour)
+               self.setPixel(i+q, colour)
             self.strip.show()
             time.sleep(options['delay']/1000.0)
             for i in range(0, self.strip.numPixels(), 4):
-                self.strip.setPixelColor(i+q, 0)
+                self.setPixel(i+q, 0)
 
 
 
@@ -171,7 +185,7 @@ class NeoPixelSeq():
         colours = self.command.getColours()
         colourNum = 0
         for i in range(self.strip.numPixels()):
-            self.strip.setPixelColor(i, colours[colourNum])
+            self.setPixel(i, colours[colourNum])
             self.strip.show()
             colourNum += 1
             if (colourNum >= len(colours)) :
@@ -201,7 +215,7 @@ class NeoPixelSeq():
         self.command.setCmdStatus(False)
         for j in range(256):
             for i in range(self.strip.numPixels()):
-                self.strip.setPixelColor(i, self.wheel((i+j) & 255))
+                self.setPixel(i, self.wheel((i+j) & 255))
             self.strip.show()
             # Exit if new command
             if (self.command.getCmdStatus()):
@@ -214,7 +228,7 @@ class NeoPixelSeq():
         """Draw rainbow that uniformly distributes itself across all pixels."""
         for j in range(256):
             for i in range(self.strip.numPixels()):
-                    self.strip.setPixelColor(i, self.wheel((int)((i * 256 / self.strip.numPixels())+ j) & 255))
+                    self.setPixel(i, self.wheel((int)((i * 256 / self.strip.numPixels())+ j) & 255))
             self.strip.show()
             time.sleep(self.command.getOptions()['delay']/10000.0)
 
@@ -226,11 +240,11 @@ class NeoPixelSeq():
         for j in range(256):
             for q in range(3):
                 for i in range(0, self.strip.numPixels(), 3):
-                    self.strip.setPixelColor(i+q, self.wheel((i+j) % 255))
+                    self.setPixel(i+q, self.wheel((i+j) % 255))
                 self.strip.show()
                 time.sleep(self.command.getOptions()['delay']/1000.0)
                 for i in range(0, self.strip.numPixels(), 3):
-                    self.strip.setPixelColor(i+q, 0)
+                    self.setPixel(i+q, 0)
             # Exit if new command
             if (self.command.getCmdStatus()):
                 return
@@ -260,8 +274,8 @@ class NeoPixelSeq():
         colour = self.command.getSingleColour()
         """Wipe color across starting at both ends"""
         for i in range((int)(self.strip.numPixels()/2)):
-            self.strip.setPixelColor(i, colour)
-            self.strip.setPixelColor(self.strip.numPixels() - i, colour);
+            self.setPixel(i, colour)
+            self.setPixel(self.strip.numPixels() - i, colour);
             self.strip.show()
             if (self.command.getCmdStatus()):
                 return
@@ -275,8 +289,8 @@ class NeoPixelSeq():
         self.command.setCmdStatus(False)
         colour = self.command.getSingleColour()
         for i in range((int)(self.strip.numPixels()/2)):
-            self.strip.setPixelColor((int)(self.strip.numPixels()/2) - i, colour)
-            self.strip.setPixelColor((int)(self.strip.numPixels()/2) + i, colour);
+            self.setPixel((int)(self.strip.numPixels()/2) - i, colour)
+            self.setPixel((int)(self.strip.numPixels()/2) + i, colour);
             self.strip.show()
             if (self.command.getCmdStatus()):
                 return
@@ -288,8 +302,8 @@ class NeoPixelSeq():
         self.command.setCmdStatus(False)
         """Wipe color across starting at both ends"""
         for i in range((int)(self.strip.numPixels()/2)):
-            self.strip.setPixelColor(i, colour)
-            self.strip.setPixelColor(self.strip.numPixels() - i, colour);
+            self.setPixel(i, colour)
+            self.setPixel(self.strip.numPixels() - i, colour);
             self.strip.show()
             if (self.command.getCmdStatus()):
                 return
@@ -302,8 +316,8 @@ class NeoPixelSeq():
         colour = 0x000000
         self.command.setCmdStatus(False)
         for i in range((int)(self.strip.numPixels()/2)):
-            self.strip.setPixelColor((int)(self.strip.numPixels()/2) - i, colour)
-            self.strip.setPixelColor((int)(self.strip.numPixels()/2) + i, colour);
+            self.setPixel((int)(self.strip.numPixels()/2) - i, colour)
+            self.setPixel((int)(self.strip.numPixels()/2) + i, colour);
             self.strip.show()
             if (self.command.getCmdStatus()):
                 return
@@ -317,11 +331,11 @@ class NeoPixelSeq():
         
         for q in range(4):
             for i in range(0, self.strip.numPixels(), 4):
-               self.strip.setPixelColor(i+q, 0)
+               self.setPixel(i+q, 0)
             self.strip.show()
             time.sleep(options['delay']/1000.0)
             for i in range(0, self.strip.numPixels(), 4):
-                self.strip.setPixelColor(i+q, colour)
+                self.setPixel(i+q, colour)
 
 
     # Follow me
@@ -348,13 +362,13 @@ class NeoPixelSeq():
         for iter in range(iterations):
             # Set all pixels to the background - then we update those not
             for resetPixel in range(self.strip.numPixels()):
-                self.strip.setPixelColor (resetPixel, backColour)
+                self.setPixel (resetPixel, backColour)
             
             for i in range(0, self.strip.numPixels(), colourPixelRange):
                 if (self.chaserStartPos + i < self.strip.numPixels()) :
-                    self.strip.setPixelColor (self.chaserStartPos + i, colours[0])
+                    self.setPixel (self.chaserStartPos + i, colours[0])
                     if (self.chaserStartPos + i + 4 < self.strip.numPixels()) :
-                        self.strip.setPixelColor (self.chaserStartPos + i + 4, colours[1])
+                        self.setPixel (self.chaserStartPos + i + 4, colours[1])
             self.strip.show()
             time.sleep(options['delay']/1000.0)
             

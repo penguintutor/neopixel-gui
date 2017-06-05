@@ -78,6 +78,10 @@ class ConfigNeopixel():
         else:
             self.config['LEDs']['ledinvert'] = "False"
             
+        if (self.rgbVar.get() == 1):
+            self.config['LEDs']['rgb'] = "True"
+        else:
+            self.config['LEDs']['rgb'] = "False"
         
         # save config
         response = self.command.setConfigNeopixels(self.config['LEDs'])
@@ -128,7 +132,13 @@ class ConfigNeopixel():
             self.invertVar.set(1)
         else:
             self.invertVar.set(0)
-        
+        self.rgbVar = IntVar()
+        if (self.config['LEDs']['rgb'] == True):
+            self.rgbVar.set(1)
+        else:
+            self.rgbVar.set(0)
+
+
         configTitleLabel = Label(self.configTop,
                 text="NeoPixel - Configuration",
                 foreground="blue", font="Verdana 16 bold").grid(columnspan=3, sticky=W, pady=(4, 15), padx=5)
@@ -169,6 +179,15 @@ class ConfigNeopixel():
                     font="Verdana 14",
                     variable=self.invertVar).grid(row=4, column=3, sticky=W)
 
+
+        rgbLabel = Label(self.configTop,
+                    font="Verdana 14",
+                    text="RGB (red first)").grid(row=5, column=1, columnspan=2, sticky=W, padx=(15,2))
+
+
+        rgbCheckBox = Checkbutton(self.configTop,
+                    font="Verdana 14",
+                    variable=self.rgbVar).grid(row=5, column=3, sticky=W)
 
 
         buttonRow = 6
