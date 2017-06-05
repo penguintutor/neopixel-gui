@@ -99,23 +99,23 @@ class App(Frame):
 
         # Colour code the list
         for i in range(len(self.chosenColours)):
-            self.coloursChosenBox.itemconfigure(i, background=hexColourToString(self.colourChoice[self.chosenColours[i]]), foreground=colourContrast(self.colourChoice[self.chosenColours[i]]))
+            self.coloursChosenBox.itemconfigure(i, background=hexColourToString(colourLookup(self.colourChoice, self.chosenColours[i])), foreground=colourContrast(colourLookup(self.colourChoice, self.chosenColours[i])))
 
 
     # Adds custom colour using colorchooser
     # todo - modify to match required colour selection
     def customColour(self):
         thiscolour = askcolor()
-        print (thiscolour)
-        self.chosenColours += thiscolour[1]
-        #chosenColoursVar = StringVar(value=thiscolour[1])
+        if (thiscolour[0] == None) :
+            return
+        self.chosenColours += ((thiscolour[1]),)
 
         self.chosenColoursVar = StringVar(value=self.chosenColours)
         self.coloursChosenBox.configure (listvariable=self.chosenColoursVar)
 
         # Colour code the list
         for i in range(len(self.chosenColours)):
-            self.coloursChosenBox.itemconfigure(i, background=hexColourToString(self.colourChoice[self.chosenColours[i]]), foreground=colourContrast(self.colourChoice[self.chosenColours[i]]))
+            self.coloursChosenBox.itemconfigure(i, background=hexColourToString(colourLookup(self.colourChoice, self.chosenColours[i])), foreground=colourContrast(colourLookup(self.colourChoice, self.chosenColours[i])))
 
 
 
@@ -143,7 +143,7 @@ class App(Frame):
         # Reapply colour coding
         # Colour code the list
         for i in range(len(self.chosenColours)):
-            self.coloursChosenBox.itemconfigure(i, background=hexColourToString(self.colourChoice[self.chosenColours[i]]), foreground=colourContrast(self.colourChoice[self.chosenColours[i]]))
+            self.coloursChosenBox.itemconfigure(i, background=hexColourToString(colourLookup(self.colourChoice, self.chosenColours[i])), foreground=colourContrast(colourLookup(self.colourChoice, self.chosenColours[i])))
     
     def rstColour(self):
         self.chosenColours = tuple()
@@ -161,7 +161,7 @@ class App(Frame):
         coloursTicked = []
         for i in range (len(self.chosenColours)):
             text = self.chosenColours[i]
-            value = self.colourChoice[text]
+            value = colourLookup (self.colourChoice, text)
             # value is from config which is string - so convert to int
             coloursTicked.append(int(value, 16))
         # Handle speed - convert from String to int
@@ -337,6 +337,8 @@ class App(Frame):
         
         self.tuple_colours = ()
         # temp to get from list of tuples to dict
+        # This stores the pre-stored colours as tuples eg. ('white', 0xffffff)
+        # Note that it should not be used directly (as that would fail with custom colours - instead use colourLookup passing this as first argument and colour string (or # code) as second argument
         for key in self.colourChoice:
             self.tuple_colours += (key,)
         
@@ -387,8 +389,8 @@ class App(Frame):
         rstColourButton.grid(row=6, column=2)
         
         # todo - enable custom colour button
-        #customColourButton = ttk.Button(self, text="Custom colour", command=self.customColour)
-        #customColourButton.grid(row=currentRow, column=4, columnspan=2, pady=10,padx=10)
+        customColourButton = ttk.Button(self, text="Custom colour", command=self.customColour)
+        customColourButton.grid(row=currentRow, column=4, columnspan=2, pady=10,padx=10)
         
                         
         applyButton = ttk.Button(self, 
@@ -415,8 +417,29 @@ def colourContrast(colour):
        return "#000000"
     else:
        return "#FFFFFF"
-       
-       
+    
+# Takes colour rgb tuple and returns as int
+# todo Notused ??
+def colourToInt (colour):
+    red = colour[0] << 16
+    green = colour [1] << 8
+    blue = colour[2]
+    
+    return int(reg+green+blue)
+    
+def htmlColourToHexString (htmlcolour):
+    # replace # with 0x
+    return ('0x'+htmlcolour[2:])
+    
+# Looks up colour from colourChoice - or returns 0x string if starts with #
+# if doesn't begin with # then lookup value from colourChoice dict
+# eg. '#ffffff' - would return '0xffffff', 'white' would return colourChoice['white'] which should have been pre-configured as '0xffffff'
+def colourLookup(colourChoice, thisColour):
+    if (thisColour[:1] == '#'):
+        return '0x'+thisColour[1:]
+        #return thisColour
+    return colourChoice[thisColour]
+    
 def hexColourToString(colour):
     blueValue = int(colour, 16) & 0xFF
     greenValue = (int(colour, 16) >> 8) & 0xFF
