@@ -17,9 +17,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this software.  If not, see <http://www.gnu.org/licenses/>
 
+ 
+
 
 import bottle
-from bottle import route, request, response, template, static_file
+from bottle import Bottle, get, run, ServerAdapter, route, request, response, template, static_file
 import sys
 import math
 import random
@@ -34,6 +36,8 @@ from neopixelhtmlgen import *
 from response import Response
 import numbers
 import securitychecks
+from sslwsgirefserver import *
+
 
 
 # New version number for client server architecture
@@ -66,6 +70,11 @@ sequencefile = 'sequences.cfg'
 # If it does not exist then use defaults
 configfile = 'neopixel-server.cfg'
 
+# Enable SSL for security - you will also need to create a SSL certificate
+# openssl req -new -x509 -keyout server.pem -out server.pem -days 365 -nodes
+enablessl = False
+certificatefile = "../server.pem"
+
 # Settings for neopixels
 # load from config file or get from client
 # these are defaults if no config file found
@@ -89,8 +98,9 @@ MAXDELAY = 100.0
 
 # allow on all ip addresses
 HOST = ''
-# port 80 - standard web port (assumes no other web server installed)
+# port 80 / 443 - standard web ports (assumes no other web server installed)
 # If using apache or another browser then change this to a different value
+# Otherwise use 80 if enablessl = False or 443 if enablessl = True
 PORT = 80
 
 # Folder where this is installed and the index.html file is located
@@ -406,8 +416,13 @@ def main():
     thread=threading.Thread(target=runPixels, args=(LEDs, command))
     thread.start()
 
-    # Start the Bottle web server 
-    app.run(host=HOST, port=PORT)    
+    # Start the Bottle web server
+    if (enablessl == False) :
+        app.run(host=HOST, port=PORT)
+    else :
+        srv = SSLWSGIRefServer(host=HOST, port=PORT)
+        srv.set_certificate(certificatefile)
+        run(server=srv)
                                                                           
     
 if __name__ == "__main__":
