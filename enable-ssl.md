@@ -22,3 +22,5 @@ Select the webroot for home.penguintutor.com:
 1: Enter a new webroot
 -------------------------------------------------------------------------------
 
+It saves cert in 
+/etc/letsencrypt/live/<domain name>/fullchain.pem
