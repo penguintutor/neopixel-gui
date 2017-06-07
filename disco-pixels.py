@@ -55,7 +55,8 @@ sequencefile = 'sequences.cfg'
 # default hostnames and ports
 defaultLocalSettings = {
     'hostname': '127.0.0.1',
-    'port' : 80
+    'port' : 80,
+    'ssl' : False
     }
 
 
@@ -515,7 +516,7 @@ def main():
 
     settings = localsettings.LocalSettings(config)
     
-    command = ClientController(settings.hostname(), settings.port())
+    command = ClientController(settings.hostname(), settings.port(), settings.ssl())
     
     # Create config windows
     cfglocal = ConfigLocal(config, configfile, settings, defaultLocalSettings, command)

@@ -26,6 +26,10 @@ class ConfigLocal():
     def restoreDefaults(self): 
         self.hostnameString.set(self.defaults['hostname'])
         self.portString.set(self.defaults['port'])
+        if (bool(self.defaults['ssl'])):
+            self.sslVar.set(1)
+        else :
+            self.sslVar.set(0)
         
 
     def saveConfig(self):
@@ -42,6 +46,10 @@ class ConfigLocal():
             # Restore previous value
             self.portString.set(self.config['Server']['port'])
             return  
+        if (self.sslVar.get() == 1):
+            self.config['Server']['ssl'] = "True"
+        else:
+            self.config['Server']['ssl'] = "False"
 
         # Save config
         try:
@@ -72,6 +80,11 @@ class ConfigLocal():
         self.hostnameString.set(self.config['Server']['hostname'])
         self.portString = StringVar()
         self.portString.set(int(self.config['Server']['port']))
+        self.sslVar = IntVar()
+        if (self.config['Server']['ssl'] == True):
+            self.sslVar.set(1)
+        else:
+            self.sslVar.set(0)
         
         configTitleLabel = Label(self.configTop,
                 text="NeoPixel - Local Configuration",
@@ -79,13 +92,11 @@ class ConfigLocal():
                 
         hostnameLabel = Label(self.configTop,
                     font="Verdana 14",
-                    #text="Hostname").grid(row=1, column=1, columnspan=2, sticky=W, padx=(15,2))
                     text="Hostname").grid(row=1, column=1, columnspan=1, sticky=W, padx=(15,2))
                     
         hostnameEntry = Entry(self.configTop,
                     font="Verdana 14",
                     width=15,
-                    #textvariable=self.hostnameString).grid(row=1, column=3, sticky=W)
                     textvariable=self.hostnameString).grid(row=1, column=2, columnspan=2, sticky=W)
                     
         portLabel = Label(self.configTop,
@@ -96,6 +107,15 @@ class ConfigLocal():
                     font="Verdana 14",
                     width=5,
                     textvariable=self.portString).grid(row=2, column=2, sticky=W)
+                    
+        sslLabel = Label(self.configTop,
+                    font="Verdana 14",
+                    text="SSL").grid(row=3, column=1, columnspan=1, sticky=W, padx=(15,2))
+
+
+        sslCheckBox = Checkbutton(self.configTop,
+                    font="Verdana 14",
+                    variable=self.sslVar).grid(row=3, column=2, sticky=W)
 
         buttonRow = 6
 

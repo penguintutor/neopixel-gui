@@ -9,6 +9,7 @@ class LocalSettings():
         settings = {
         'hostname': self.config['Server']['hostname'],
         'port': int(self.config['Server']['port']),
+        'ssl' : self.config['Server'].getboolean('ssl')
         }
         return settings
         
@@ -17,3 +18,6 @@ class LocalSettings():
 
     def port(self):
         return self.config['Server']['port']
+        
+    def ssl(self):
+        return self.config['Server'].getboolean('ssl')

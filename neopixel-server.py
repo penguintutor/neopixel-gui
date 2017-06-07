@@ -375,32 +375,32 @@ def nossl_server_public(filename):
 # /neopixel post designed for client application
 @app.route('/neopixel', method='POST')
 def nossl_server_json ():
-    server_json()
+    return server_json()
     
 @get('/neopixel', method='POST')
 def ssl_server_json ():
-    server_json()
+    return server_json()
 
 # Handle sequence request
 # eg /sequence?seq=rainbow - or other sequence from sequence.cfg
 # eg chaser / disco 
 @app.route ('/sequence')
 def nossl_chg_sequence():
-    chg_sequence()
+    return chg_sequence()
 
 @get ('/sequence')
 def ssl_chg_sequence():
-    chg_sequence()
+    return chg_sequence()
 
 # provide a comma separated list of rgb colours eg. /setcolours?colours=000000,ffffff 
 # Note that # isn't used in the url as that has a different use to jump to a part of the page
 @app.route ('/setcolours')
 def nossl_setcolours():
-    setcolours()
+    return setcolours()
 
 @get ('/setcolours')
 def nossl_setcolours():
-    setcolours()
+    return setcolours()
 
 #Thread for communicating with neopixels
 #Simple one-way communication with thread using globals

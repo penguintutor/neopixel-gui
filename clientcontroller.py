@@ -12,8 +12,11 @@ from urllib.error import *
 
 class ClientController():
     
-    def __init__(self, hostname, port):
-        self.urlpost = 'http://'+hostname+":"+str(port)+'/neopixel'  
+    def __init__(self, hostname, port, ssl):
+        if (ssl == False):
+            self.urlpost = 'http://'+hostname+":"+str(port)+'/neopixel'
+        else:
+            self.urlpost = 'https://'+hostname+":"+str(port)+'/neopixel'
         self.config = {}
 
     def chgServer (self, hostname, port):
