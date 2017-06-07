@@ -364,6 +364,17 @@ def debugMsg(priority, message) :
     if (DEBUG >= priority):
         print (message)
 
+#Bottle plugin to redirects http requests to https
+def redirect_http_to_https(callback):
+    def wrapper(*args, **kwargs):
+        scheme = bottle.request.urlparts[0]
+        if scheme == 'http':
+            # request is http redirect to https
+            bottle.redirect(bottle.request.url.replace('http', 'https', 1))
+        else:
+            # request is already https
+            return callback(*args, **kwargs)
+    return wrapper
 
 
 def main():
@@ -420,9 +431,10 @@ def main():
     if (enablessl == False) :
         app.run(host=HOST, port=PORT)
     else :
-        srv = SSLWSGIRefServer(host=HOST, port=PORT)
-        srv.set_certificate(certificatefile)
-        run(server=srv)
+        bottle.install(redirect_http_to_https)
+        app = SSLWSGIRefServer(host=HOST, port=PORT)
+        app.set_certificate(certificatefile)
+        run(server=app)
                                                                           
     
 if __name__ == "__main__":

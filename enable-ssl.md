@@ -24,3 +24,11 @@ Select the webroot for home.penguintutor.com:
 
 It saves cert in 
 /etc/letsencrypt/live/<domain name>/fullchain.pem
+and key in
+/etc/letsencrypt/live/<domain name>/privkey.pem
+
+This needs to be combined eg.
+sudo -s
+cd /etc/letsencrypt/live/<domain name>/
+cat fullchain.pem privkey.pem > combined.pem
+
