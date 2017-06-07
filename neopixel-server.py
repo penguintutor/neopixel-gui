@@ -73,7 +73,9 @@ configfile = 'neopixel-server.cfg'
 # Enable SSL for security - you will also need to create a SSL certificate
 # openssl req -new -x509 -keyout server.pem -out server.pem -days 365 -nodes
 enablessl = False
-certificatefile = "../server.pem"
+#certificatefile = "/etc/letsencrypt/live/<servername>/combined.pem"
+certificatefile = "/home/pi/server.pem"
+
 
 # Settings for neopixels
 # load from config file or get from client
@@ -119,9 +121,6 @@ config = configparser.ConfigParser()
 app = bottle.Bottle()
 
 
-# public files
-# *** WARNING ANYTHING STORED IN THE PUBLIC FOLDER WILL BE AVAILABLE TO DOWNLOAD BY ANYONE CONNECTED TO THE SAME NETWORK ***
-@app.route ('/public/<filename>')
 def server_public (filename):
     return static_file (filename, root=DOCUMENT_ROOT+"/public")
     
@@ -134,7 +133,7 @@ def server_public (filename):
 # basic functions without needing to worry about converting to json
 # Can have multiple commands, but not query and command at same time
 # and not multiple queries
-@app.route('/neopixel', method='POST')
+
 def server_json ():
     global command, settings, LEDs
     data = request.json
@@ -268,8 +267,7 @@ def server_json ():
     return response.getStatus()
     
     
-# Handle switch on request
-@app.route ('/allon')
+
 def allon():
     colour = request.query.colour
     # Only limited colours defined
@@ -287,11 +285,8 @@ def allon():
     command.setCommand("allOn")
     command.setCmdStatus(True)
       
-# Handle sequence request
-# eg /sequence?seq=rainbow - or other sequence from sequence.cfg
-# eg chaser / disco 
-@app.route ('/sequence')
-def rainbow():
+
+def chg_sequence():
     seq = request.query.seq
     # For security reasons check that it is a valid sequence
     if not seq in sequenceOptions.keys(): 
@@ -301,8 +296,6 @@ def rainbow():
     command.setCmdStatus(True)
     
 
-# Handle switch off
-@app.route ('/alloff')
 def alloff():
     command.setCommand("allOff")
     command.setCmdStatus(True)
@@ -312,9 +305,6 @@ def alloff():
 def status():
     pass
 
-# provide a comma separated list of rgb colours eg. /setcolours?colours=000000,ffffff 
-# Note that # isn't used in the url as that has a different use to jump to a part of the page
-@app.route ('/setcolours')
 def setcolours():
     colours = request.query.colours
     colourlist = colours.split(",")
@@ -338,16 +328,79 @@ def setcolours():
     command.setColours(intcolours)
 
 
-
-# Serve up the default index.html page
-@app.route ('/')
 def server_home ():
     #return static_file ('index.html', root=DOCUMENT_ROOT)
     return indexPage(sequenceOptions)
 
+# Serve up the default index.html page
+@app.route ('/')
+def nossl_server_home():
+    return server_home()
+
+@get('/')
+def ssl_server_home():
+    return server_home()
+
+# Handle switch on request
+@app.route ('/allon')
+def nossl_allon():
+    return allon()
+
+@get ('/allon')
+def ssl_allon():
+    return allon()
+    
+
+# Handle switch off
+@app.route ('/alloff')
+def nossl_alloff():
+    return alloff()
+
+# Handle switch off
+@get ('/alloff')
+def ssl_alloff():
+    return alloff()
 
 
+# public files
+# *** WARNING ANYTHING STORED IN THE PUBLIC FOLDER WILL BE AVAILABLE TO DOWNLOAD BY ANYONE CONNECTED TO THE SAME NETWORK ***
+@app.route ('/public/<filename>')
+def nossl_server_public(filename):
+    return server_public(filename)
 
+@get ('/public/<filename>')
+def nossl_server_public(filename):
+    return server_public(filename)
+        
+# /neopixel post designed for client application
+@app.route('/neopixel', method='POST')
+def nossl_server_json ():
+    server_json()
+    
+@get('/neopixel', method='POST')
+def ssl_server_json ():
+    server_json()
+
+# Handle sequence request
+# eg /sequence?seq=rainbow - or other sequence from sequence.cfg
+# eg chaser / disco 
+@app.route ('/sequence')
+def nossl_chg_sequence():
+    chg_sequence()
+
+@get ('/sequence')
+def ssl_chg_sequence():
+    chg_sequence()
+
+# provide a comma separated list of rgb colours eg. /setcolours?colours=000000,ffffff 
+# Note that # isn't used in the url as that has a different use to jump to a part of the page
+@app.route ('/setcolours')
+def nossl_setcolours():
+    setcolours()
+
+@get ('/setcolours')
+def nossl_setcolours():
+    setcolours()
 
 #Thread for communicating with neopixels
 #Simple one-way communication with thread using globals
@@ -364,17 +417,7 @@ def debugMsg(priority, message) :
     if (DEBUG >= priority):
         print (message)
 
-#Bottle plugin to redirects http requests to https
-def redirect_http_to_https(callback):
-    def wrapper(*args, **kwargs):
-        scheme = bottle.request.urlparts[0]
-        if scheme == 'http':
-            # request is http redirect to https
-            bottle.redirect(bottle.request.url.replace('http', 'https', 1))
-        else:
-            # request is already https
-            return callback(*args, **kwargs)
-    return wrapper
+
 
 
 def main():
@@ -431,10 +474,9 @@ def main():
     if (enablessl == False) :
         app.run(host=HOST, port=PORT)
     else :
-        bottle.install(redirect_http_to_https)
-        app = SSLWSGIRefServer(host=HOST, port=PORT)
-        app.set_certificate(certificatefile)
-        run(server=app)
+        srv = SSLWSGIRefServer(host=HOST, port=PORT)
+        srv.set_certificate(certificatefile)
+        run(server=srv)
                                                                           
     
 if __name__ == "__main__":
