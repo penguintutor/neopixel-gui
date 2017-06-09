@@ -58,3 +58,6 @@ target/
 
 # Temp files
 *~
+
+# Config files
+*.cfg

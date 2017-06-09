@@ -19,8 +19,11 @@ class ClientController():
             self.urlpost = 'https://'+hostname+":"+str(port)+'/neopixel'
         self.config = {}
 
-    def chgServer (self, hostname, port):
-        self.urlpost = 'http://'+hostname+":"+str(port)+'/neopixel'
+    def chgServer (self, hostname, port, ssl):
+        if (ssl == 'False'):
+            self.urlpost = 'http://'+hostname+":"+str(port)+'/neopixel'
+        else:
+            self.urlpost = 'https://'+hostname+":"+str(port)+'/neopixel'
 
     def setConfigNeopixels(self, config):
         config['request']='update'
@@ -44,6 +47,8 @@ class ClientController():
         pass
         
     def fetchPage(self, parmsdict):
+        # debug 
+        # print ("Request : "+self.urlpost)
         params = json.dumps(parmsdict).encode('utf8')
         try:
             req = urllib.request.Request(self.urlpost, data=params, headers={'content-type': 'application/json'})

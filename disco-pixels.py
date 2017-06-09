@@ -274,7 +274,7 @@ class App(Frame):
         self.frames = []
         self.seqButtons = []
         numtabs = int(math.ceil(len(self.sequenceOptions)/numsequenceButtons));
-        currentButton = 0;
+        currentButton = 0
         
         
         for numframe in range (numtabs):

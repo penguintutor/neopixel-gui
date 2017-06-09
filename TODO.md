@@ -1,0 +1,1 @@
+# Checks for server availability before running and/or changing settings
