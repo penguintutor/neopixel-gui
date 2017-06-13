@@ -58,3 +58,6 @@ target/
 
 # Config files
 neopixel-disco.cfg
+
+# Temp files 
+*~
