@@ -60,4 +60,4 @@ target/
 *~
 
 # Config files
-*.cfg
+neopixel-disco.cfg
