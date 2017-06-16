@@ -52,18 +52,19 @@ Install the Python 3 library file using
 sudo python3 setup.py install
 ```
 
-If you also want to use the library with Python 2 you can also install using
-
-```bash
-sudo python setup.py install
-```
-(this last step is not required for this software, but may be useful if you install any other Neopixel software that uses Python version 2).
 
 ## Add Python tk
 The client interface does not need to be run on the Raspberry Pi. If you are installing onto a Ubuntu computer then you will need to install the Python TK libraries (used for the graphics application). This is done by running
 
 ```bash
 sudo apt install python3-tk
+```
+
+## Add passlib
+This is required for password authentication
+
+```bash
+sudo pip3 install passlib
 ```
 
 ## Disable audio on the Raspberry Pi
