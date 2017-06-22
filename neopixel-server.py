@@ -106,6 +106,10 @@ HOST = ''
 # Otherwise use 80 if enablessl = False or 443 if enablessl = True
 PORT = 80
 
+# Does it need to login 
+# True then must login each time, False = login parameter is ignored
+LOGINREQ = False
+
 # Folder where this is installed and the index.html file is located
 # The index.html file is exposed to the webserver as well as any files in a subdirectory called public (ie. /home/pi/neopixel-gui/public) 
 DOCUMENT_ROOT = '/home/pi/git/neopixel-gui'
@@ -141,8 +145,24 @@ def server_json ():
     # response is our reply - stored by utility class
     response = Response(DEBUG)
     
+    # First check if this is a login (which we can handle directly)
+    if (data['request'] == 'login'):
+        # Todo - handle login requests
+        return "Login not supported"
+    
+    
+    # If it's not a login then check we have got an active session
+    if (LOGINREQ == True):
+        # check session identifier
+        return "Login failed"
+    
+    
+    
+    
+    #### If we reach here then we must be logged in (or login not required)
+    
     ### Command
-    if (data['request'] == 'command'):
+    elif (data['request'] == 'command'):
         if 'sequence' in data:
             # check it's a valid sequence
             if not data['sequence'] in sequenceOptions.keys():
