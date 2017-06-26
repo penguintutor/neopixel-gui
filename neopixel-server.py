@@ -37,6 +37,7 @@ from response import Response
 import numbers
 import securitychecks
 from sslwsgirefserver import *
+import password
 
 
 
@@ -63,6 +64,9 @@ DEBUG = 5
 global command, settings, LEDs
 
 
+## Configuration options - hard coded durign this version.
+## Any changes will require a server restart
+
 # File containing sequences and colour options
 # Must exist and have valid entries
 sequencefile = 'sequences.cfg'
@@ -71,11 +75,37 @@ sequencefile = 'sequences.cfg'
 # If it does not exist then use defaults
 configfile = 'neopixel-server.cfg'
 
+# File containing passwords (will be generated if doesn't exist)
+# Only used if LOGINREQ = True
+passwordfile = 'users.cfg'
+
 # Enable SSL for security - you will also need to create a SSL certificate
 # openssl req -new -x509 -keyout server.pem -out server.pem -days 365 -nodes
 enablessl = False
 #certificatefile = "/etc/letsencrypt/live/<servername>/combined.pem"
 certificatefile = "/home/pi/server.pem"
+
+
+DEFAULTSPEED = 50
+MINDELAY = 10.0
+MAXDELAY = 100.0
+
+# allow on all ip addresses
+HOST = ''
+# port 80 / 443 - standard web ports (assumes no other web server installed)
+# If using apache or another browser then change this to a different value
+# Otherwise use 80 if enablessl = False or 443 if enablessl = True
+PORT = 80
+
+# Does it need to login?
+# True then must login each time, False = login parameter is ignored
+# Recommended to be set to True if using an untrusted network
+LOGINREQ = True
+
+# Folder where this is installed and the index.html file is located
+# The index.html file is exposed to the webserver as well as any files in a subdirectory called public (ie. /home/pi/neopixel-gui/public) 
+DOCUMENT_ROOT = '/home/pi/git/neopixel-gui'
+
 
 
 # Settings for neopixels
@@ -95,31 +125,14 @@ defaultLEDSettings = {
     'rgb': False
     }
 
-DEFAULTSPEED = 50
-MINDELAY = 10.0
-MAXDELAY = 100.0
 
-# allow on all ip addresses
-HOST = ''
-# port 80 / 443 - standard web ports (assumes no other web server installed)
-# If using apache or another browser then change this to a different value
-# Otherwise use 80 if enablessl = False or 443 if enablessl = True
-PORT = 80
-
-# Does it need to login 
-# True then must login each time, False = login parameter is ignored
-LOGINREQ = False
-
-# Folder where this is installed and the index.html file is located
-# The index.html file is exposed to the webserver as well as any files in a subdirectory called public (ie. /home/pi/neopixel-gui/public) 
-DOCUMENT_ROOT = '/home/pi/git/neopixel-gui'
+############### End of configuration options
 
 
 # These are used to provide settings to the NeoPixels and the web interface
 # This is the list of sequences that can be selected, key = methodname, value = user friendly string
 sequenceOptions = dict()
 config = configparser.ConfigParser()
-
 
 
 # Create the bottle web server
@@ -140,7 +153,7 @@ def server_public (filename):
 # and not multiple queries
 
 def server_json ():
-    global command, settings, LEDs
+    global command, settings, LEDs, passwords
     data = request.json
     # response is our reply - stored by utility class
     response = Response(DEBUG)
@@ -154,7 +167,13 @@ def server_json ():
     # If it's not a login then check we have got an active session
     if (LOGINREQ == True):
         # check session identifier
-        return "Login failed"
+        if ((not 'username' in data) or (not 'password' in data)):
+            showLogin("Login required")
+            return ("Login required")
+        if (not passwords.chkPassword(data['username'], data['password'])):
+            showLogin("Login failed")
+            return ("Login failed")
+        # otherwise login successful
     
     
     
@@ -439,11 +458,13 @@ def debugMsg(priority, message) :
         print (message)
 
 
+def showLogin(message):
+    print ("Login required "+message)
 
 
 def main():
 
-    global command, settings, LEDs
+    global command, settings, LEDs, passwords
 
     # load settings during startup    
     seqconfig = configparser.ConfigParser()
@@ -486,6 +507,12 @@ def main():
     
     command = NeoPixelCmds()
     LEDs = NeoPixelSeq(settings.allSettings(), command)
+    
+    # Setup the password object if required
+    if (LOGINREQ == True):
+        passwords = password.Password(passwordfile)
+    
+    
     
     # Spawn separate thread for handling the updates to the Pixels
     thread=threading.Thread(target=runPixels, args=(LEDs, command))

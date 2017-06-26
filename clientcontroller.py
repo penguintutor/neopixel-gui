@@ -12,18 +12,22 @@ from urllib.error import *
 
 class ClientController():
     
-    def __init__(self, hostname, port, ssl):
+    def __init__(self, hostname, port, ssl, username, password):
         if (ssl == False):
             self.urlpost = 'http://'+hostname+":"+str(port)+'/neopixel'
         else:
             self.urlpost = 'https://'+hostname+":"+str(port)+'/neopixel'
         self.config = {}
+        self.username = username
+        self.password = password
 
-    def chgServer (self, hostname, port, ssl):
+    def chgServer (self, hostname, port, ssl, username, password):
         if (ssl == 'False'):
             self.urlpost = 'http://'+hostname+":"+str(port)+'/neopixel'
         else:
             self.urlpost = 'https://'+hostname+":"+str(port)+'/neopixel'
+        self.username = username
+        self.password = password
 
     def setConfigNeopixels(self, config):
         config['request']='update'
@@ -47,9 +51,14 @@ class ClientController():
         pass
         
     def fetchPage(self, parmsdict):
-        # debug 
-        # print ("Request : "+self.urlpost)
+        # If username and/or password then add to parmsdict
+        if (self.username != '') :
+            parmsdict['username'] = self.username
+        if (self.password != '') :
+            parmsdict ['password'] = self.password
         params = json.dumps(parmsdict).encode('utf8')
+        print ("Post: "+self.urlpost)
+        print ("Trying: "+str(params))
         try:
             req = urllib.request.Request(self.urlpost, data=params, headers={'content-type': 'application/json'})
             response = urllib.request.urlopen(req)

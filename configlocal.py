@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 import localsettings
 import sys
+import re
 
 # This pop-up window is used for the client server configuration of the client
 
@@ -30,6 +31,8 @@ class ConfigLocal():
             self.sslVar.set(1)
         else :
             self.sslVar.set(0)
+        self.usernameString.set(self.defaults['username'])
+        self.passwordString.set(self.defaults['password'])
         
 
     def saveConfig(self):
@@ -50,6 +53,19 @@ class ConfigLocal():
             self.config['Server']['ssl'] = "True"
         else:
             self.config['Server']['ssl'] = "False"
+        # username and password
+        if (self._validateUsernamePassword(self.usernameString.get(), "Username ")):
+            self.config['Server']['username'] = self.usernameString.get()
+        else :
+            # Restore previous value
+            self.usernameString.set(self.config['Server']['username'])
+            return  
+        if (self._validateUsernamePassword(self.passwordString.get(), "Password ")):
+            self.config['Server']['password'] = self.passwordString.get()
+        else :
+            # Restore previous value
+            self.passwordString.set(self.config['Server']['password'])
+            return  
 
         # Save config
         try:
@@ -57,7 +73,7 @@ class ConfigLocal():
                 self.config.write(cfgfile)
                 self.closeConfig()
                 # Change server info dynamically
-                self.command.chgServer (self.config['Server']['hostname'], self.config['Server']['port'], self.config['Server']['ssl']) 
+                self.command.chgServer (self.config['Server']['hostname'], self.config['Server']['port'], self.config['Server']['ssl'], self.config['Server']['username'], self.config['Server']['password']) 
                 messagebox.showinfo("Info", "Configuration saved.")
         except : 
             self.closeConfig()
@@ -85,6 +101,10 @@ class ConfigLocal():
             self.sslVar.set(1)
         else:
             self.sslVar.set(0)
+        self.usernameString = StringVar()
+        self.usernameString.set(self.config['Server']['username'])
+        self.passwordString = StringVar()
+        self.passwordString.set(self.config['Server']['password'])
         
         configTitleLabel = Label(self.configTop,
                 text="NeoPixel - Local Configuration",
@@ -116,6 +136,24 @@ class ConfigLocal():
         sslCheckBox = Checkbutton(self.configTop,
                     font="Verdana 14",
                     variable=self.sslVar).grid(row=3, column=2, sticky=W)
+                    
+        usernameLabel = Label(self.configTop,
+                    font="Verdana 14",
+                    text="Username").grid(row=4, column=1, columnspan=1, sticky=W, padx=(15,2))
+                    
+        usernameEntry = Entry(self.configTop,
+                    font="Verdana 14",
+                    width=15,
+                    textvariable=self.usernameString).grid(row=4, column=2, columnspan=2, sticky=W)
+                    
+        passwordLabel = Label(self.configTop,
+                    font="Verdana 14",
+                    text="Password").grid(row=5, column=1, columnspan=1, sticky=W, padx=(15,2))
+                    
+        passwordEntry = Entry(self.configTop,
+                    font="Verdana 14",
+                    width=15,
+                    textvariable=self.passwordString).grid(row=5, column=2, columnspan=2, sticky=W)
 
         buttonRow = 6
 
@@ -164,6 +202,13 @@ class ConfigLocal():
             return False
         return True
         
+    # username and password can only have \w (ie. letters, digits and _)
+    def _validateUsernamePassword (self, string, errormsg):
+        # uses * instead of + so allows empty string
+        if (not re.match(r'^\w*$', string)):
+            messagebox.showinfo("Warning", errormsg + "contains invalid characters.", parent=self.configTop)
+            return False
+        return True
         
         
     # Warning this is for user of a local hostname and has no checking
