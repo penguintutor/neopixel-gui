@@ -4,6 +4,10 @@ class LocalSettings():
     
     def __init__(self, config):
         self.config = config
+        # If no username in the configfile (older version) set default
+        if not "username" in self.config['Server']:
+            self.config['Server']['username'] = ''
+            self.config['Server']['password'] = ''
         
     def allSettings(self):
         settings = {
