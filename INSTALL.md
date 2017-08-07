@@ -67,6 +67,9 @@ This is required for password authentication
 sudo pip3 install passlib
 ```
 
+Note on Ubuntu this is easier installed as sudo apt install python3-passlib
+
+
 ## Disable audio on the Raspberry Pi
 
 There is a conflict between the sound driver and the PCM used to control the NeoPixels. 

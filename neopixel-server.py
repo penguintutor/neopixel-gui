@@ -27,7 +27,8 @@ import math
 import random
 import threading
 from neopixelcmds import *
-from neopixelseq import *
+#from neopixelseq import *
+from lightseq import *
 import configparser
 import time
 import ledsettings
@@ -100,13 +101,15 @@ PORT = 80
 # Does it need to login?
 # True then must login each time, False = login parameter is ignored
 # Recommended to be set to True if using an untrusted network
-LOGINREQ = True
+LOGINREQ = False
 
 # Folder where this is installed and the index.html file is located
 # The index.html file is exposed to the webserver as well as any files in a subdirectory called public (ie. /home/pi/neopixel-gui/public) 
 DOCUMENT_ROOT = '/home/pi/git/neopixel-gui'
 
-
+# Temp store this here - in future move to config file
+# can be either generic or neopixel
+hardware = 'generic'
 
 # Settings for neopixels
 # load from config file or get from client
@@ -506,7 +509,7 @@ def main():
     settings = ledsettings.LEDSettings(config)
     
     command = NeoPixelCmds()
-    LEDs = NeoPixelSeq(settings.allSettings(), command)
+    LEDs = LightSeq(hardware, settings.allSettings(), command)
     
     # Setup the password object if required
     if (LOGINREQ == True):
