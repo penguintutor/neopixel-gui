@@ -65,6 +65,7 @@ class ClientController():
             reply = response.read().decode('utf8')
             replydata = json.loads(reply)
         except (OSError, HTTPError) as e:
+            print ("Error "+str(e))
             replydata = {"reply":"fail","error":"Error communicating with server"}
         return replydata
        

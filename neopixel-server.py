@@ -79,16 +79,16 @@ configfile = 'neopixel-server.cfg'
 # Only used if LOGINREQ = True
 passwordfile = 'users.cfg'
 
-# Recommended to enable SSL for security - if enabled you will need to create 
-# an SSL certificate
-# openssl req -new -x509 -keyout server.pem -out server.pem -days 365 -nodes
-#certificatefile = "/etc/letsencrypt/live/<servername>/combined.pem"
-certificatefile = "/home/pi/server.pem"
-
 
 DEFAULTSPEED = 50
 MINDELAY = 10.0
 MAXDELAY = 100.0
+
+# Recommended to enable SSL for security - if enabled you will need to create 
+# an SSL certificate
+# openssl req -new -x509 -keyout server.pem -out server.pem -days 365 -nodes
+# by default server file is in "/etc/letsencrypt/live/<servername>/combined.pem"
+
 
 
 ## Configuration options - default settings
@@ -107,7 +107,8 @@ defaultServerSettings = {
     'enablessl': False,
     # Folder where documents are stored 
     # WARNING any files in this will be publically accessible
-    'document_root': '/home/pi/git/neopixel-gui'
+    'document_root': '/home/pi/git/neopixel-gui', 
+    'certificatefile': "/home/pi/server.pem"
     }
     
 
@@ -551,12 +552,12 @@ def main():
     else :
         print ("Running in SSL (secure) mode")
         # Simple check that certificate file exists, to give a user friendly error if not
-        if not os.path.isfile(certificatefile):
+        if not os.path.isfile(config['Server']['certificatefile']):
             # Stop the pixel thread
             command.setCommand("STOP")
-            sys.exit ("Error: Secure mode set (enablessl)\n but certificate file "+certificatefile+" does not exist")
+            sys.exit ("Error: Secure mode set (enablessl)\n but certificate file "+config['Server']['certificatefile']+" does not exist")
         srv = SSLWSGIRefServer(host=config['Server']['host'], port=config['Server']['port'])
-        srv.set_certificate(certificatefile)
+        srv.set_certificate(config['Server']['certificatefile'])
         run(server=srv)
                                                                           
     
