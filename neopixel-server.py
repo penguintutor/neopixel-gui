@@ -43,8 +43,9 @@ import password
 
 
 
-# New version number for client server architecture
-VERSION = '0.3'
+# Version number added for client server architecture
+# Config file can have different version number as long as it includes same features
+version = '0.3'
 
 # Level of debugging shown on the console 
 # 1 = normal - errors only
@@ -65,8 +66,6 @@ DEBUG = 5
 global command, settings, LEDs
 
 
-## Configuration options - hard coded durign this version.
-## Any changes will require a server restart
 
 # File containing sequences and colour options
 # Must exist and have valid entries
@@ -80,9 +79,9 @@ configfile = 'neopixel-server.cfg'
 # Only used if LOGINREQ = True
 passwordfile = 'users.cfg'
 
-# Enable SSL for security - you will also need to create a SSL certificate
+# Recommended to enable SSL for security - if enabled you will need to create 
+# an SSL certificate
 # openssl req -new -x509 -keyout server.pem -out server.pem -days 365 -nodes
-enablessl = False
 #certificatefile = "/etc/letsencrypt/live/<servername>/combined.pem"
 certificatefile = "/home/pi/server.pem"
 
@@ -91,25 +90,26 @@ DEFAULTSPEED = 50
 MINDELAY = 10.0
 MAXDELAY = 100.0
 
-# allow on all ip addresses
-HOST = ''
-# port 80 / 443 - standard web ports (assumes no other web server installed)
-# If using apache or another browser then change this to a different value
-# Otherwise use 80 if enablessl = False or 443 if enablessl = True
-PORT = 80
 
-# Does it need to login?
-# True then must login each time, False = login parameter is ignored
-# Recommended to be set to True if using an untrusted network
-LOGINREQ = False
-
-# Folder where this is installed and the index.html file is located
-# The index.html file is exposed to the webserver as well as any files in a subdirectory called public (ie. /home/pi/neopixel-gui/public) 
-DOCUMENT_ROOT = '/home/pi/git/neopixel-gui'
-
-# Temp store this here - in future move to config file
-# can be either generic or neopixel
-hardware = 'generic'
+## Configuration options - default settings
+## Any changes will require a server restart
+defaultServerSettings = {
+    'version': version,
+    # hardware eg. neopixel (generic for testing only)
+    'hardware': 'neopixel',
+    # if login mandatory
+    'loginreq': False,
+    # host normally blank (any address) can pin to specific interface
+    'host': '',
+    # For non-secure normally port 80, for secure port 443
+    'port': 80,   
+    # Enable ssl - ie secure connection (use 443)
+    'enablessl': False,
+    # Folder where documents are stored 
+    # WARNING any files in this will be publically accessible
+    'document_root': '/home/pi/git/neopixel-gui'
+    }
+    
 
 # Settings for neopixels
 # load from config file or get from client
@@ -168,7 +168,7 @@ def server_json ():
     
     
     # If it's not a login then check we have got an active session
-    if (LOGINREQ == True):
+    if (config['Server']['loginreq'] == True):
         # check session identifier
         if ((not 'username' in data) or (not 'password' in data)):
             showLogin("Login required")
@@ -504,15 +504,32 @@ def main():
         config.add_section('LEDs')
         for key, value in defaultLEDSettings.items():
             config.set('LEDs', key, str(value)) 
+            
+    # If no server setting then add default server settings
+    if  not config.has_section('Server'):
+        config.add_section('Server')
+        for key, value in defaultServerSettings.items():
+            config.set('Server', key, str(value)) 
+            
+        # If didn't previously have a config file - or it didn't include server then save it
+        try:
+            with open(configfile, 'w') as cfgfile:
+                config.write(cfgfile)
+                # tell user config saved
+                print ("New configuration file saved")
+        except : 
+            # If unable to save then continue with the default values
+            print ("Warning: Unable to save config file") 
+        
 
 
     settings = ledsettings.LEDSettings(config)
     
     command = NeoPixelCmds()
-    LEDs = LightSeq(hardware, settings.allSettings(), command)
+    LEDs = LightSeq(config['Server']['hardware'], settings.allSettings(), command)
     
     # Setup the password object if required
-    if (LOGINREQ == True):
+    if (config['Server']['loginreq'] == True):
         passwords = password.Password(passwordfile)
     
     
@@ -522,10 +539,12 @@ def main():
     thread.start()
 
     # Start the Bottle web server
-    if (enablessl == False) :
-        app.run(host=HOST, port=PORT)
+    if (config.getboolean('Server','enablessl') == False) :
+        print ("Running in non SSL (insecure) mode")
+        app.run(host=config['Server']['host'], port=config['Server']['port'])
     else :
-        srv = SSLWSGIRefServer(host=HOST, port=PORT)
+        print ("Running in SSL (secure) mode")
+        srv = SSLWSGIRefServer(host=config['Server']['host'], port=config['Server']['port'])
         srv.set_certificate(certificatefile)
         run(server=srv)
                                                                           

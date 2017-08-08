@@ -1,4 +1,5 @@
 # Class to provide settings from configwriter config
+# Used for the client
 
 class LocalSettings():
     
