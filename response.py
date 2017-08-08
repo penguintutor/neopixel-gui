@@ -26,16 +26,23 @@ class Response():
         elif (status == "error"):
             if (self.response['reply'] == 'success'):
                 self.response['reply'] = 'warning'
-            # warning we leave unchanged (so anything that's not warning is error)
-            elif (self.response['reply'] != 'warning'):
+            # warning we leave unchanged (so anything that's not warning or auth is error)
+            elif (self.response['reply'] != 'warning' and self.response['reply'] != 'auth'):
                 self.response['reply'] = 'error'
             if (self.debug >= 3):
                 print ("Error: error for "+ field +" "+message)
-        # if status is warning then set to warning regardless
+        # if status is warning then set to warning except for authetnication
         elif (status == "warning"):
-            self.response['reply']= 'warning'
+            if (self.response['reply'] != 'auth'):
+                self.response['reply']= 'warning'
             if (self.debug >= 5):
                 print ("Warning: warning for "+ field +" "+message)
+        # if status authentication then that overrides as won't be able to do anything else until authenticated
+        elif (status == 'auth'):
+            self.response['reply']= 'auth'
+            if (self.debug >= 4):
+                print ("Authentication: "+ field +" "+message)
+        
                 
             
             

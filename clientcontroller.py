@@ -1,8 +1,8 @@
 # Moves the client communication away from the GUI.
 # Instead of using direct communication call to this, which 
 # converts into a network request
-## Note that there is now a greater risk of commands failing, so
-## error messages are more likely
+## Note there is a greater risk of commands failing if over a network
+## or server is down, so error messages are more likely
 
 
 import json
@@ -57,8 +57,8 @@ class ClientController():
         if (self.password != '') :
             parmsdict ['password'] = self.password
         params = json.dumps(parmsdict).encode('utf8')
-        print ("Post: "+self.urlpost)
-        print ("Trying: "+str(params))
+#        print ("Post: "+self.urlpost)
+#        print ("Trying: "+str(params))
         try:
             req = urllib.request.Request(self.urlpost, data=params, headers={'content-type': 'application/json'})
             response = urllib.request.urlopen(req)

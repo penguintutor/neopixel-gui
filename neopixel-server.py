@@ -27,7 +27,6 @@ import math
 import random
 import threading
 from neopixelcmds import *
-#from neopixelseq import *
 from lightseq import *
 import configparser
 import time
@@ -39,6 +38,7 @@ import numbers
 import securitychecks
 from sslwsgirefserver import *
 import password
+import os.path
 
 
 
@@ -172,10 +172,14 @@ def server_json ():
         # check session identifier
         if ((not 'username' in data) or (not 'password' in data)):
             showLogin("Login required")
-            return ("Login required")
+            # Field (2nd argument) set to login - could be missing username or password
+            response.addStatus ("auth", "login", "Login required")
+            return response.getStatus()
+            #return ("Login required")
         if (not passwords.chkPassword(data['username'], data['password'])):
-            showLogin("Login failed")
-            return ("Login failed")
+            showLogin("Login failed - invalid username or password")
+            response.addStatus ("auth", "login", "Login failed")
+            return response.getStatus()
         # otherwise login successful
     
     
@@ -192,7 +196,7 @@ def server_json ():
             else:
                 command.setCommand(data['sequence'])
                 command.setCmdStatus(True)
-                response.addStatus ("success", "sequence", "success")
+                response.addStatus ("success", "sequence", "Sequence updated")
         if 'colours' in data:
             selectedColours = data['colours']
             intcolours = []
@@ -202,20 +206,22 @@ def server_json ():
                             intcolours.append(selectedColours[i])
                             response.addStatus("success", "colours", "success")
                     else:
-                        return response
+                        response.addStatus("error", "colours", "Fail security check")
+                        return response.getStatus()
                 except ValueError as err:
                     response.addStatus ("error", "colours", "Colour not valid")
-                    return response
+                    return response.getStatus()       
                 except Exception as e:
                     response.addStatus ("error", "colours", "Unknown error in setting colour" + str(e))
-                    return response
+                    return response.getStatus()
             command.setColours(intcolours)
+            response.addStatus ("success", "colours", "Colour updated")
         if 'delay' in data:
             if (securitychecks.validateIntegerResponse(data['delay'], "delay", MINDELAY, MAXDELAY, response)) :
                 command.setDelay(data['delay'])
-                response.addStatus("success", "delay", "success")
+                response.addStatus("success", "delay", "Delay updated")
             else :
-                return response
+                return response.getStatus()
                 
     ### Queries
     elif (data['request'] == 'query'):
@@ -240,7 +246,7 @@ def server_json ():
                         # This is a serious error - not even sending correct
                         # value type so don't even try the other values
                         response = {'reply':'error', 'error':'Invalid type in ledcount'}
-                        return response
+                        return response.getStatus()
                     validate = securitychecks.validateIntegerResponse(thisvalue, "ledcount", 0, 1000000, response)
                     if validate:
                         config['LEDs']['ledcount'] = data['ledcount']
@@ -252,7 +258,7 @@ def server_json ():
                         # This is a serious error - not even sending correct
                         # value type so don't even try the other values
                         response = {'reply':'error', 'error':'Invalid type in gpiopin'}
-                        return response
+                        return response.getStatus()
                     validate = securitychecks.validateIntegerResponse(thisvalue, "gpiopin", 0, 128, response)
                     if validate:
                         config['LEDs']['gpiopin'] = data['gpiopin']
@@ -263,7 +269,7 @@ def server_json ():
                         # This is a serious error - not even sending correct
                         # value type so don't even try the other values
                         response = {'reply':'error', 'error':'Invalid type in ledmaxbrightness'}
-                        return response
+                        return response.getStatus()
                     validate = securitychecks.validateIntegerResponse(thisvalue, "ledmaxbrightness", 0, 255, response)
                     if validate:
                         config['LEDs']['ledmaxbrightness'] = data['ledmaxbrightness']
@@ -277,7 +283,7 @@ def server_json ():
                     # if not true or false then serious error
                     else:
                         response = {'reply':'error', 'error':'Invalid type in ledinvert'}
-                        return response
+                        return response.getStatus()
                 if ('rgb' in data):
                     if (data['rgb'] == 'True'):
                         response.addStatus ("success", "rgb", "success")
@@ -288,7 +294,7 @@ def server_json ():
                     # if not true or false then serious error
                     else:
                         response = {'reply':'error', 'error':'Invalid type in rgb'}
-                        return response
+                        return response.getStatus()
                 ## Now save the config
                 # save config
                 try:
@@ -299,7 +305,7 @@ def server_json ():
                 except Exception as e:
                         response = {'reply':'error', 'error':'Error saving configuration'}
                         if (DEBUG >= 1) : print ("Error: saving configuration file "+configfile+"::"+str(e))
-                        return response
+                        return response.getStatus()
                 # Reread in settings (always use the saved config - if can't update then settings don't get updated
                 settings = ledsettings.LEDSettings(config)
                 LEDs.updSettings(settings.allSettings())
@@ -544,6 +550,11 @@ def main():
         app.run(host=config['Server']['host'], port=config['Server']['port'])
     else :
         print ("Running in SSL (secure) mode")
+        # Simple check that certificate file exists, to give a user friendly error if not
+        if not os.path.isfile(certificatefile):
+            # Stop the pixel thread
+            command.setCommand("STOP")
+            sys.exit ("Error: Secure mode set (enablessl)\n but certificate file "+certificatefile+" does not exist")
         srv = SSLWSGIRefServer(host=config['Server']['host'], port=config['Server']['port'])
         srv.set_certificate(certificatefile)
         run(server=srv)

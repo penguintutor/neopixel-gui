@@ -158,7 +158,11 @@ class App(Frame):
         # update command object to be passed to the 
         cmd, text = self.sequenceOptions[self.sequence.get()]
         response = self.command.setSequence(cmd)
-        if (response['reply'] == "fail"):
+        #print ("Response received "+str(response))
+        if (response['reply'] == "auth"):
+            messagebox.showinfo("Error", "Authentication required\nUpdate settings with username and password\n")
+            return
+        elif (response['reply'] == "fail"):
             messagebox.showinfo("Error", "Unable to connect to server.\nCheck server is started and address matches\n")
             return
         coloursTicked = []
@@ -181,8 +185,6 @@ class App(Frame):
     # as more reliable than needing to wait for __del__
     def closeApp(self):
         # When close window notify thread to terminate 
-#todo update this
-#        self.command.setCommand("STOP")
         self.parent.destroy()
 
 
