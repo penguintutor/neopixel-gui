@@ -60,7 +60,6 @@ target/
 *~
 
 # Config files
-neopixel-disco.cfg
-password.cfg
-neopixel-server.cfg
-users.cfg
+*.cfg
+# Certificates
+*.pem
