@@ -168,7 +168,7 @@ def server_json ():
     
     
     # If it's not a login then check we have got an active session
-    if (config['Server']['loginreq'] == True):
+    if (config.getboolean('Server','loginreq') == True):
         # check session identifier
         if ((not 'username' in data) or (not 'password' in data)):
             showLogin("Login required")
@@ -529,7 +529,7 @@ def main():
     LEDs = LightSeq(config['Server']['hardware'], settings.allSettings(), command)
     
     # Setup the password object if required
-    if (config['Server']['loginreq'] == True):
+    if (config.getboolean('Server','loginreq') == True):
         passwords = password.Password(passwordfile)
     
     
