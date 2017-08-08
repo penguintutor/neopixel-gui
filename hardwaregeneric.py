@@ -1,5 +1,6 @@
 # Generic hardware abstraction for lightseq to convert to neopixel / other hardware
 # This is a dummy version that doesn't actually update any hardware
+# Useful for testing on a computer that does not support the neopixel library
 
 class HardwareGeneric():
     
@@ -12,6 +13,7 @@ class HardwareGeneric():
     
     
     def setPixel (self, i, colour):
+        #print ("Pixel "+str(i)+"set to : "+str(colour))
         pass
     
     
@@ -25,4 +27,8 @@ class HardwareGeneric():
     
     
     def setPixelColor (self, i, colour):
+        #print ("Pixel "+str(i)+"set to colour :"+str(colour))
         pass
+    
+    def numPixels (self):
+        return self.settings['ledcount']
