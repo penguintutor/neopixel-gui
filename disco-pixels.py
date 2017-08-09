@@ -88,6 +88,14 @@ MAXCOLOURS = 10
 MINDELAY = 10.0
 MAXDELAY = 100.0
 
+DEFAULTWIDTH = 800
+DEFAULTHEIGHT = 400
+MINWIDTH = 800
+MINHEIGHT = 400
+
+
+global app
+
 
 class App(Frame):
 
@@ -107,6 +115,39 @@ class App(Frame):
         for i in range(len(self.chosenColours)):
             self.coloursChosenBox.itemconfigure(i, background=hexColourToString(colourLookup(self.colourChoice, self.chosenColours[i])), foreground=colourContrast(colourLookup(self.colourChoice, self.chosenColours[i])))
 
+    # Handle resize of screen. Does not change the root size, just resize internal components
+    def resizeLayout(self, width, height):
+        # Resize the font on the buttons etc - just basic thresholds where we change
+        # min = default font
+        newfont = "Verdana 10"
+        newcolourfont = "Verdana 8"
+        if (width < 900 or height < 500):
+            ttk.Style().configure("TButton", font='Helvetica 10')
+            ttk.Style().configure('TNotebook.Tab', font='Helvetica 9')
+            ttk.Style().configure('ColButton.TButton', font='Helvetica 10 bold')
+        elif (width < 1000 or height < 600):
+            newfont = "Verdana 12"
+            newcolourfont = "Verdana 10"
+            ttk.Style().configure("TButton", font='Helvetica 13')
+            ttk.Style().configure('TNotebook.Tab', font='Helvetica 12 bold')
+            ttk.Style().configure('ColButton.TButton', font='Helvetica 13 bold')
+        else :
+            newfont = "Verdana 15"
+            newcolourfont = "Verdana 11"
+            ttk.Style().configure("TButton", font='Helvetica 15')
+            ttk.Style().configure('TNotebook.Tab', font='Helvetica 15 bold')
+            ttk.Style().configure('ColButton.TButton', font='Helvetica 14 bold')
+            
+        for thisSeqButton in self.seqButtons:
+            thisSeqButton.configure(font=newfont)
+            
+        #for thisFrame in self.frames:
+        #    thisFrame.configure(style=tabstyle)
+            
+        self.speedLabel.configure(font=newfont)
+        self.colourLabel.configure(font=newcolourfont)
+        self.colourLabel2.configure(font=newcolourfont)
+
 
     # Adds custom colour using colorchooser
     # todo - modify to match required colour selection
@@ -124,6 +165,8 @@ class App(Frame):
             self.coloursChosenBox.itemconfigure(i, background=hexColourToString(colourLookup(self.colourChoice, self.chosenColours[i])), foreground=colourContrast(colourLookup(self.colourChoice, self.chosenColours[i])))
 
 
+    def getStatus(self):
+        print ("Running")
 
 
     def addColourEvent(self, event):
@@ -250,9 +293,6 @@ class App(Frame):
         self.sequence = IntVar()
         self.sequence.set(0)
 
-        
-        #s = ttk.Style();
-        #s.configure ('TNotebook.Tab', font=("Verdana",  11));
 
         # The image is a massively oversized image of a strip of LEDs
         # I like the effect of being zoomed in, but this will also help with large screens not having horrible borders 
@@ -312,10 +352,10 @@ class App(Frame):
        
         # Set to allow between 10 and 500 
         
-        speedLabel = Label(self,
+        self.speedLabel = Label(self,
                     font="Verdana 11",
                     text="Speed")
-        speedLabel.grid (row=currentRow, column=1, sticky='ew', padx=10)
+        self.speedLabel.grid (row=currentRow, column=1, sticky='ew', padx=10, pady=5)
         
         # default is 50mS
         speedBar = ttk.Scale(self, orient=HORIZONTAL, from_=MAXDELAY, to=MINDELAY, variable=self.speedLEDVar)
@@ -332,15 +372,15 @@ class App(Frame):
         colourSelectFrame.columnconfigure(2, weight=10)
         
         #Title for frame
-        colourLabel = Label(colourSelectFrame,
+        self.colourLabel = Label(colourSelectFrame,
                     font="Verdana 8",
                     text="Colours Available")
-        colourLabel.grid (row=0, column=0, columnspan=2, sticky='ews')
+        self.colourLabel.grid (row=0, column=0, columnspan=2, sticky='ews')
         
-        colourLabel2 = Label(colourSelectFrame,
+        self.colourLabel2 = Label(colourSelectFrame,
                     font="Verdana 8",
                     text="Colours Chosen")
-        colourLabel2.grid (row=0, column=3, sticky='ews')
+        self.colourLabel2.grid (row=0, column=3, sticky='ews')
         
         
         self.tuple_colours = ()
@@ -373,39 +413,39 @@ class App(Frame):
         self.coloursChosenBox.grid(column=3, row=1, rowspan=6, sticky=(N,S,E,W))
         
         
-        addColourButton = ttk.Button(colourSelectFrame, 
+        self.addColourButton = ttk.Button(colourSelectFrame, 
                     text=">>",
                     width = 5,
-                    style="ColButtons.TButton",
+                    style="ColButton.TButton",
                     command=self.addColour)
-        addColourButton.grid(row=1, column=2)
+        self.addColourButton.grid(row=1, column=2)
         
         
-        delColourButton = ttk.Button(colourSelectFrame, 
+        self.delColourButton = ttk.Button(colourSelectFrame, 
                     text="<<",
                     width = 5,
-                    style="ColButtons.TButton",
+                    style="ColButton.TButton",
                     command=self.delColour)
-        delColourButton.grid(row=4, column=2)
+        self.delColourButton.grid(row=4, column=2)
         
         
-        rstColourButton = ttk.Button(colourSelectFrame, 
+        self.rstColourButton = ttk.Button(colourSelectFrame, 
                     text="Clr",
                     width = 5,
-                    style="ColButtons.TButton",
+                    style="ColButton.TButton",
                     command=self.rstColour)
-        rstColourButton.grid(row=6, column=2)
+        self.rstColourButton.grid(row=6, column=2)
         
         # todo - enable custom colour button
-        customColourButton = ttk.Button(self, text="Custom colour", command=self.customColour)
-        customColourButton.grid(row=currentRow, column=4, columnspan=2, pady=10,padx=10)
+        self.customColourButton = ttk.Button(self, text="Custom colour", command=self.customColour)
+        self.customColourButton.grid(row=currentRow, column=4, columnspan=2, pady=10,padx=10)
         
                         
-        applyButton = ttk.Button(self, 
+        self.applyButton = ttk.Button(self, 
                     text="Apply",
                     width = 10,
                     command=self.ApplyChange,)
-        applyButton.grid(row=currentRow+1, column=4, columnspan=2, pady=20, padx=40, sticky='nesw')
+        self.applyButton.grid(row=currentRow+1, column=4, columnspan=2, pady=20, padx=40, sticky='nesw')
 
        
         # Finished setting up GUI - now issue any message
@@ -476,11 +516,16 @@ def numpages (numsequences, numbuttons) :
     return int((numsequences-1) / numbuttons) + 1
 
 
+def configure (event):
+    # Only interested in changes to the top level window (.)
+    if (str(event.widget) != '.'): return
+    width, height = event.width, event.height
+    app.resizeLayout(width,height)
 
 
 def main():
 
-    global message
+    global message, app
 
     # load settings during startup    
     seqconfig = configparser.ConfigParser()
@@ -535,14 +580,17 @@ def main():
     
     root.option_add('*tearOff', FALSE)
     
-    ttk.Style().configure("TButton", font='Helvetica 11 bold')
-    ttk.Style().configure("TNotebook", background='#999999')
+    ttk.Style().configure("TButton", font='Helvetica 11')
     ttk.Style().configure('TabFrame.TFrame', background='#999999')
-    ttk.Style().configure('TNotebook.Tab', font='Helvetica 10 bold')
-    ttk.Style().configure('ColButtons.TButton', font='Helvetica 10 bold')
+    ttk.Style().configure("TNotebook", background='#999999')
+    ttk.Style().configure('TNotebook.Tab', font='Helvetica 11 bold')
+    ttk.Style().configure('ColButton.TButton', font='Helvetica 10 bold')
+
                                                                           
-    root.geometry("800x400+100+100")
+    root.geometry("%dx%d+100+100" % (DEFAULTWIDTH, DEFAULTHEIGHT))
+    root.minsize(MINWIDTH,MINHEIGHT)
     app = App(root, command, sequenceOptions, colourChoice, config, cfglocal, cfgneopixel)
+    root.bind("<Configure>", configure)
     root.mainloop()
     
 if __name__ == "__main__":
