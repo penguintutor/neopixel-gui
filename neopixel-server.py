@@ -108,7 +108,10 @@ defaultServerSettings = {
     # Folder where documents are stored 
     # WARNING any files in this will be publically accessible
     'document_root': '/home/pi/git/neopixel-gui', 
-    'certificatefile': "/home/pi/server.pem"
+    'certificatefile': "/home/pi/server.pem",
+    # allowunverified does not authenticate the certificate
+    # this means you cannot guarentee what computer you are communicating with
+    'allowunverified': False
     }
     
 

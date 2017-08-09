@@ -7,22 +7,30 @@
 
 import json
 import urllib.request
+import ssl
 from urllib.error import *
 
 
 class ClientController():
     
-    def __init__(self, hostname, port, ssl, username, password):
-        if (ssl == False):
+    def __init__(self, hostname, port, sslenabled, username, password, allowunverified=False):
+        if (sslenabled == False):
             self.urlpost = 'http://'+hostname+":"+str(port)+'/neopixel'
         else:
             self.urlpost = 'https://'+hostname+":"+str(port)+'/neopixel'
         self.config = {}
+        self.sslenabled = sslenabled
         self.username = username
         self.password = password
-
-    def chgServer (self, hostname, port, ssl, username, password):
-        if (ssl == 'False'):
+        self.allowunverified = allowunverified
+        # if unverified allowed then create context
+        if (self.allowunverified == True):
+            self.ctx = ssl.create_default_context()
+            self.ctx.check_hostname = False
+            self.ctx.verify_mode = ssl.CERT_NONE
+        
+    def chgServer (self, hostname, port, sslenabled, username, password):
+        if (self.sslenabled == False):
             self.urlpost = 'http://'+hostname+":"+str(port)+'/neopixel'
         else:
             self.urlpost = 'https://'+hostname+":"+str(port)+'/neopixel'
@@ -61,7 +69,10 @@ class ClientController():
 #        print ("Trying: "+str(params))
         try:
             req = urllib.request.Request(self.urlpost, data=params, headers={'content-type': 'application/json'})
-            response = urllib.request.urlopen(req)
+            if (self.sslenabled == True and self.allowunverified == True):
+                response = urllib.request.urlopen(req, context=self.ctx)
+            else:
+                response = urllib.request.urlopen(req)
             reply = response.read().decode('utf8')
             replydata = json.loads(reply)
         except (OSError, HTTPError) as e:

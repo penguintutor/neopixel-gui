@@ -58,7 +58,10 @@ defaultLocalSettings = {
     'port' : 80,
     'ssl' : False,
     'username' : '',
-    'password' : ''
+    'password' : '',
+    # allow unverified will not check authentication of server
+    # This could allow for server spoofing
+    'allowunverified': False
     }
 
 
@@ -520,7 +523,7 @@ def main():
 
     settings = localsettings.LocalSettings(config)
     
-    command = ClientController(settings.hostname(), settings.port(), settings.ssl(), settings.username(), settings.password())
+    command = ClientController(settings.hostname(), settings.port(), settings.ssl(), settings.username(), settings.password(), settings.allowunverified())
     
     # Create config windows
     cfglocal = ConfigLocal(config, configfile, settings, defaultLocalSettings, command)

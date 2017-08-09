@@ -60,7 +60,7 @@ class Password():
         if (not self.pwconfig.has_section(username)):
             print ("Username "+username+" does not exist")
             return False
-        print ("Checking password for "+username)
+        #print ("Checking password for "+username)
         return pbkdf2_sha256.verify(password, self.pwconfig[username]['password'])
         
         
