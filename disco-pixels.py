@@ -540,7 +540,15 @@ def configure (event):
 def main():
 
     global message, app
+    
+    # command line arguments - currently supports -v for verbose
+    if (len(sys.argv)>1 and sys.argv[1] == '-v'):
+        verbose = 1
+    else:
+        verbose = 0
 
+    if (verbose > 0):
+        print ("Loading sequence configuration file",)
     # load settings during startup    
     seqconfig = configparser.ConfigParser()
     # configwriter keys are normally case insensitive (converted to lowercase) - override as need case of the keys to match method names
@@ -551,6 +559,8 @@ def main():
     except (configparser.Error, KeyError) :
         # Can't display warning at this stage so save message for when gui loaded
         message = ("Error", "Sequence.cfg does not exist\n or is missing important values")
+    if (verbose > 0):
+        print (" - done")
         
     # iterate over sequences which allows handling of "\n" text to '\n' character
     sequenceOptions = []
@@ -579,10 +589,20 @@ def main():
         for key, value in defaultLocalSettings.items():
             config.set('Server', key, str(value)) 
 
+    if (verbose > 0):
+        print ("Loading settings configuration file",)
 
     settings = localsettings.LocalSettings(config)
+                    
+    if (verbose > 0):
+        print (" - done")
+        print ("Creating client controller",)
+    
     
     command = ClientController(settings.hostname(), settings.port(), settings.ssl(), settings.username(), settings.password(), settings.allowunverified())
+    
+    if (verbose > 0):
+        print (" - done")
     
     # Create config windows
     cfglocal = ConfigLocal(config, configfile, settings, defaultLocalSettings, command)
