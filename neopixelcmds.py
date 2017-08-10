@@ -1,4 +1,3 @@
-#from neopixel import *
 from neopixelutils import *
 
 # Class used to hold commands to share with thread

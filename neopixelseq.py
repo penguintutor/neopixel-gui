@@ -3,6 +3,11 @@ import tkinter as tk
 from neopixel import *
 from dynneopixel import *
 
+
+#### To be dropped in future - replaced by lightseq
+
+
+
 # Sequence method should change some LEDs and then return
 # If that sequence is still running then the method should resume
 # from where it left off. In the case of short sequences then the entire 
