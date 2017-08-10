@@ -3,37 +3,31 @@ Simple graphical interface for controlling neopixel RGB LEDs on a Raspberry Pi
 
 ## Introduction
 
-This project is currently work in progress. More documentation will be provided in future.
+This software provides graphical interfaces for controlling NeoPixel and similar RGB LEDs on a Raspberry Pi. It includes a disco GUI for use in a disco or theatre lighting environment and a mood light GUI which allows the lights to be controlled for room lighting etc.
+There's even a version included to work with artificial intelligence voice activatation using the Google AIY project.
+
+From version 0.3 onwards the software is designed to run in a client server configuration. This means that the graphical interface (client) does not need to be installed on the same computer that the NeoPixels are connected to (server).
 
 ## GUI Layout
 
-The user interface is intentionally basic in appearance using large buttons. This is so that it is suitable for use in a disco environment using a touchscreen (eg. using VNC from a touchscreen laptop).
+The user interfaces are intentionally basic in appearance using large buttons. This is so that it is suitable for use in a disco environment using a touchscreen (eg. using VNC from a touchscreen laptop) or for a wall mounted touchscreen for the mood lighting.
 
 The Apply button needs to be pressed for the changes to take effect, which allows the user to choose all the appropriate settings prior to applying them.
 
 ![NeoPixel GUI screenshot](docs/screenshot-v0-1.png "Screenshot of NeoPixel GUI Version 0.1")
 
 
-
 ## Supported platform
 
-This is designed to run on a Raspberry Pi and Raspberry Pi 2.
-It has been tested with the [MyPifi Neopixel board](http://smstextblog.blogspot.co.uk/2015/03/afirstly-thank-you-for-purchasing-this.html) and by using a simple MOS-FET switch circuit. Using a MOS-FET requires that the LEDinvert be selected.
+The server code is designed to run on a Raspberry Pi with a level shifter to control the NeoPixels.
+A suitable circuit is available on the [Penguintutor NeoPixel page](http://www.penguintutor.com/electronics/neopixels)
 
-## Pre-requisites
+The client code can be run on the same Raspberry Pi as the server, or it should work on any Linux computer. There is also a web interface which can be accessed using a web browser.
 
-Install the neopixel library from: https://github.com/jgarff/rpi_ws281x/tree/rpi2
 
-This needs to be installed for python3
-The final step should be:
-sudo python3 setup.py install
+## Install Instructions
 
-## Install
-
-Download and extract files into a new folder named /home/pi/neopixel
-Copy the appropriate desktop and startmenu files as listed in the INSTALL.md guide. Restart the lxpanel and then the icon should appear on the normal start menu.
-
-A more detailed install guide is provided in the file INSTALL.md
+Please see the file INSTALL.md for detailed installation instructions.
 
 
 ## More Information 

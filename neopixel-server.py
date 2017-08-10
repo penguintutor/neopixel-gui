@@ -107,8 +107,8 @@ defaultServerSettings = {
     'enablessl': 'False',
     # Folder where documents are stored 
     # WARNING any files in this will be publically accessible
-    'document_root': '/home/pi/git/neopixel-gui', 
-    'certificatefile': "/home/pi/server.pem"
+    'document_root': '/home/pi/neopixel/public', 
+    'certificatefile': "/home/pi/neopixel/server.pem"
     }
     
 

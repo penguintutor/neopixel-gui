@@ -63,3 +63,5 @@ target/
 *.cfg
 # Certificates
 *.pem
+# other files
+.directory

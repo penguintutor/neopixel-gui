@@ -14,7 +14,7 @@ from neopixelcmds import *
 from neopixelseq import *
 
 
-VERSION = '0.2'
+VERSION = '0.'
 
 # File containing user config
 # If it does not exist then use defaults
