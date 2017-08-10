@@ -56,12 +56,12 @@ sequencefile = 'sequences.cfg'
 defaultLocalSettings = {
     'hostname': '127.0.0.1',
     'port' : 80,
-    'ssl' : False,
+    'ssl' : 'False',
     'username' : '',
     'password' : '',
     # allow unverified will not check authentication of server
     # This could allow for server spoofing
-    'allowunverified': False
+    'allowunverified': 'False'
     }
 
 

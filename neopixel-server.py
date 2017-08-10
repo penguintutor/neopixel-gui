@@ -98,20 +98,17 @@ defaultServerSettings = {
     # hardware eg. neopixel (generic for testing only)
     'hardware': 'neopixel',
     # if login mandatory
-    'loginreq': False,
+    'loginreq': 'False',
     # host normally blank (any address) can pin to specific interface
     'host': '',
     # For non-secure normally port 80, for secure port 443
     'port': 80,   
     # Enable ssl - ie secure connection (use 443)
-    'enablessl': False,
+    'enablessl': 'False',
     # Folder where documents are stored 
     # WARNING any files in this will be publically accessible
     'document_root': '/home/pi/git/neopixel-gui', 
-    'certificatefile': "/home/pi/server.pem",
-    # allowunverified does not authenticate the certificate
-    # this means you cannot guarentee what computer you are communicating with
-    'allowunverified': False
+    'certificatefile': "/home/pi/server.pem"
     }
     
 

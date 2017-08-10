@@ -11,7 +11,7 @@ class LocalSettings():
             self.config['Server']['password'] = ''
         # Same for allowunverified
         if not "allowunverified" in self.config['Server']:
-            self.config['Server']['allowunverified'] = False
+            self.config['Server']['allowunverified'] = 'False'
         
     def allSettings(self):
         settings = {
