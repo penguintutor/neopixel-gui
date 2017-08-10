@@ -116,37 +116,48 @@ class App(Frame):
             self.coloursChosenBox.itemconfigure(i, background=hexColourToString(colourLookup(self.colourChoice, self.chosenColours[i])), foreground=colourContrast(colourLookup(self.colourChoice, self.chosenColours[i])))
 
     # Handle resize of screen. Does not change the root size, just resize internal components
+    # Fairly basic - font resizing and button sizes based on frame size
     def resizeLayout(self, width, height):
         # Resize the font on the buttons etc - just basic thresholds where we change
         # min = default font
         newfont = "Verdana 10"
         newcolourfont = "Verdana 8"
-        if (width < 900 or height < 500):
+        paddingsize = 5
+        seqheight = 2
+        seqwidth = 20
+        if (width < 900 or height < 550):
             ttk.Style().configure("TButton", font='Helvetica 10')
             ttk.Style().configure('TNotebook.Tab', font='Helvetica 9')
             ttk.Style().configure('ColButton.TButton', font='Helvetica 10 bold')
-        elif (width < 1000 or height < 600):
+        elif (width < 1000 or height < 750):
             newfont = "Verdana 12"
             newcolourfont = "Verdana 10"
+            paddingsize = 15
+            seqheight = 3
+            seqwidth = 25
             ttk.Style().configure("TButton", font='Helvetica 13')
             ttk.Style().configure('TNotebook.Tab', font='Helvetica 12 bold')
             ttk.Style().configure('ColButton.TButton', font='Helvetica 13 bold')
         else :
             newfont = "Verdana 15"
-            newcolourfont = "Verdana 11"
+            newcolourfont = "Verdana 13"
+            paddingsize = 30
+            seqheight = 4
+            seqwidth = 30
             ttk.Style().configure("TButton", font='Helvetica 15')
             ttk.Style().configure('TNotebook.Tab', font='Helvetica 15 bold')
             ttk.Style().configure('ColButton.TButton', font='Helvetica 14 bold')
             
         for thisSeqButton in self.seqButtons:
-            thisSeqButton.configure(font=newfont)
-            
-        #for thisFrame in self.frames:
-        #    thisFrame.configure(style=tabstyle)
+            thisSeqButton.configure(font=newfont, height=seqheight, width=seqwidth)
             
         self.speedLabel.configure(font=newfont)
         self.colourLabel.configure(font=newcolourfont)
         self.colourLabel2.configure(font=newcolourfont)
+        self.coloursAvailBox.configure(font=newcolourfont)
+        self.coloursChosenBox.configure(font=newcolourfont)
+        self.rowconfigure(1, minsize=paddingsize)
+        self.rowconfigure(6, minsize=paddingsize)
 
 
     # Adds custom colour using colorchooser
@@ -283,12 +294,12 @@ class App(Frame):
         self.columnconfigure(5, weight=1)
         self.columnconfigure(6, weight=1)                                                           
         
-        self.rowconfigure(1, minsize=5)    # Spacer at top
+        self.rowconfigure(1, minsize=5)     # Spacer at top
         self.rowconfigure(2, minsize=65)    # Tab frame
         self.rowconfigure(3, minsize=25)    # Speed slider
         self.rowconfigure(4, minsize=60)    # Colours (also rowspan to 5)
         self.rowconfigure(5, minsize=25)    # Apply button       
-        self.rowconfigure(6, minsize=5)    # Bottom padding / messages
+        self.rowconfigure(6, minsize=5)     # Bottom padding / messages
 
         self.sequence = IntVar()
         self.sequence.set(0)
@@ -393,7 +404,7 @@ class App(Frame):
         
         self.colourList = StringVar(value=self.tuple_colours)
                 
-        self.coloursAvailBox = Listbox(colourSelectFrame, listvariable=self.colourList, height=10)
+        self.coloursAvailBox = Listbox(colourSelectFrame, listvariable=self.colourList, height=10, font="Verdana 8")
         self.coloursAvailBox.grid(column=0, row=1, rowspan=6, sticky=(N,S,E,W))
 
         # Colour code the list
@@ -409,7 +420,7 @@ class App(Frame):
         self.chosenColours = ()        
         self.chosenColoursVar = StringVar(value=self.chosenColours)
 
-        self.coloursChosenBox = Listbox(colourSelectFrame, listvariable=self.chosenColoursVar, height=10)
+        self.coloursChosenBox = Listbox(colourSelectFrame, listvariable=self.chosenColoursVar, height=10, font="Verdana 8")
         self.coloursChosenBox.grid(column=3, row=1, rowspan=6, sticky=(N,S,E,W))
         
         
@@ -580,6 +591,7 @@ def main():
     
     root.option_add('*tearOff', FALSE)
     
+    # New styles use <newname>.<existing> - where newname derives rest of properties from existing
     ttk.Style().configure("TButton", font='Helvetica 11')
     ttk.Style().configure('TabFrame.TFrame', background='#999999')
     ttk.Style().configure("TNotebook", background='#999999')
