@@ -74,16 +74,17 @@ The Python Tk libraries are included in the Raspberry Pi. If you are installing 
 sudo apt install python3-tk
 ```
 
-## Add passlib
-This is required for password authentication
+## Add Server libraries
+The following are required for the server code to run
 
 ```bash
 sudo pip3 install passlib
+sudo apt install python3-bottle
+
 ```
 
-Note if installing the client on Ubuntu this is easier installed as 
+Note if installing on Ubuntu passlib is easier installed as 
 sudo apt install python3-passlib
-
 
 ## Disable audio on the Raspberry Pi
 
