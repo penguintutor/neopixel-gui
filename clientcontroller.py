@@ -10,7 +10,6 @@ import urllib.request
 import ssl
 from urllib.error import *
 
-
 class ClientController():
     
     def __init__(self, hostname, port, sslenabled, username, password, allowunverified=False):
@@ -23,19 +22,20 @@ class ClientController():
         self.username = username
         self.password = password
         self.allowunverified = allowunverified
-        # if unverified allowed then create context
-        if (self.allowunverified == True):
-            self.ctx = ssl.create_default_context()
-            self.ctx.check_hostname = False
-            self.ctx.verify_mode = ssl.CERT_NONE
+        # if unverified allowed then need context - create anyway in case changes dynamically
+        self.ctx = ssl.create_default_context()
+        self.ctx.check_hostname = False
+        self.ctx.verify_mode = ssl.CERT_NONE
         
-    def chgServer (self, hostname, port, sslenabled, username, password):
+    def chgServer (self, hostname, port, sslenabled, username, password, allowunverified=False):
+        self.sslenabled = sslenabled
         if (self.sslenabled == False):
             self.urlpost = 'http://'+hostname+":"+str(port)+'/neopixel'
         else:
             self.urlpost = 'https://'+hostname+":"+str(port)+'/neopixel'
         self.username = username
         self.password = password
+        self.allowunverified = allowunverified
 
     def setConfigNeopixels(self, config):
         config['request']='update'
@@ -65,19 +65,25 @@ class ClientController():
         if (self.password != '') :
             parmsdict ['password'] = self.password
         params = json.dumps(parmsdict).encode('utf8')
-#        print ("Post: "+self.urlpost)
-#        print ("Trying: "+str(params))
         try:
             req = urllib.request.Request(self.urlpost, data=params, headers={'content-type': 'application/json'})
             if (self.sslenabled == True and self.allowunverified == True):
+                #print ("unverified connection")
                 response = urllib.request.urlopen(req, context=self.ctx)
             else:
                 response = urllib.request.urlopen(req)
             reply = response.read().decode('utf8')
             replydata = json.loads(reply)
         except (OSError, HTTPError) as e:
-            print ("Error "+str(e))
-            replydata = {"reply":"fail","error":"Error communicating with server"}
+            # print ("Error "+str(e))
+            # special error message for certificate problem
+            errorstring = str(e)
+            if ("certificate verify" in errorstring): 
+                #print ("Unable to verify certificate")
+                replydata = {"reply":"fail","type":"certificate","error":"Error communicating with server"}
+            else:
+                print ("Unable to connect to server")
+                replydata = {"reply":"fail","type":"connection","error":"Error communicating with server"}
         return replydata
        
     def setColours(self, colours):

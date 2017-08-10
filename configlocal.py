@@ -31,6 +31,10 @@ class ConfigLocal():
             self.sslVar.set(1)
         else :
             self.sslVar.set(0)
+        if (bool(self.defaults['allowunverified'])):
+            self.unverifiedVar.set(1)
+        else :
+            self.unverifiedVar.set(0)
         self.usernameString.set(self.defaults['username'])
         self.passwordString.set(self.defaults['password'])
         
@@ -53,6 +57,10 @@ class ConfigLocal():
             self.config['Server']['ssl'] = "True"
         else:
             self.config['Server']['ssl'] = "False"
+        if (self.unverifiedVar.get() == 1):
+            self.config['Server']['allowunverified'] = "True"
+        else:
+            self.config['Server']['allowunverified'] = "False"
         # username and password
         if (self._validateUsernamePassword(self.usernameString.get(), "Username ")):
             self.config['Server']['username'] = self.usernameString.get()
@@ -73,7 +81,7 @@ class ConfigLocal():
                 self.config.write(cfgfile)
                 self.closeConfig()
                 # Change server info dynamically
-                self.command.chgServer (self.config['Server']['hostname'], self.config['Server']['port'], self.config['Server']['ssl'], self.config['Server']['username'], self.config['Server']['password']) 
+                self.command.chgServer (self.config['Server']['hostname'], self.config['Server']['port'], self.config['Server'].getboolean('ssl'), self.config['Server']['username'], self.config['Server']['password'], self.config['Server'].getboolean('allowunverified')) 
                 messagebox.showinfo("Info", "Configuration saved.")
         except : 
             self.closeConfig()
@@ -101,6 +109,11 @@ class ConfigLocal():
             self.sslVar.set(1)
         else:
             self.sslVar.set(0)
+        self.unverifiedVar = IntVar()
+        if (self.config['Server']['allowunverified'] == 'True'):
+            self.unverifiedVar.set(1)
+        else:
+            self.unverifiedVar.set(0)
         self.usernameString = StringVar()
         self.usernameString.set(self.config['Server']['username'])
         self.passwordString = StringVar()
@@ -137,25 +150,33 @@ class ConfigLocal():
                     font="Verdana 14",
                     variable=self.sslVar).grid(row=3, column=2, sticky=W)
                     
+        unverifiedLabel = Label(self.configTop,
+                    font="Verdana 14",
+                    text="Allow unverified").grid(row=4, column=1, columnspan=1, sticky=W, padx=(15,2))
+
+        unverifiedCheckBox = Checkbutton(self.configTop,
+                    font="Verdana 14",
+                    variable=self.unverifiedVar).grid(row=4, column=2, sticky=W)
+                    
         usernameLabel = Label(self.configTop,
                     font="Verdana 14",
-                    text="Username").grid(row=4, column=1, columnspan=1, sticky=W, padx=(15,2))
+                    text="Username").grid(row=5, column=1, columnspan=1, sticky=W, padx=(15,2))
                     
         usernameEntry = Entry(self.configTop,
                     font="Verdana 14",
                     width=15,
-                    textvariable=self.usernameString).grid(row=4, column=2, columnspan=2, sticky=W)
+                    textvariable=self.usernameString).grid(row=6, column=2, columnspan=2, sticky=W)
                     
         passwordLabel = Label(self.configTop,
                     font="Verdana 14",
-                    text="Password").grid(row=5, column=1, columnspan=1, sticky=W, padx=(15,2))
+                    text="Password").grid(row=6, column=1, columnspan=1, sticky=W, padx=(15,2))
                     
         passwordEntry = Entry(self.configTop,
                     font="Verdana 14",
                     width=15,
-                    textvariable=self.passwordString).grid(row=5, column=2, columnspan=2, sticky=W)
+                    textvariable=self.passwordString).grid(row=6, column=2, columnspan=2, sticky=W)
 
-        buttonRow = 6
+        buttonRow = 7
 
         restoreButton = Button(self.configTop, 
                     text="Restore\ndefaults",

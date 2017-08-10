@@ -217,10 +217,13 @@ class App(Frame):
         response = self.command.setSequence(cmd)
         #print ("Response received "+str(response))
         if (response['reply'] == "auth"):
-            messagebox.showinfo("Error", "Authentication required\nUpdate settings with username and password\n")
+            messagebox.showinfo("Error", "Authentication required\nUpdate settings with username and password.\n")
+            return
+        elif (response['reply'] == "fail" and "type" in response and response['type'] == "certificate"):
+            messagebox.showinfo("Error", "Certificate verification failed.\nCheck server certificate or allow unverified certificates.\n")
             return
         elif (response['reply'] == "fail"):
-            messagebox.showinfo("Error", "Unable to connect to server.\nCheck server is started and address matches\n")
+            messagebox.showinfo("Error", "Unable to connect to server.\nCheck server is started and address matches.\n")
             return
         coloursTicked = []
         for i in range (len(self.chosenColours)):
