@@ -192,7 +192,7 @@ def server_json ():
     #### If we reach here then we must be logged in (or login not required)
     
     ### Command
-    elif (data['request'] == 'command'):
+    if (data['request'] == 'command'):
         if 'sequence' in data:
             # check it's a valid sequence
             if not data['sequence'] in sequenceOptions.keys():

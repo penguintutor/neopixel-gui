@@ -107,7 +107,7 @@ class ConfigNeopixel():
             
         # load config from server
         self.config['LEDs'] = self.command.getConfigNeopixels()
-        #print (self.config)
+        print (self.config)
         # Check we have a valid response
         if (self.config['LEDs']['reply'] != "success") :
             messagebox.showinfo("Error", "Unable to retrieve config from server\nPlease check network configuration");
