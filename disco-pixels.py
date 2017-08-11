@@ -119,6 +119,11 @@ class App(Frame):
     # Fairly basic - font resizing and button sizes based on frame size
     def resizeLayout(self, width, height):
         # Resize the font on the buttons etc - just basic thresholds where we change
+        
+        # Check if actually change size - if not return 
+        if (width == self.currentwidth or height == self.currentheight):
+            return
+      
         # min = default font
         newfont = "Verdana 10"
         newcolourfont = "Verdana 8"
@@ -258,6 +263,10 @@ class App(Frame):
         self.parent = parent
         self.cfglocal = cfglocal
         self.cfgneopixel = cfgneopixel
+        # set currentwidth and height to default 
+        # used to check if resize, so no harm if customer has overridden as long as resize is called
+        self.currentwidth = DEFAULTWIDTH
+        self.currentheight = DEFAULTHEIGHT
         self.initUI()
 
     def initUI(self):

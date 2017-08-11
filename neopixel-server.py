@@ -460,7 +460,8 @@ def runPixels(LEDs, command):
         # run appropriate script
         method = getattr (LEDs, command.getCommand())
         method()
-        time.sleep(0.001)
+        # sleep to allow other threads to run
+        time.sleep(0.01)
         
 
 
