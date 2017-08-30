@@ -5,9 +5,7 @@ from neopixelutils import *
 ## Depreciated - now replaced with websrvcmds and ledcmds
 
 
-
-
-class NeoPixelCmds():
+class LEDCmds():
     
     cmdMessage="allOff"
     cmdColours=[Color(255,255,255)]
@@ -22,6 +20,9 @@ class NeoPixelCmds():
     # Change to True when there is a new command issued
     # This allows the program to breakout during a slow command, otherwise waits until the end of the cycle
     newCmdStatus = False;
+    
+    def receive(self, command):
+        pass
 
     def setCommand(self, command):
         self.cmdMessage = command

@@ -25,8 +25,10 @@ from bottle import Bottle, get, run, ServerAdapter, route, request, response, te
 import sys
 import math
 import random
-import threading
-from neopixelcmds import *
+#import threading
+from multiprocessing import Process, Queue
+from websrvcmds import *
+from ledcmds import *
 from lightseq import *
 import configparser
 import time
@@ -138,10 +140,8 @@ defaultLEDSettings = {
 sequenceOptions = dict()
 config = configparser.ConfigParser()
 
-
 # Create the bottle web server
 app = bottle.Bottle()
-
 
 def server_public (filename):
     return static_file (filename, root=DOCUMENT_ROOT+"/public")
@@ -455,10 +455,20 @@ def nossl_setcolours():
 #Thread for communicating with neopixels
 #Simple one-way communication with thread using globals
 #checks variables or updates (cmdMessage, cmdColours)
-def runPixels(LEDs, command):
-    while command.getCommand() != "STOP":
+def runPixels(q):
+    
+    cmd = LEDCmds()
+    LEDs = LightSeq(config['Server']['hardware'], settings.allSettings(), cmd)
+    
+    while cmd.getCommand() != "STOP":
+        # check for new command on the queue
+        if (not q.empty()):
+            qcmd, qvalue = q.get()
+            # split the queue string into method and parameter
+            updcmd = getattr (cmd, qcmd)
+            updcmd(qvalue)
         # run appropriate script
-        method = getattr (LEDs, command.getCommand())
+        method = getattr (LEDs, cmd.getCommand())
         method()
         # sleep to allow other threads to run
         time.sleep(0.01)
@@ -533,9 +543,8 @@ def main():
 
 
     settings = ledsettings.LEDSettings(config)
+    command = WebSrvCmds(q)
     
-    command = NeoPixelCmds()
-    LEDs = LightSeq(config['Server']['hardware'], settings.allSettings(), command)
     
     # Setup the password object if required
     if (config.getboolean('Server','loginreq') == True):
@@ -544,8 +553,9 @@ def main():
     
     
     # Spawn separate thread for handling the updates to the Pixels
-    thread=threading.Thread(target=runPixels, args=(LEDs, command))
-    thread.start()
+    #thread=threading.Thread(target=runPixels, args=(LEDs, command))
+    #thread.start()
+    p.start()
 
     # Start the Bottle web server
     if (config.getboolean('Server','enablessl') == False) :
@@ -564,6 +574,11 @@ def main():
                                                                           
     
 if __name__ == "__main__":
+
+    # Create process for multi-process support (controls neopixels)
+    q = Queue()
+    p = Process(target=runPixels, args=(q,))
+    
 
     main()
 
