@@ -79,9 +79,15 @@ The following are required for the server code to run
 
 ```bash
 sudo pip3 install passlib
-sudo apt install python3-bottle
-
+xxxxxsudo apt install python3-bottle
+sudo apt install apache2
+sudo a2enmod cgi
+sudo service apache2 restart
 ```
+
+The executable to be storted in /usr/lib/cgi-bin/neopixel
+
+
 
 Note if installing on Ubuntu passlib is easier installed as 
 sudo apt install python3-passlib

@@ -48,7 +48,7 @@ DEBUG = 5
 
 
 #SOCKET_PORT = 321
-MSG_QUEUE_NAME = "/LED_SHARED_MEMORY"
+MSG_QUEUE_NAME = "/LED_SHARED_MEMORY_1"
 
 ## Command is defined globally as it provides the main interface to the 
 # NeoPixels which needs to be accessible 
@@ -202,32 +202,41 @@ def main():
     
     
     # Create posix IPC message queue
-    mq = posix_ipc.MessageQueue(MSG_QUEUE_NAME, posix_ipc.O_CREAT)
+    #mq = posix_ipc.MessageQueue(MSG_QUEUE_NAME, posix_ipc.O_CREAT)
+    mq = posix_ipc.MessageQueue(MSG_QUEUE_NAME)
+    mq.block=False
     
+    print ("Waiting...")
     
     while cmd.getCommand() != "STOP":
         try:
-            msg, priority = mq.receive(block=False)
-            qcmd, qvalue = msg.split(',')
+            msg, priority = mq.receive()
+            msgstr = msg.decode('UTF-8')
+            print ("Received msg "+msgstr)
+            qcmd, status = msgstr.split(',')
+            print ("New cmd "+qcmd)
             # split the queue string into method and parameter
-            updcmd = getattr (cmd, qcmd)
-            updcmd(qvalue)
+            #updcmd = getattr (cmd, qcmd)
+            #updcmd(qvalue)
             
         except posix_ipc.BusyError:
             # Nothing waiting
+            #print ("Busy error")
             pass
         
-        except:
+        except Exception as e:
             # Some other error (eg. cmd not valid)
+            print ("Other error " + str(e))
             pass
         
         
         # run appropriate script
-        method = getattr (LEDs, cmd.getCommand())
-        method()
+        #method = getattr (LEDs, cmd.getCommand())
+        #method()
         # sleep to allow other threads to run
         time.sleep(0.01)
         
+    mq.close()
     mq.unlink()
     #posix_ipc.unlink_message_queue(MSG_QUEUE_NAME)
 
