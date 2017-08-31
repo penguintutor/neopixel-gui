@@ -44,7 +44,7 @@ There are a number of pre-requisites that need to be installed. Some of these ar
 The software is written for Python version 3 and needs the NeoPixel library to be installed for Python 3. To work with the Raspberry Pi then the updated version of the NeoPixel needs to be installed (this can be installed on the older Raspberry Pi as well).
 
 First install the developer libraries using:
-`sudo apt-get install build-essential python3-dev git scons swig`
+`sudo apt-get install build-essential python3-dev git scons swig python3-posix-ipc`
 
 Download the neopixel code from github:
 `git clone https://github.com/jgarff/rpi_ws281x.git`

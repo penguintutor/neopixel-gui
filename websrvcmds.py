@@ -7,8 +7,7 @@ from neopixelutils import *
 
 class WebSrvCmds():
 
-    def __init__(self, queue):
-        self.queue = queue
+    def __init__(self):
         self.cmdMessage="allOff"
         self.cmdColours=[Color(255,255,255)]
         self.backColour=0x000000   # Used by some methods as colour for not set pixels
