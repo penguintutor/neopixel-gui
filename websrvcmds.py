@@ -1,13 +1,13 @@
 from neopixelutils import *
+import posix_ipc
 
 # Class used to hold commands to share with thread
 
 
 
-
 class WebSrvCmds():
 
-    def __init__(self):
+    def __init__(self, msg_queue_name):
         self.cmdMessage="allOff"
         self.cmdColours=[Color(255,255,255)]
         self.backColour=0x000000   # Used by some methods as colour for not set pixels
@@ -21,19 +21,30 @@ class WebSrvCmds():
         # Change to True when there is a new command issued
         # This allows the program to breakout during a slow command, otherwise waits until the end of the cycle
         newCmdStatus = False;
+        
+        # Setup shared memory queue - only if already exists
+        try:
+            self.mq = posix_ipc.MessageQueue(msg_queue_name)
+            #self.mq = posix_ipc.MessageQueue(msg_queue_name, posix_ipc.O_CREAT)
+#            print ("Message queue connected")
+            # Send message to queue
+            #self.mq.send("status,1")
+        except Exception as e: 
+            print ("Error connecting to server "+str(e))
+            exit()
     
 
 
     def setCommand(self, command):
         self.cmdMessage = command
-        self.queue.put("setCommand,"+command)
+        self.mq.send("setCommand,"+command)
         
     def getCommand(self):
         return self.cmdMessage
         
     def setColours(self, colours):
         self.cmdColours = colours;
-        self.queue.put("cmdColours,"+colours)
+        self.mq.send("cmdColours,"+colours)
     
     # Returns array of selected colours - or white if none selected
     def getColours(self):
@@ -61,12 +72,12 @@ class WebSrvCmds():
     
     def setCmdStatus(self, status):
         self.newCmdStatus = status
-        self.queue.put("newCmdStatus,"+str(status))
+        #self.mq.send("newCmdStatus,"+str(status))
         
     def setDelay (self, delay):
         self.cmdOptions['delay'] = delay
         self.cmdOptions['wait'] = delay * 2
-        self.queue.put("setDelay,"+delay)
+        self.mq.send("setDelay,"+delay)
 
 
 

@@ -33,7 +33,6 @@ import securitychecks
 from sslwsgirefserver import *
 import password
 import os.path
-import posix_ipc
 
 
 # Version number added for client server architecture
@@ -47,8 +46,7 @@ version = '0.3'
 DEBUG = 5
 
 
-#SOCKET_PORT = 321
-MSG_QUEUE_NAME = "/LED_SHARED_MEMORY_3"
+SOCKET_PORT = 321
 
 ## Command is defined globally as it provides the main interface to the 
 # NeoPixels which needs to be accessible 
@@ -127,6 +125,14 @@ sequenceOptions = dict()
 config = configparser.ConfigParser()
 
 
+def server_public (filename):
+    return static_file (filename, root=DOCUMENT_ROOT+"/public")
+    
+    
+## Can accept two types of request
+# preferred /neopixel which is used by the client applications 
+# this uses json to exchange messages between client and server
+
 
 def main():
 
@@ -201,49 +207,27 @@ def main():
     LEDs = LightSeq(config['Server']['hardware'], settings.allSettings(), cmd)
     
     
-    # Create posix IPC message queue
-    mq = posix_ipc.MessageQueue(MSG_QUEUE_NAME, posix_ipc.O_CREAT)
-    #mq = posix_ipc.MessageQueue(MSG_QUEUE_NAME)
-    mq.block=False
+    # Establish a socket for incoming connections
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    #serversocket.bind((socket.gethostname(), SOCKET_PORT))
+    sock.bind(('localhost', SOCKET_PORT))
+    sock.listen(5)  # max 5 items queued
     
-    print ("Waiting...")
     
     while cmd.getCommand() != "STOP":
-        try:
-            msg, priority = mq.receive()
-            msgstr = msg.decode('UTF-8')
-            print ("Received msg "+msgstr)
-            qcmd, qvalue = msgstr.split(',')
-            print ("New cmd "+qcmd+" value "+qvalue)
+        # check for new command on the queue
+        if (not q.empty()):
+            qcmd, qvalue = q.get()
             # split the queue string into method and parameter
-            # Security note there is no checking of cmd and value at this stage
-            # Anything that is not valid will raise an exception, but
-            # will not stop the server - these can only be sent by
-            # other processes with the same permission anyway and it is
-            # the web server code that is validating the user input
             updcmd = getattr (cmd, qcmd)
             updcmd(qvalue)
-            
-        except posix_ipc.BusyError:
-            # Nothing waiting
-            #print ("Busy error")
-            pass
-        
-        except Exception as e:
-            # Some other error (eg. cmd not valid)
-            print ("Other error " + str(e))
-            pass
-        
-        
         # run appropriate script
-        #method = getattr (LEDs, cmd.getCommand())
-        #method()
+        method = getattr (LEDs, cmd.getCommand())
+        method()
         # sleep to allow other threads to run
         time.sleep(0.01)
         
-    mq.close()
-    mq.unlink()
-    #posix_ipc.unlink_message_queue(MSG_QUEUE_NAME)
+
 
 
 

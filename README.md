@@ -1,6 +1,8 @@
 # neopixel-gui
 Simple graphical interface for controlling neopixel RGB LEDs on a Raspberry Pi
 
+Gainpix
+
 ## Introduction
 
 This software provides graphical interfaces for controlling NeoPixel and similar RGB LEDs on a Raspberry Pi. It includes a disco GUI for use in a disco or theatre lighting environment and a mood light GUI which allows the lights to be controlled for room lighting etc.
@@ -28,6 +30,19 @@ The client code can be run on the same Raspberry Pi as the server, or it should 
 ## Install Instructions
 
 Please see the file INSTALL.md for detailed installation instructions.
+
+
+## Advanced 
+
+The software implements a network based client server model between the GUI client and the web server. 
+In theory multiple clients can be used at the same time, but that will mean that they will override each others settings
+and so the status may not be correct. 
+
+At a lower level the web server and the led server communicate using IPC which is one-directional. There should only
+be a single web server attempting to access the message queue (and/or direct client) and there is noway to know the 
+status of the led-server from the web-server at this time. That may be added later using signals and/or a separate 
+message queue, but doing so could result in problems if there are two web servers / clients trying to access the message
+queue at the same time.
 
 
 ## More Information 

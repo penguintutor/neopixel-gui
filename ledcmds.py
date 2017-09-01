@@ -1,8 +1,6 @@
 from neopixelutils import *
 
-# Class used to hold commands to share with thread
-
-## Depreciated - now replaced with websrvcmds and ledcmds
+# Class used to hold commands received
 
 
 class LEDCmds():
@@ -25,6 +23,7 @@ class LEDCmds():
         pass
 
     def setCommand(self, command):
+        #print ("* Command set to "+command) 
         self.cmdMessage = command
         
     def getCommand(self):

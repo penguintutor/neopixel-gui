@@ -18,13 +18,15 @@
 # along with this software.  If not, see <http://www.gnu.org/licenses/>
 
 
-# Receive instruction from webserver and send to led-server via posix msg queue
 
+import bottle
+from bottle import Bottle, get, run, ServerAdapter, route, request, response, template, static_file
 import sys
 import math
 import random
 from websrvcmds import *
-#from lightseq import *
+from ledcmds import *
+from lightseq import *
 import configparser
 import time
 import ledsettings
@@ -38,19 +40,8 @@ import password
 import os.path
 import posix_ipc
 
-
-# cgi module - perform error handling
-import cgi
-import cgitb
-cgitb.enable()
-# to avoid showing errors to user change to 
-# cgitb.enable(display=0, logdir="/path/to/logdir")
-
-# to load non standard libraries use 
-#sys.path.insert(0, "/usr/home/joe/lib/python")
-
 # POSIX shared memory message queue
-MSG_QUEUE_NAME = "/LED_SHARED_MEMORY_2"
+MSG_QUEUE_NAME = "/LED_SHARED_MEMORY_3"
 
 
 # Version number added for client server architecture
@@ -61,7 +52,8 @@ version = '0.3'
 # 1 = normal - errors only
 # 3 = detailed debugging (any malformed requests show)
 # 5 = very detailed debugging includes allowed operations
-
+# Note this does not change the level of debugging from Bottle, only those
+# from this code
 DEBUG = 5
 
 ## Command is defined globally as it provides the main interface to the 
@@ -147,9 +139,13 @@ defaultLEDSettings = {
 sequenceOptions = dict()
 config = configparser.ConfigParser()
 
+# Create the bottle web server
+app = bottle.Bottle()
 
 def server_public (filename):
-    return static_file (filename, root=DOCUMENT_ROOT+"/public")
+    #Todo - fix document root
+    #return static_file (filename, root=DOCUMENT_ROOT+"/public")
+    return static_file (filename, root="/home/pi/neopixel/public")
     
     
 ## Can accept two types of request
@@ -356,7 +352,9 @@ def alloff():
     command.setCmdStatus(True)
 
 ## Todo
-
+@app.route ('/status')
+def status():
+    pass
 
 def setcolours():
     colours = request.query.colours
@@ -385,28 +383,75 @@ def server_home ():
     #return static_file ('index.html', root=DOCUMENT_ROOT)
     return indexPage(sequenceOptions)
 
+# Serve up the default index.html page
+@app.route ('/')
+def nossl_server_home():
+    return server_home()
 
-#Thread for communicating with neopixels
-#Simple one-way communication with thread using globals
-#checks variables or updates (cmdMessage, cmdColours)
-def runPixels(q):
+@get('/')
+def ssl_server_home():
+    return server_home()
+
+# Handle switch on request
+@app.route ('/allon')
+def nossl_allon():
+    return allon()
+
+@get ('/allon')
+def ssl_allon():
+    return allon()
     
-    cmd = LEDCmds()
-    LEDs = LightSeq(config['Server']['hardware'], settings.allSettings(), cmd)
-    
-    while cmd.getCommand() != "STOP":
-        # check for new command on the queue
-        if (not q.empty()):
-            qcmd, qvalue = q.get()
-            # split the queue string into method and parameter
-            updcmd = getattr (cmd, qcmd)
-            updcmd(qvalue)
-        # run appropriate script
-        method = getattr (LEDs, cmd.getCommand())
-        method()
-        # sleep to allow other threads to run
-        time.sleep(0.01)
+
+# Handle switch off
+@app.route ('/alloff')
+def nossl_alloff():
+    return alloff()
+
+# Handle switch off
+@get ('/alloff')
+def ssl_alloff():
+    return alloff()
+
+
+# public files
+# *** WARNING ANYTHING STORED IN THE PUBLIC FOLDER WILL BE AVAILABLE TO DOWNLOAD BY ANYONE CONNECTED TO THE SAME NETWORK ***
+@app.route ('/public/<filename>')
+def nossl_server_public(filename):
+    return server_public(filename)
+
+@get ('/public/<filename>')
+def nossl_server_public(filename):
+    return server_public(filename)
         
+# /neopixel post designed for client application
+@app.route('/neopixel', method='POST')
+def nossl_server_json ():
+    return server_json()
+    
+@get('/neopixel', method='POST')
+def ssl_server_json ():
+    return server_json()
+
+# Handle sequence request
+# eg /sequence?seq=rainbow - or other sequence from sequence.cfg
+# eg chaser / disco 
+@app.route ('/sequence')
+def nossl_chg_sequence():
+    return chg_sequence()
+
+@get ('/sequence')
+def ssl_chg_sequence():
+    return chg_sequence()
+
+# provide a comma separated list of rgb colours eg. /setcolours?colours=000000,ffffff 
+# Note that # isn't used in the url as that has a different use to jump to a part of the page
+@app.route ('/setcolours')
+def nossl_setcolours():
+    return setcolours()
+
+@get ('/setcolours')
+def nossl_setcolours():
+    return setcolours()
 
 
 def debugMsg(priority, message) :
@@ -416,10 +461,12 @@ def debugMsg(priority, message) :
 
 def showLogin(message):
     print ("Login required "+message)
-    
-    
-def loadConfig():
-    
+
+
+def main():
+
+    global command, settings, LEDs, passwords
+
     # load settings during startup    
     seqconfig = configparser.ConfigParser()
     # configwriter keys are normally case insensitive (converted to lowercase) - override as need case of the keys to match method names
@@ -468,45 +515,37 @@ def loadConfig():
                 config.write(cfgfile)
                 # tell user config saved
                 print ("New configuration file saved")
+                close(cfgfile)
         except : 
             # If unable to save then continue with the default values
             print ("Warning: Unable to save config file") 
-
-
-
-
-def main():
-
-    global command, settings, LEDs, passwords
-
-
-    print ("Content-Type: text/html")     # HTML is following
-    print ("")                              # blank line, end of headers
-
-    arguments = cgi.FieldStorage()
-    for i in arguments.keys():
-        print (arguments[i].value)
-
+            
 
     settings = ledsettings.LEDSettings(config)
-    command = WebSrvCmds()
+    command = WebSrvCmds(MSG_QUEUE_NAME)
     
-    # Setup shared memory queue - only if already exists
-    try:
-        mq = posix_ipc.MessageQueue(MSG_QUEUE_NAME, posix_ipc.O_CREAT)
-        print ("Message queue connected")
-        # Send message to queue
-        mq.send("status,1")
-    except Exception as e: 
-        print ("Error connecting to server "+str(e))
-        
-    # Send message to queue
-    #mq.send("status, ", block=False)
+    
+    # Setup the password object if required
+    if (config.getboolean('Server','loginreq') == True):
+        passwords = password.Password(passwordfile)
+    
 
+    # Start the Bottle web server
+    if (config.getboolean('Server','enablessl') == False) :
+        print ("Running in non SSL (insecure) mode")
+        app.run(host=config['Server']['host'], port=config['Server']['port'])
+    else :
+        print ("Running in SSL (secure) mode")
+        # Simple check that certificate file exists, to give a user friendly error if not
+        if not os.path.isfile(config['Server']['certificatefile']):
+            # Stop the pixel thread
+            command.setCommand("STOP")
+            sys.exit ("Error: Secure mode set (enablessl)\n but certificate file "+config['Server']['certificatefile']+" does not exist")
+        srv = SSLWSGIRefServer(host=config['Server']['host'], port=config['Server']['port'])
+        srv.set_certificate(config['Server']['certificatefile'])
+        run(server=srv)
                                                                           
     
 if __name__ == "__main__":
-  
-
     main()
 
