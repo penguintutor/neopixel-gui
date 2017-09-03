@@ -9,10 +9,26 @@ import json
 import urllib.request
 import ssl
 from urllib.error import *
+import posix_ipc
 
 class ClientController():
     
-    def __init__(self, hostname, port, sslenabled, username, password, allowunverified=False):
+    def __init__(self, remoteserver, hostname, port, sslenabled, username, password, msg_queue_name, allowunverified=False):
+        self.remoteserver = remoteserver
+        if (remoteserver == False):
+            # remoteserver false means local server communicate with ipc
+            # can only change this by calling chgToLocal
+            # remote server details can be changed and updated, but will be ignored unless this is set to True
+            try:
+                self.mq = posix_ipc.MessageQueue(msg_queue_name)
+                print ("Message queue connected")
+                # Send message to queue
+                self.mq.send("status,1")
+            except Exception as e: 
+                print ("Error connecting to server "+str(e))
+                exit()
+   
+                
         if (sslenabled == False):
             self.urlpost = 'http://'+hostname+":"+str(port)+'/neopixel'
         else:
@@ -26,6 +42,9 @@ class ClientController():
         self.ctx = ssl.create_default_context()
         self.ctx.check_hostname = False
         self.ctx.verify_mode = ssl.CERT_NONE
+        
+    def chgToLocal():
+        pass
         
     def chgServer (self, hostname, port, sslenabled, username, password, allowunverified=False):
         self.sslenabled = sslenabled

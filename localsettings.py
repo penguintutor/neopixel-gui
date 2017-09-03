@@ -15,6 +15,7 @@ class LocalSettings():
         
     def allSettings(self):
         settings = {
+        'remoteserver' : self.config['Server'].getboolean('remoteserver'),
         'hostname': self.config['Server']['hostname'],
         'port': int(self.config['Server']['port']),
         'ssl' : self.config['Server'].getboolean('ssl'),
@@ -23,7 +24,10 @@ class LocalSettings():
         'allowunverified' : self.config['Server'].getboolean('allowunverified')
         }
         return settings
-        
+    
+    def remoteserver(self):
+        return self.config['Server'].getboolean('remoteserver')
+    
     def hostname(self):
         return self.config['Server']['hostname']
 

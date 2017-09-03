@@ -48,7 +48,7 @@ DEBUG = 5
 
 
 #SOCKET_PORT = 321
-MSG_QUEUE_NAME = "/LED_SHARED_MEMORY_4"
+MSG_QUEUE_NAME = "/LED_SHARED_MEMORY_6"
 
 ## Command is defined globally as it provides the main interface to the 
 # NeoPixels which needs to be accessible 
@@ -201,10 +201,19 @@ def main():
     LEDs = LightSeq(config['Server']['hardware'], settings.allSettings(), cmd)
     
     
-    # Create posix IPC message queue
-    mq = posix_ipc.MessageQueue(MSG_QUEUE_NAME, posix_ipc.O_CREAT)
-    #mq = posix_ipc.MessageQueue(MSG_QUEUE_NAME)
-    mq.block=False
+    try:
+        # Create posix IPC message queue
+        os.umask(000) # Set umask to allow write access to all users to the message queue
+        mq = posix_ipc.MessageQueue(MSG_QUEUE_NAME, posix_ipc.O_CREAT, 777)
+        #mq = posix_ipc.MessageQueue(MSG_QUEUE_NAME)
+        mq.block=False
+    except Exception as e:
+        # Some other error (eg. cmd not valid)
+        print ("Unable to create message queue " + str(e))
+        exit(0)
+        pass
+    
+    print ("Message queue "+MSG_QUEUE_NAME)
     
     print ("Waiting...")
     

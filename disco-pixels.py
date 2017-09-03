@@ -48,6 +48,8 @@ from clientcontroller import *
 
 VERSION = '0.3'
 
+MSG_QUEUE_NAME = "/LED_SHARED_MEMORY_6"
+
 # File containing sequences and colour options
 # Must exist and have valid entries
 sequencefile = 'sequences.cfg'
@@ -609,7 +611,7 @@ def main():
         print ("Creating client controller",)
     
     
-    command = ClientController(settings.hostname(), settings.port(), settings.ssl(), settings.username(), settings.password(), settings.allowunverified())
+    command = ClientController(settings.remoteserver(), settings.hostname(), settings.port(), settings.ssl(), settings.username(), settings.password(), MSG_QUEUE_NAME, settings.allowunverified())
     
     if (verbose > 0):
         print (" - done")
