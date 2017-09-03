@@ -25,6 +25,11 @@ class ConfigLocal():
         self.configTop.destroy()
         
     def restoreDefaults(self): 
+        
+        if (bool(self.defaults['remoteserver'])):
+            self.remoteVar.set(1)
+        else :
+            self.remoteVar.set(0)
         self.hostnameString.set(self.defaults['hostname'])
         self.portString.set(self.defaults['port'])
         if (bool(self.defaults['ssl'])):
@@ -41,6 +46,10 @@ class ConfigLocal():
 
     def saveConfig(self):
         # Check for valid entries - if not restore previous value and give error message
+        if (self.remoteVar.get() == 1):
+            self.config['Server']['remoteserver'] = "True"
+        else:
+            self.config['Server']['remoteserver'] = "False"
         if (self._validateHostname(self.hostnameString.get(), "Hostname ")):
             self.config['Server']['hostname'] = self.hostnameString.get()
         else :
@@ -81,6 +90,7 @@ class ConfigLocal():
                 self.config.write(cfgfile)
                 self.closeConfig()
                 # Change server info dynamically
+                self.config['Server'].getboolean('remoteserver'),
                 self.command.chgServer (self.config['Server']['hostname'], self.config['Server']['port'], self.config['Server'].getboolean('ssl'), self.config['Server']['username'], self.config['Server']['password'], self.config['Server'].getboolean('allowunverified')) 
                 messagebox.showinfo("Info", "Configuration saved.")
         except : 
@@ -99,7 +109,11 @@ class ConfigLocal():
         # set handler for close window using WM X
         self.configTop.wm_protocol('WM_DELETE_WINDOW',  self.closeConfig)
 
-        
+        self.remoteVar = IntVar()
+        if (self.config['Server']['remoteserver'] == 'True'):
+            self.remoteVar.set(1)
+        else:
+            self.remoteVar.set(0)
         self.hostnameString = StringVar()
         self.hostnameString.set(self.config['Server']['hostname'])
         self.portString = StringVar()
@@ -118,49 +132,60 @@ class ConfigLocal():
         self.usernameString.set(self.config['Server']['username'])
         self.passwordString = StringVar()
         self.passwordString.set(self.config['Server']['password'])
-        
+
+
         configTitleLabel = Label(self.configTop,
                 text="NeoPixel - Local Configuration",
                 foreground="blue", font="Verdana 16 bold").grid(columnspan=4, sticky=W, pady=(4, 15), padx=5)
                 
+        remoteLabel = Label(self.configTop,
+                    font="Verdana 14",
+                    text="SSL").grid(row=1, column=1, columnspan=1, sticky=W, padx=(15,2))
+
+
+        remoteCheckBox = Checkbutton(self.configTop,
+                    font="Verdana 14",
+                    variable=self.remoteVar).grid(row=1, column=2, sticky=W)
+
         hostnameLabel = Label(self.configTop,
                     font="Verdana 14",
-                    text="Hostname").grid(row=1, column=1, columnspan=1, sticky=W, padx=(15,2))
-                    
+                    text="Hostname").grid(row=2, column=1, columnspan=1, sticky=W, padx=(15,2))
+
+
         hostnameEntry = Entry(self.configTop,
                     font="Verdana 14",
                     width=15,
-                    textvariable=self.hostnameString).grid(row=1, column=2, columnspan=2, sticky=W)
+                    textvariable=self.hostnameString).grid(row=2, column=2, columnspan=2, sticky=W)
                     
         portLabel = Label(self.configTop,
                     font="Verdana 14",
-                    text="Port").grid(row=2, column=1, columnspan=1, sticky=W, padx=(15,2))
+                    text="Port").grid(row=3, column=1, columnspan=1, sticky=W, padx=(15,2))
                     
         portEntry = Entry(self.configTop,
                     font="Verdana 14",
                     width=5,
-                    textvariable=self.portString).grid(row=2, column=2, sticky=W)
+                    textvariable=self.portString).grid(row=3, column=2, sticky=W)
                     
         sslLabel = Label(self.configTop,
                     font="Verdana 14",
-                    text="SSL").grid(row=3, column=1, columnspan=1, sticky=W, padx=(15,2))
+                    text="Remote Server").grid(row=4, column=1, columnspan=1, sticky=W, padx=(15,2))
 
 
         sslCheckBox = Checkbutton(self.configTop,
                     font="Verdana 14",
-                    variable=self.sslVar).grid(row=3, column=2, sticky=W)
+                    variable=self.sslVar).grid(row=4, column=2, sticky=W)
                     
         unverifiedLabel = Label(self.configTop,
                     font="Verdana 14",
-                    text="Allow unverified").grid(row=4, column=1, columnspan=1, sticky=W, padx=(15,2))
+                    text="Allow unverified").grid(row=5, column=1, columnspan=1, sticky=W, padx=(15,2))
 
         unverifiedCheckBox = Checkbutton(self.configTop,
                     font="Verdana 14",
-                    variable=self.unverifiedVar).grid(row=4, column=2, sticky=W)
+                    variable=self.unverifiedVar).grid(row=5, column=2, sticky=W)
                     
         usernameLabel = Label(self.configTop,
                     font="Verdana 14",
-                    text="Username").grid(row=5, column=1, columnspan=1, sticky=W, padx=(15,2))
+                    text="Username").grid(row=6, column=1, columnspan=1, sticky=W, padx=(15,2))
                     
         usernameEntry = Entry(self.configTop,
                     font="Verdana 14",
@@ -169,14 +194,14 @@ class ConfigLocal():
                     
         passwordLabel = Label(self.configTop,
                     font="Verdana 14",
-                    text="Password").grid(row=6, column=1, columnspan=1, sticky=W, padx=(15,2))
+                    text="Password").grid(row=7, column=1, columnspan=1, sticky=W, padx=(15,2))
                     
         passwordEntry = Entry(self.configTop,
                     font="Verdana 14",
                     width=15,
-                    textvariable=self.passwordString).grid(row=6, column=2, columnspan=2, sticky=W)
+                    textvariable=self.passwordString).grid(row=7, column=2, columnspan=2, sticky=W)
 
-        buttonRow = 7
+        buttonRow = 8
 
         restoreButton = Button(self.configTop, 
                     text="Restore\ndefaults",

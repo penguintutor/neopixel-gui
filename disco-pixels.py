@@ -54,6 +54,7 @@ sequencefile = 'sequences.cfg'
 
 # default hostnames and ports
 defaultLocalSettings = {
+    'remoteserver' : 'False',
     'hostname': '127.0.0.1',
     'port' : 80,
     'ssl' : 'False',
@@ -67,7 +68,7 @@ defaultLocalSettings = {
 
 # File containing user config
 # If it does not exist then use defaults
-configfile = 'neopixel-disco.cfg'
+configfile = 'disco-pixels.cfg'
 
 readmefile = 'docs/readme.html'
 userfile = 'docs/userguide.html'

@@ -48,7 +48,7 @@ DEBUG = 5
 
 
 #SOCKET_PORT = 321
-MSG_QUEUE_NAME = "/LED_SHARED_MEMORY_3"
+MSG_QUEUE_NAME = "/LED_SHARED_MEMORY_4"
 
 ## Command is defined globally as it provides the main interface to the 
 # NeoPixels which needs to be accessible 

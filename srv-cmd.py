@@ -50,7 +50,7 @@ cgitb.enable()
 #sys.path.insert(0, "/usr/home/joe/lib/python")
 
 # POSIX shared memory message queue
-MSG_QUEUE_NAME = "/LED_SHARED_MEMORY_2"
+MSG_QUEUE_NAME = "/LED_SHARED_MEMORY_4"
 
 
 # Version number added for client server architecture
@@ -489,16 +489,20 @@ def main():
 
 
     settings = ledsettings.LEDSettings(config)
-    command = WebSrvCmds()
+    command = WebSrvCmds(MSG_QUEUE_NAME)
+    
+    command.setCommand("allOn")
+    
+    # memory queue now moved to WebSrvCmds
     
     # Setup shared memory queue - only if already exists
-    try:
-        mq = posix_ipc.MessageQueue(MSG_QUEUE_NAME, posix_ipc.O_CREAT)
-        print ("Message queue connected")
+    #try:
+    #    mq = posix_ipc.MessageQueue(MSG_QUEUE_NAME, posix_ipc.O_CREAT)
+    #    print ("Message queue connected")
         # Send message to queue
-        mq.send("status,1")
-    except Exception as e: 
-        print ("Error connecting to server "+str(e))
+    #    mq.send("status,1")
+    #except Exception as e: 
+    #    print ("Error connecting to server "+str(e))
         
     # Send message to queue
     #mq.send("status, ", block=False)

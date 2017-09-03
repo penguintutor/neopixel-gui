@@ -24,8 +24,8 @@ class WebSrvCmds():
         
         # Setup shared memory queue - only if already exists
         try:
-            self.mq = posix_ipc.MessageQueue(msg_queue_name)
-            #self.mq = posix_ipc.MessageQueue(msg_queue_name, posix_ipc.O_CREAT)
+            #self.mq = posix_ipc.MessageQueue(msg_queue_name)
+            self.mq = posix_ipc.MessageQueue(msg_queue_name, posix_ipc.O_CREAT)
 #            print ("Message queue connected")
             # Send message to queue
             #self.mq.send("status,1")
