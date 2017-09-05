@@ -9,24 +9,16 @@ import json
 import urllib.request
 import ssl
 from urllib.error import *
-import posix_ipc
+import json
+import socket
 
 class ClientController():
     
-    def __init__(self, remoteserver, hostname, port, sslenabled, username, password, msg_queue_name, allowunverified=False):
+    def __init__(self, remoteserver, hostname, port, sslenabled, username, password, socket_address, allowunverified=False):
         self.remoteserver = remoteserver
-        if (remoteserver == False):
-            # remoteserver false means local server communicate with ipc
-            # can only change this by calling chgToLocal
-            # remote server details can be changed and updated, but will be ignored unless this is set to True
-            try:
-                self.mq = posix_ipc.MessageQueue(msg_queue_name)
-                print ("Message queue connected")
-                # Send message to queue
-                self.mq.send("status,1")
-            except Exception as e: 
-                print ("Error connecting to server "+str(e))
-                exit()
+        # remoteserver false means local server communicate with domain sockets
+        # remote server details can be changed and updated, but will be ignored unless remoteserver is set to True
+        self.socket_address = socket_address
    
                 
         if (sslenabled == False):
@@ -43,8 +35,7 @@ class ClientController():
         self.ctx.check_hostname = False
         self.ctx.verify_mode = ssl.CERT_NONE
         
-    def chgToLocal():
-        pass
+        
         
     def chgServer (self, hostname, port, sslenabled, username, password, allowunverified=False):
         self.sslenabled = sslenabled
@@ -60,22 +51,40 @@ class ClientController():
         config['request']='update'
         config['type']='config'
         config['value']='neopixels'
-        response = self.fetchPage(config)
+        response = self.sendCmd(config)
         return response
 
     def setSequence(self, sequence):
         parmsdict = {"request":"command", "sequence":sequence}
-        response = self.fetchPage(parmsdict)
+        response = self.sendCmd(parmsdict)
         return response
         
     def getConfigNeopixels(self):
         parmsdict = {"request":"query", "type":"config", "value":"neopixels"}
-        response = self.fetchPage(parmsdict)
+        response = self.sendCmd(parmsdict)
         return response
         
     #Todo
     def getConfigServer(self):
         pass
+        
+    def sendCmd(self, parmsdict):
+        # If remote then pass to fetchPage instead (which sends as web request)
+        if (self.remoteserver == True):
+            return (fetchPage, parmsdict)
+        # otherwise send using domain sockets
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        instruction = json.dumps(parmsdict)
+        try:
+            sock.connect(self.socket_address)
+            sock.sendall(instruction.encode('UTF-8'))
+            data = sock.recv(4096)
+            print ("received "+data.decode('UTF-8'))
+        except Exception as e:
+            print ("Error communicating with server: " + str(e))
+        finally:
+            sock.close()
+
         
     def fetchPage(self, parmsdict):
         # If username and/or password then add to parmsdict
@@ -107,12 +116,12 @@ class ClientController():
        
     def setColours(self, colours):
         parmsdict = {'request':'command','colours':colours}
-        response = self.fetchPage(parmsdict)
+        response = self.sendCmd(parmsdict)
         return response
     
     def setDelay(self, delay):
         parmsdict = {'request':'command','delay':delay}
-        response = self.fetchPage(parmsdict)
+        response = self.sendCmd(parmsdict)
         return response
     
     

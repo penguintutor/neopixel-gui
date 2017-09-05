@@ -1,5 +1,22 @@
 #!/usr/bin/pgzrun
-#from neopixel import *
+
+# see http://www.penguintutor.com/
+# Copyright Stewart Watkiss 2015-2017
+
+
+# This code is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This software is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this software.  If not, see <http://www.gnu.org/licenses/>
+
 import os
 import sys
 import time       
@@ -10,11 +27,14 @@ import configparser
 sys.path.append(os.getcwd())
 
 import ledsettings
-from neopixelcmds import *
+#from neopixelcmds import *
 from neopixelseq import *
+import localsettings
+from clientcontroller import *
 
+VERSION = '0.3'
 
-VERSION = '0.'
+SOCKET_ADDRESS = "/tmp/led-server-socket"
 
 # File containing user config
 # If it does not exist then use defaults
@@ -38,39 +58,19 @@ defaultLEDSettings = {
     'ledmaxbrightness': 255,
     'ledinvert': True 
     }
-
-config = configparser.ConfigParser()
-# load user settings from configfile
-try :
-    config.read(configfile)
-    # Test that config entries loaded by looking at first entry
-    numLEDs = int(config['LEDs']['ledcount'])
-except (configparser.Error, KeyError) :
-    # Can't display warning at this stage so save message for when gui loaded
-    # Don't overwrite error message if there is one
-    if (message[0] == '') : 
-        message = ("Warning", "No config file found\nUsing default values")
     
-    # if load failed then use defaults
-    config.add_section('LEDs')
-    for key, value in defaultLEDSettings.items():
-        config.set('LEDs', key, str(value)) 
-
-
-
-
-
-#Thread for communicating with neopixels
-#Simple one-way communication with thread using globals
-#checks variables or updates (cmdMessage, cmdColours)
-def runPixels(LEDs, command):
-    while command.getCommand() != "STOP":
-        # run appropriate script
-        method = getattr (LEDs, command.getCommand())
-        method() 
-        
-
-
+# default hostnames and ports
+defaultLocalSettings = {
+    'remoteserver' : 'False',
+    'hostname': '127.0.0.1',
+    'port' : 80,
+    'ssl' : 'False',
+    'username' : '',
+    'password' : '',
+    # allow unverified will not check authentication of server
+    # This could allow for server spoofing
+    'allowunverified': 'False'
+    }
 
 
 # load sequence config    
@@ -85,21 +85,28 @@ except (configparser.Error, KeyError) :
     message = ("Error", "Sequence.cfg does not exist\n or is missing important values")
 
 
-settings = ledsettings.LEDSettings(config)
+config = configparser.ConfigParser()
+# load user settings from configfile
+try :
+    config.read(configfile)
+    # Test that config entries loaded by looking at first entry
+    hostname = config['Server']['hostname']
+except (configparser.Error, KeyError) :
+    # Can't display warning at this stage so save message for when gui loaded
+    # Don't overwrite error message if there is one
+    if (message[0] == '') : 
+        message = ("Warning", "No config file found\nUsing default values")
+    
+    # if load failed then use defaults
+    config.add_section('Server')
+    for key, value in defaultLocalSettings.items():
+        config.set('Server', key, str(value)) 
 
-command = NeoPixelCmds()
-LEDs = NeoPixelSeq(settings.allSettings(), command)
 
-#
-thread=threading.Thread(target=runPixels, args=(LEDs, command))
-thread.start()
+settings = localsettings.LocalSettings(config)
 
-#LEDCOUNT = 96
-#GPIOPIN = 18
-#FREQ = 800000
-#DMA = 5
-#INVERT = True       # Invert required when using inverting buffer
-#BRIGHTNESS = 255
+command = ClientController(settings.remoteserver(), settings.hostname(), settings.port(), settings.ssl(), settings.username(), settings.password(), SOCKET_ADDRESS, settings.allowunverified())
+
 
 WIDTH = 760
 HEIGHT = 380
@@ -196,127 +203,18 @@ def on_mouse_down(button, pos):
     for i in range(len(buttonRect)):
         if buttonRect[i].collidepoint(x,y) :
             sequence = buttonText[i]
+            command.setSequence(sequence)
     # Check position of speed buttons
     if minusRect.collidepoint(x,y) :
         delay_counts = delay_counts + 5
+        command.setDelay(delay_counts)
     if plusRect.collidepoint(x,y) :
         delay_counts = delay_counts - 5
+        command.setDelay(delay_counts)
+    
 
 
 
 def update():
-    global timer
-    global delay_counts 
-    global seq_number
-    timer = timer +1 
-    if (timer > delay_counts) :
-        seq_number += 1
-        updseq ()
-        timer = 0
+    pass
 
-
-def updseq () :
-    global sequence
-    #cmd, text = sequenceOptions[sequence.get()]
-    #command.setCommand(cmd)
-    command.setCommand('rainbow');
-#    if (sequence == "All On"):
-#        seq_all_on()
-#    if (sequence == "All Off"):
-#        seq_all_off()
-#    if (sequence == "Flash Alt"):
-#        seq_flash_alt ()
-#    if (sequence == "Chaser"):
-#        seq_chaser ()
-#    if (sequence == "Multi Chaser"):
-#        seq_multi_chaser ()
-#    if (sequence == "Color Cycle"):
-#        seq_color_cycle()
-    
-
-
-
-
-###### Sequences
-def seq_all_on():
-    for x in range (LEDCOUNT):
-        strip.setPixelColor(x, Color(255,255,255))
-    strip.show()        
-
-def seq_all_off():
-    for x in range (LEDCOUNT):
-        strip.setPixelColor(x, Color(0,0,0))
-    strip.show()
-    
-# Uses 2 seq numbers for odd and even
-def seq_flash_alt ():
-    global seq_number
-    if (seq_number > 1):
-        seq_number = 0
-    colors = [Color(255, 255, 255), Color(0,0,0)]
-    for x in range (LEDCOUNT):
-        if (x %2 == 1):
-            strip.setPixelColor(x, colors[seq_number])
-        else:
-            strip.setPixelColor(x, colors[1-seq_number])
-    strip.show()
-    
-def seq_chaser ():
-    global seq_number
-    if (seq_number >= LEDCOUNT):
-        seq_number = 0
-    for x in range (LEDCOUNT):
-        strip.setPixelColor(x, Color(0,0,0))
-    strip.setPixelColor(seq_number, Color(255,255,255))
-    strip.show()
-    
-def seq_chaser ():
-    global seq_number
-    if (seq_number >= LEDCOUNT):
-        seq_number = 0
-    for x in range (LEDCOUNT):
-        strip.setPixelColor(x, Color(0,0,0))
-    strip.setPixelColor(seq_number, Color(255,255,255))
-    strip.show()
-    
-# Needs at least 6 pixels preferably more for this to look correct
-def seq_multi_chaser ():
-    global seq_number
-    if (seq_number >= LEDCOUNT):
-        seq_number = 0
-    colors = [Color(255, 0, 0), Color(0,255,0), Color(0,0,255)]
-    for x in range (LEDCOUNT):
-        strip.setPixelColor(x, Color(0,0,0))
-    # Set current, one before and one after
-    # seq number is always valid
-    strip.setPixelColor(seq_number, colors[1])
-    # Ensure there is one before - if not put it at the end of the row
-    if (seq_number > 0) :
-        strip.setPixelColor(seq_number-1, colors[0])
-    else:
-        strip.setPixelColor(LEDCOUNT-1, colors[0])
-    # Ensure there is one after - if not put it at the start of the row
-    if (seq_number < LEDCOUNT-1) :
-        strip.setPixelColor(seq_number+1, colors[2])
-    else:
-        strip.setPixelColor(0, colors[2])
-        
-    strip.show()
-    
-def seq_color_cycle():
-    global seq_number
-    colors = [Color(248,12,18), Color(255,51,17), Color(255,102,68), \
-        Color(254,174,45), Color(208,195,16), Color(105,208,37), \
-        Color(18,189,185), Color(68,68,221), Color(59,12,189)]
-    if (seq_number >= len(colors)):
-        seq_number = 0
-        
-    # seq number is used to define the first color then we increment through the colors
-    this_color = seq_number
-    for x in range(LEDCOUNT):
-        strip.setPixelColor(x, colors[this_color])
-        this_color = this_color + 1;
-        if (this_color >= len(colors)):
-            this_color = 0
-    strip.show()
-    

@@ -49,8 +49,7 @@ cgitb.enable()
 # to load non standard libraries use 
 #sys.path.insert(0, "/usr/home/joe/lib/python")
 
-# POSIX shared memory message queue
-MSG_QUEUE_NAME = "/LED_SHARED_MEMORY_4"
+SOCKET_ADDRESS = "/tmp/led-server-socket"
 
 
 # Version number added for client server architecture
@@ -489,7 +488,7 @@ def main():
 
 
     settings = ledsettings.LEDSettings(config)
-    command = WebSrvCmds(MSG_QUEUE_NAME)
+    command = WebSrvCmds(SOCKET_ADDRESS)
     
     command.setCommand("allOn")
     

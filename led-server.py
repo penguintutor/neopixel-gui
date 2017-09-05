@@ -32,8 +32,10 @@ import numbers
 import securitychecks
 from sslwsgirefserver import *
 import password
-import os.path
-import posix_ipc
+import os
+import socket
+import select
+import json
 
 
 # Version number added for client server architecture
@@ -47,8 +49,7 @@ version = '0.3'
 DEBUG = 5
 
 
-#SOCKET_PORT = 321
-MSG_QUEUE_NAME = "/LED_SHARED_MEMORY_6"
+SOCKET_ADDRESS = "/tmp/led-server-socket"
 
 ## Command is defined globally as it provides the main interface to the 
 # NeoPixels which needs to be accessible 
@@ -201,48 +202,55 @@ def main():
     LEDs = LightSeq(config['Server']['hardware'], settings.allSettings(), cmd)
     
     
+    # Setup domain socket
     try:
-        # Create posix IPC message queue
-        os.umask(000) # Set umask to allow write access to all users to the message queue
-        mq = posix_ipc.MessageQueue(MSG_QUEUE_NAME, posix_ipc.O_CREAT, 777)
-        #mq = posix_ipc.MessageQueue(MSG_QUEUE_NAME)
-        mq.block=False
-    except Exception as e:
-        # Some other error (eg. cmd not valid)
-        print ("Unable to create message queue " + str(e))
-        exit(0)
+        # remove any left over connection
+        os.unlink (SOCKET_ADDRESS)
+    except:
         pass
     
-    print ("Message queue "+MSG_QUEUE_NAME)
+    try:
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        sock.bind (SOCKET_ADDRESS)
+        os.chmod(SOCKET_ADDRESS, 666)
+        sock.listen(5)
+        read_list = [sock]
+    except Exception as e:
+        # Some other error (eg. cmd not valid)
+        print ("Unable to create socket " + str(e))
+        exit(0)
+        pass
     
     print ("Waiting...")
     
     while cmd.getCommand() != "STOP":
-        try:
-            msg, priority = mq.receive()
-            msgstr = msg.decode('UTF-8')
-            print ("Received msg "+msgstr)
-            qcmd, qvalue = msgstr.split(',')
-            print ("New cmd "+qcmd+" value "+qvalue)
+        readable, writeable, errored = select.select(read_list, [], [])
+        for s in readable:
+            if s is sock:
+                client_socket, address = sock.accept()
+                read_list.append(client_socket)
+                #print ("Incoming connection")
+            else:
+                data = s.recv(1024)
+                if data:
+                    s.send("Accept".encode('UTF-8'))
+                    jsondata = json.loads(data.decode('UTF-8'))
+                    print (str(jsondata))
+                    
+                else:
+                    s.close()
+                    read_list.remove(s)
+        
+        
+        #    print ("New cmd "+qcmd+" value "+qvalue)
             # split the queue string into method and parameter
             # Security note there is no checking of cmd and value at this stage
             # Anything that is not valid will raise an exception, but
             # will not stop the server - these can only be sent by
             # other processes with the same permission anyway and it is
             # the web server code that is validating the user input
-            updcmd = getattr (cmd, qcmd)
-            updcmd(qvalue)
-            
-        except posix_ipc.BusyError:
-            # Nothing waiting
-            #print ("Busy error")
-            pass
-        
-        except Exception as e:
-            # Some other error (eg. cmd not valid)
-            print ("Other error " + str(e))
-            pass
-        
+        #    updcmd = getattr (cmd, qcmd)
+        #    updcmd(qvalue)
         
         # run appropriate script
         #method = getattr (LEDs, cmd.getCommand())
@@ -250,10 +258,7 @@ def main():
         # sleep to allow other threads to run
         time.sleep(0.01)
         
-    mq.close()
-    mq.unlink()
-    #posix_ipc.unlink_message_queue(MSG_QUEUE_NAME)
-
+    sock.close()
 
 
     

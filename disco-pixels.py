@@ -48,7 +48,7 @@ from clientcontroller import *
 
 VERSION = '0.3'
 
-MSG_QUEUE_NAME = "/LED_SHARED_MEMORY_6"
+SOCKET_ADDRESS = "/tmp/led-server-socket"
 
 # File containing sequences and colour options
 # Must exist and have valid entries
@@ -121,6 +121,7 @@ class App(Frame):
     # Handle resize of screen. Does not change the root size, just resize internal components
     # Fairly basic - font resizing and button sizes based on frame size
     def resizeLayout(self, width, height):
+        return
         # Resize the font on the buttons etc - just basic thresholds where we change
         
         # Check if actually change size - if not return 
@@ -220,6 +221,7 @@ class App(Frame):
 
 
     def ApplyChange(self):
+        return
         # update command object to be passed to the 
         cmd, text = self.sequenceOptions[self.sequence.get()]
         response = self.command.setSequence(cmd)
@@ -542,11 +544,11 @@ def numpages (numsequences, numbuttons) :
     return int((numsequences-1) / numbuttons) + 1
 
 
-def configure (event):
+#def configureApp (event):
     # Only interested in changes to the top level window (.)
-    if (str(event.widget) != '.'): return
-    width, height = event.width, event.height
-    app.resizeLayout(width,height)
+#    if (str(event.widget) != '.'): return
+#    width, height = event.width, event.height
+    #app.resizeLayout(width,height)
 
 
 def main():
@@ -611,7 +613,7 @@ def main():
         print ("Creating client controller",)
     
     
-    command = ClientController(settings.remoteserver(), settings.hostname(), settings.port(), settings.ssl(), settings.username(), settings.password(), MSG_QUEUE_NAME, settings.allowunverified())
+    command = ClientController(settings.remoteserver(), settings.hostname(), settings.port(), settings.ssl(), settings.username(), settings.password(), SOCKET_ADDRESS, settings.allowunverified())
     
     if (verbose > 0):
         print (" - done")
@@ -637,7 +639,7 @@ def main():
     root.geometry("%dx%d+100+100" % (DEFAULTWIDTH, DEFAULTHEIGHT))
     root.minsize(MINWIDTH,MINHEIGHT)
     app = App(root, command, sequenceOptions, colourChoice, config, cfglocal, cfgneopixel)
-    root.bind("<Configure>", configure)
+    #root.bind("<Configure>", configureApp)
     root.mainloop()
     
 if __name__ == "__main__":
