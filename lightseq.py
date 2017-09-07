@@ -186,6 +186,28 @@ class LightSeq():
                 self.setPixel(i+q, 0)
 
 
+    # Flashes odd and even - 2 colour (or black)
+    def flashAlt(self):
+        self.command.setCmdStatus(False)
+        options = self.command.getOptions()
+        colours = self.command.getColours()
+        if (len(colours[1]) < 2): 
+            colours[1] = 0x000000
+
+        even = 1
+        
+        for i in range(self.strip.numPixels()/2):    
+            if (i %2 == 1):
+                strip.setPixelColor(i, colors[even])
+            else:
+                strip.setPixelColor(i, colors[1-even])
+            self.strip.show()
+            if (self.command.getCmdStatus()):
+                return
+            time.sleep(self.command.getOptions()['delay']/1000.0)
+            even = even - 1
+
+
 
     # Define functions which animate LEDs in various ways.
     def colourWipe(self):

@@ -122,6 +122,15 @@ buttonText = (
     u"Multi Chaser",
     u"Color Cycle"
 )
+# Sequence names, must match buttonText order
+buttonSequences = (
+    u"allOn",
+    u"allOff",
+    u"flashAlt",
+    u"chaser",
+    u"chaser",
+    u"rainbow"
+)
 buttonRect = (
     Rect(50, 100, 120, 40),
     Rect(300, 100, 120, 40),
@@ -203,7 +212,8 @@ def on_mouse_down(button, pos):
     for i in range(len(buttonRect)):
         if buttonRect[i].collidepoint(x,y) :
             sequence = buttonText[i]
-            command.setSequence(sequence)
+            seqnum = buttonText.index(sequence)
+            command.setSequence(buttonSequences[seqnum])
     # Check position of speed buttons
     if minusRect.collidepoint(x,y) :
         delay_counts = delay_counts + 5

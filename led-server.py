@@ -129,6 +129,142 @@ config = configparser.ConfigParser()
 
 
 
+def handle_request(command, sequenceOptions, jsondata):
+    # convert data from json encoded
+    data = json.loads(jsondata.decode('UTF-8'))
+    
+    print (str(data))
+    
+    response = Response(DEBUG)
+    
+    ### Command
+    if (data['request'] == 'command'):
+        if 'sequence' in data:
+            # check it's a valid sequence
+            if not data['sequence'] in sequenceOptions.keys():
+                response.addStatus ("error", "sequence", "Sequence not valid")
+            else:
+                command.setCommand(data['sequence'])
+                command.setCmdStatus(True)
+                response.addStatus ("success", "sequence", "Sequence updated")
+        if 'colours' in data:
+            selectedColours = data['colours']
+            intcolours = []
+            for i in range(len(selectedColours)):
+                try:
+                    if (securitychecks.validateIntegerResponse(selectedColours[i], "colour", 0, 16777215, response)) :
+                            intcolours.append(selectedColours[i])
+                            response.addStatus("success", "colours", "success")
+                    else:
+                        response.addStatus("error", "colours", "Fail security check")
+                        return response.getStatus()
+                except ValueError as err:
+                    response.addStatus ("error", "colours", "Colour not valid")
+                    return response.getStatus()       
+                except Exception as e:
+                    response.addStatus ("error", "colours", "Unknown error in setting colour" + str(e))
+                    return response.getStatus()
+            command.setColours(intcolours)
+            response.addStatus ("success", "colours", "Colour updated")
+        if 'delay' in data:
+            if (securitychecks.validateIntegerResponse(data['delay'], "delay", MINDELAY, MAXDELAY, response)) :
+                command.setDelay(data['delay'])
+                response.addStatus("success", "delay", "Delay updated")
+            else :
+                return response.getStatus()
+                
+    ### Queries
+    elif (data['request'] == 'query'):
+        ## Config - current saved configs (eg. neopixel / server)
+        if (data['type'] == 'config'):
+            if (data['value'] == "neopixels"):
+                returnvalue = settings.allSettings()
+                returnvalue['reply'] = "success"
+                return returnvalue
+    
+    ### Updates
+    ### Need to doubly make sure that all values are valid
+    elif (data['request'] == 'update'):
+        if (data['type']=='config'):
+            if (data['value'] == 'neopixels'):
+                # update the neopixel settings individually - checking for valid settings
+                # I don't know how many NeoPixels could be supported, but clearly 1M is going to be too large
+                if ('ledcount' in data):
+                    try:
+                        thisvalue = int(data['ledcount'])
+                    except (TypeError, ValueError):
+                        # This is a serious error - not even sending correct
+                        # value type so don't even try the other values
+                        response = {'reply':'error', 'error':'Invalid type in ledcount'}
+                        return response.getStatus()
+                    validate = securitychecks.validateIntegerResponse(thisvalue, "ledcount", 0, 1000000, response)
+                    if validate:
+                        config['LEDs']['ledcount'] = data['ledcount']
+                # Don't check it's a valid pwm pin (that should be checked first), just that it's a sensible number ie between 0 and 128 
+                if ('gpiopin' in data):
+                    try:
+                        thisvalue = int(data['gpiopin'])
+                    except (TypeError, ValueError):
+                        # This is a serious error - not even sending correct
+                        # value type so don't even try the other values
+                        response = {'reply':'error', 'error':'Invalid type in gpiopin'}
+                        return response.getStatus()
+                    validate = securitychecks.validateIntegerResponse(thisvalue, "gpiopin", 0, 128, response)
+                    if validate:
+                        config['LEDs']['gpiopin'] = data['gpiopin']
+                if ('ledmaxbrightness' in data):
+                    try:
+                        thisvalue = int(data['ledmaxbrightness'])
+                    except (TypeError, ValueError):
+                        # This is a serious error - not even sending correct
+                        # value type so don't even try the other values
+                        response = {'reply':'error', 'error':'Invalid type in ledmaxbrightness'}
+                        return response.getStatus()
+                    validate = securitychecks.validateIntegerResponse(thisvalue, "ledmaxbrightness", 0, 255, response)
+                    if validate:
+                        config['LEDs']['ledmaxbrightness'] = data['ledmaxbrightness']
+                if ('ledinvert' in data):
+                    if (data['ledinvert'] == 'True'):
+                        response.addStatus ("success", "ledinvert", "success")
+                        config['LEDs']['ledinvert'] = "True"
+                    elif (data['ledinvert'] == 'False'):
+                        response.addStatus ("success", "ledinvert", "success")
+                        config['LEDs']['ledinvert'] = "False"
+                    # if not true or false then serious error
+                    else:
+                        response = {'reply':'error', 'error':'Invalid type in ledinvert'}
+                        return response.getStatus()
+                if ('rgb' in data):
+                    if (data['rgb'] == 'True'):
+                        response.addStatus ("success", "rgb", "success")
+                        config['LEDs']['rgb'] = "True"
+                    elif (data['rgb'] == 'False'):
+                        response.addStatus ("success", "rgb", "success")
+                        config['LEDs']['rgb'] = "False"
+                    # if not true or false then serious error
+                    else:
+                        response = {'reply':'error', 'error':'Invalid type in rgb'}
+                        return response.getStatus()
+                ## Now save the config
+                # save config
+                try:
+                    with open(configfile, 'w') as cfgfile:
+                        config.write(cfgfile)
+                        response.addStatus ("success", "saveconfig", "success")
+                        if (DEBUG >= 3) : print ("Info: Updated configuration saved "+configfile)
+                except Exception as e:
+                        response = {'reply':'error', 'error':'Error saving configuration'}
+                        if (DEBUG >= 1) : print ("Error: saving configuration file "+configfile+"::"+str(e))
+                        return response.getStatus()
+                # Reread in settings (always use the saved config - if can't update then settings don't get updated
+                settings = ledsettings.LEDSettings(config)
+                LEDs.updSettings(settings.allSettings())
+    
+    print ("Returning response "+str(response.getStatus()))
+    return response.getStatus()
+
+
+
 def main():
 
     global command, settings, LEDs, passwords
@@ -231,11 +367,18 @@ def main():
                 read_list.append(client_socket)
                 #print ("Incoming connection")
             else:
+                # Note this does not handle message fragmentation
+                # Messages are much smaller than the receive size so 
+                # it is unlikely any fragmentation will occur
+                # TODO - better checks for full packet received
                 data = s.recv(1024)
                 if data:
-                    s.send("Accept".encode('UTF-8'))
-                    jsondata = json.loads(data.decode('UTF-8'))
-                    print (str(jsondata))
+                    #jsondata = json.loads(data.decode('UTF-8'))
+                    response = handle_request(cmd, sequenceOptions, data)
+                    jsonresponse = json.dumps(response)
+                    s.send(jsonresponse.encode('UTF-8'))
+                    
+                    #print (str(jsondata))
                     
                 else:
                     s.close()
@@ -255,9 +398,13 @@ def main():
         # run appropriate script
         #method = getattr (LEDs, cmd.getCommand())
         #method()
+        
+        
+        
         # sleep to allow other threads to run
         time.sleep(0.01)
         
+    # If beak out of loop then 
     sock.close()
 
 

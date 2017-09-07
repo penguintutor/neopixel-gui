@@ -182,7 +182,6 @@ class NeoPixelSeq():
                 self.setPixel(i+q, 0)
 
 
-
     # Define functions which animate LEDs in various ways.
     def colourWipe(self):
         self.command.setCmdStatus(False)
