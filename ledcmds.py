@@ -23,7 +23,7 @@ class LEDCmds():
         pass
 
     def setCommand(self, command):
-        #print ("* Command set to "+command) 
+        print ("* Command set to "+command) 
         self.cmdMessage = command
         
     def getCommand(self):

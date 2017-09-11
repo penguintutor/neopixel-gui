@@ -220,12 +220,11 @@ class App(Frame):
         self.coloursChosenBox.configure (listvariable=self.chosenColoursVar)
 
 
-    def ApplyChange(self):
-        return
+    def applyChange(self):
         # update command object to be passed to the 
         cmd, text = self.sequenceOptions[self.sequence.get()]
         response = self.command.setSequence(cmd)
-        #print ("Response received "+str(response))
+        print ("Response received "+str(response))
         if (response['reply'] == "auth"):
             messagebox.showinfo("Error", "Authentication required\nUpdate settings with username and password.\n")
             return
@@ -472,7 +471,7 @@ class App(Frame):
         self.applyButton = ttk.Button(self, 
                     text="Apply",
                     width = 10,
-                    command=self.ApplyChange,)
+                    command=self.applyChange,)
         self.applyButton.grid(row=currentRow+1, column=4, columnspan=2, pady=20, padx=40, sticky='nesw')
 
        
@@ -544,11 +543,11 @@ def numpages (numsequences, numbuttons) :
     return int((numsequences-1) / numbuttons) + 1
 
 
-#def configureApp (event):
+def configureApp (event):
     # Only interested in changes to the top level window (.)
-#    if (str(event.widget) != '.'): return
-#    width, height = event.width, event.height
-    #app.resizeLayout(width,height)
+    if (str(event.widget) != '.'): return
+    width, height = event.width, event.height
+    app.resizeLayout(width,height)
 
 
 def main():
@@ -639,7 +638,7 @@ def main():
     root.geometry("%dx%d+100+100" % (DEFAULTWIDTH, DEFAULTHEIGHT))
     root.minsize(MINWIDTH,MINHEIGHT)
     app = App(root, command, sequenceOptions, colourChoice, config, cfglocal, cfgneopixel)
-    #root.bind("<Configure>", configureApp)
+    root.bind("<Configure>", configureApp)
     root.mainloop()
     
 if __name__ == "__main__":

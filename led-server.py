@@ -336,7 +336,8 @@ def main():
     
     cmd = LEDCmds()
     LEDs = LightSeq(config['Server']['hardware'], settings.allSettings(), cmd)
-    
+
+    LEDs.allOff()
     
     # Setup domain socket
     try:
@@ -360,12 +361,14 @@ def main():
     print ("Waiting...")
     
     while cmd.getCommand() != "STOP":
-        readable, writeable, errored = select.select(read_list, [], [])
+        #print ("Start of loop")
+        readable, writeable, errored = select.select(read_list, [], [], 0)
         for s in readable:
+            #print ("In readable")
             if s is sock:
                 client_socket, address = sock.accept()
                 read_list.append(client_socket)
-                #print ("Incoming connection")
+                print ("Incoming connection")
             else:
                 # Note this does not handle message fragmentation
                 # Messages are much smaller than the receive size so 
@@ -396,14 +399,17 @@ def main():
         #    updcmd(qvalue)
         
         # run appropriate script
-        #method = getattr (LEDs, cmd.getCommand())
-        #method()
-        
+        method = getattr (LEDs, cmd.getCommand())
+        #print ("* Running "+cmd.getCommand())
+        method()
+        #print ("* method returned")
         
         
         # sleep to allow other threads to run
-        time.sleep(0.01)
+        time.sleep(0.2)
+        #print ("End of sleep")
         
+    print ("Server stopping ...")
     # If beak out of loop then 
     sock.close()
 

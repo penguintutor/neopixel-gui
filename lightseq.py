@@ -39,10 +39,13 @@ class LightSeq():
         self.rgb = settings['rgb']
         
         if (hardware == 'generic'):
+            print ("Hardware Generic - Test only")
             module = __import__('hardwaregeneric')
             hardwaregeneric = getattr(module, 'HardwareGeneric')
             self.strip = hardwaregeneric(self.settings)
-        elif (hardware == 'neopixel'):
+        #elif (hardware == 'neopixel'):
+        else:
+            print ("Controlling NeoPixels")
             module = __import__('dynneopixel')
             hardwareneopixel = getattr(module, 'Dynamic_NeoPixel')
             self.strip = hardwareneopixel(self.settings['ledcount'], self.settings['gpiopin'], self.settings['ledfreq'], self.settings['leddma'], self.settings['ledinvert'], self.settings['ledmaxbrightness'])
@@ -86,6 +89,7 @@ class LightSeq():
     # All on with multiple colours (each colour used in cycle)
     # Full intensity
     def allOn(self):
+        #print (" ** allOn ")
         colours = self.command.getColours()
         currentColour = 0
         for i in range(self.numPixels):
@@ -97,6 +101,7 @@ class LightSeq():
         time.sleep(self.command.getOptions()['delay']/1000)
 
     def allOff(self):
+        #print (" ** allOff ")
         for i in range(self.numPixels):
             self.setPixel(i, Color(0,0,0))
         self.strip.show()

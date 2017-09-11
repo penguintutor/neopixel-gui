@@ -140,7 +140,7 @@ class ConfigLocal():
                 
         remoteLabel = Label(self.configTop,
                     font="Verdana 14",
-                    text="SSL").grid(row=1, column=1, columnspan=1, sticky=W, padx=(15,2))
+                    text="Remote server").grid(row=1, column=1, columnspan=1, sticky=W, padx=(15,2))
 
 
         remoteCheckBox = Checkbutton(self.configTop,
@@ -168,7 +168,7 @@ class ConfigLocal():
                     
         sslLabel = Label(self.configTop,
                     font="Verdana 14",
-                    text="Remote Server").grid(row=4, column=1, columnspan=1, sticky=W, padx=(15,2))
+                    text="SSL enable").grid(row=4, column=1, columnspan=1, sticky=W, padx=(15,2))
 
 
         sslCheckBox = Checkbutton(self.configTop,
