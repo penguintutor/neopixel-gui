@@ -362,7 +362,10 @@ def main():
     
     while cmd.getCommand() != "STOP":
         #print ("Start of loop")
-        readable, writeable, errored = select.select(read_list, [], [], 0)
+        # set wait time based on speed required
+        # Certain commands we can wait much longer
+        sleep_time = LEDs.getEffectiveDelay()/1000
+        readable, writeable, errored = select.select(read_list, [], [], sleep_time)
         for s in readable:
             #print ("In readable")
             if s is sock:
@@ -405,8 +408,9 @@ def main():
         #print ("* method returned")
         
         
-        # sleep to allow other threads to run
-        time.sleep(0.2)
+        # sleep based on delay requested
+        #time.sleep(cmd.getOptions()['delay']/1000)
+        #time.sleep(0.2)
         #print ("End of sleep")
         
     print ("Server stopping ...")

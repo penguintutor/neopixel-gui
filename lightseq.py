@@ -35,8 +35,18 @@ class LightSeq():
 
         self.settings = settings
         self.command = command
+        # use lastCmd to keep track of what last run - so for certain methods we can reset / return without changes
+        self.lastCmd = ""
         self.numPixels = settings['ledcount']
         self.rgb = settings['rgb']
+        # longdelay = long time wait for those that don't change (eg. all on) ms
+        # only used if delayfactor = -1
+        # time can be interrupted
+        self.longdelay = 5000
+        # each method can define it's own speed relative to the defined speed - otherwise 1
+        # eg. delayfactor = 0.5 (twice as fast) delayfactor = 2 (half the speed)
+        # ALL functions must define delayfactor each time it is run
+        self.delayfactor = 1
         
         if (hardware == 'generic'):
             print ("Hardware Generic - Test only")
@@ -54,9 +64,14 @@ class LightSeq():
         # Intialize the library (must be called once before other functions).
         self.strip.begin()
 
+    def getEffectiveDelay(self):
+        if (self.delayfactor == -1):
+            return self.longdelay
+        else:
+            return command.getDelay() * self.delayfactor
 
     # Wrapper around strip.setPixelColor
-    # This will check self.rgb to determine if the colour needs to be changed first
+    # This will check self.rgb to determine if the colour needs to be changed between RGB GRB first
     def setPixel (self, i, colour):
         # if not then need to change colour from RGB to GRB
         if (self.rgb == False) :
@@ -78,17 +93,19 @@ class LightSeq():
     # All on with a single colour (first colour is used)
     # Full intensity
     def allOnSingleColour(self):
+        self.delayfactor = -1
         colours = self.command.getColours()
         colour = colours[0]
         for i in range(self.numPixels):
             self.setPixel(i, colour)
         self.strip.show()
-        time.sleep(self.command.getOptions()['delay']/1000)
+        #time.sleep(self.command.getOptions()['delay']/1000)
 
 
     # All on with multiple colours (each colour used in cycle)
     # Full intensity
     def allOn(self):
+        self.delayfactor = -1
         #print (" ** allOn ")
         colours = self.command.getColours()
         currentColour = 0
@@ -98,18 +115,22 @@ class LightSeq():
             if (currentColour >= len(colours)):
                 currentColour = 0
         self.strip.show()
-        time.sleep(self.command.getOptions()['delay']/1000)
+        #time.sleep(self.command.getOptions()['delay']/1000)
 
     def allOff(self):
+        self.delayfactor = -1
         #print (" ** allOff ")
         for i in range(self.numPixels):
             self.setPixel(i, Color(0,0,0))
         self.strip.show()
-        time.sleep(self.command.getOptions()['delay']/1000)
+        #time.sleep(self.command.getOptions()['delay']/1000)
+    
+    ### Update all methods below this
     
     # chase colours across a background
     # uses getBackColour - normally black
     def chaserBackground(self):
+        self.delayfactor = 1
         options = self.command.getOptions()
         colours = self.command.getColours()
         backColour = self.command.getBackColour()

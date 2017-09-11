@@ -62,6 +62,9 @@ class LEDCmds():
     def setDelay (self, delay):
         self.cmdOptions['delay'] = delay
         self.cmdOptions['wait'] = delay * 2
+        
+    def getDelay (self):
+        return self.cmdOptions['delay']
 
 
 
