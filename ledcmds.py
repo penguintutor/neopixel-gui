@@ -10,8 +10,8 @@ class LEDCmds():
     backColour=0x000000   # Used by some methods as colour for not set pixels
     
     cmdOptions={
-        "delay":60,         # delay in ms (short delay eg. per each led move
-        "wait": 120,        # longer delay eg colour changes
+        "delay":100,         # delay in ms (short delay eg. per each led move
+        "wait": 150,        # longer delay eg colour changes
         "intensity":100     # intensity as % of colour
     }
 

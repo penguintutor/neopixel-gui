@@ -76,7 +76,7 @@ passwordfile = 'users.cfg'
 
 DEFAULTSPEED = 50
 MINDELAY = 10.0
-MAXDELAY = 100.0
+MAXDELAY = 1000.0
 
 
 

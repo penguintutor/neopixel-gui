@@ -127,7 +127,7 @@ buttonSequences = (
     u"allOn",
     u"allOff",
     u"flashAlt",
-    u"chaser",
+    u"chaserBackground",
     u"chaser",
     u"rainbow"
 )

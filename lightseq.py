@@ -68,7 +68,7 @@ class LightSeq():
         if (self.delayfactor == -1):
             return self.longdelay
         else:
-            return command.getDelay() * self.delayfactor
+            return self.command.getDelay() * self.delayfactor
 
     # Wrapper around strip.setPixelColor
     # This will check self.rgb to determine if the colour needs to be changed between RGB GRB first
@@ -142,31 +142,32 @@ class LightSeq():
         # Check we are within range (ie. number of leds selected reduced)
         if (self.chaserStartPos >= colourPixelRange):
                 self.chaserStartPos = 0
-        iterations = 4
+ #       iterations = 4
 
-        for iter in range(iterations):
+        #for iter in range(iterations):
             #colourNum = colourNumStart
             
             # Set all pixels to the background - then we update those not
-            for resetPixel in range(self.strip.numPixels()):
-                self.setPixel (resetPixel, backColour)
-            
-            for i in range(0, self.strip.numPixels()+1, colourPixelRange):
-                for j in range(0, len(colours)):
-                    if (i + j + self.chaserStartPos < self.strip.numPixels()) :
-                        self.setPixel (i + j + self.chaserStartPos, colours[j])
-            
-            self.strip.show()
-            time.sleep(options['delay']/1000.0)
-            
-            self.chaserStartPos += 1
-            if (self.chaserStartPos >= colourPixelRange):
-                self.chaserStartPos = 0
+        for resetPixel in range(self.strip.numPixels()):
+            self.setPixel (resetPixel, backColour)
+        
+        for i in range(0, self.strip.numPixels()+1, colourPixelRange):
+            for j in range(0, len(colours)):
+                if (i + j + self.chaserStartPos < self.strip.numPixels()) :
+                    self.setPixel (i + j + self.chaserStartPos, colours[j])
+        
+        self.strip.show()
+#        time.sleep(options['delay']/1000.0)
+        
+        self.chaserStartPos += 1
+        if (self.chaserStartPos >= colourPixelRange):
+            self.chaserStartPos = 0
    
    
     # colors is an array of colors to display
     # simple sequencer / shift
     def chaser(self):
+        self.delayfactor = 1
         options = self.command.getOptions()
         colours = self.command.getColours()
         # colourNum tracks which colour in array we are showing
@@ -179,60 +180,72 @@ class LightSeq():
         # check that chaser number is not too large (ie if we reduce number of colours)
         if (self.chaserStartPos >= len(colours)) :
             self.chaserStartPos = 0
-        iterations = 5
-        for j in range(iterations):
-            colourNum = self.chaserStartPos
+#        iterations = 5
+#        for j in range(iterations):
+        colourNum = self.chaserStartPos
             
-            for i in range(self.strip.numPixels()):
-                self.setPixel (i, colours[colourNum])
-                colourNum = colourNum +1
-                if (colourNum >= len(colours)):
-                    colourNum = 0
-            self.strip.show()
-            time.sleep(options['wait']/1000.0)
-            
-            self.chaserStartPos = self.chaserStartPos + 1
-            if (self.chaserStartPos >= len(colours)):
-                self.chaserStartPos = 0
+        for i in range(self.strip.numPixels()):
+            self.setPixel (i, colours[colourNum])
+            colourNum = colourNum +1
+            if (colourNum >= len(colours)):
+                colourNum = 0
+        self.strip.show()
+#        time.sleep(options['wait']/1000.0)
+        
+        self.chaserStartPos = self.chaserStartPos + 1
+        if (self.chaserStartPos >= len(colours)):
+            self.chaserStartPos = 0
 
 
 
     # Chaser that turns pixels on and off 4 at a time
     def chaserSingleColour(self):
+        self.delayfactor = 1
         options = self.command.getOptions()
         colours = self.command.getColours()
         colour = colours[0]
         
-        for q in range(4):
+        if chaserStartPos % 2 > 0:
+#        for q in range(4):
             for i in range(0, self.strip.numPixels(), 4):
                self.setPixel(i+q, colour)
-            self.strip.show()
-            time.sleep(options['delay']/1000.0)
+        
+#        time.sleep(options['delay']/1000.0)
+        else:
             for i in range(0, self.strip.numPixels(), 4):
                 self.setPixel(i+q, 0)
+                
+            self.strip.show()
 
 
     # Flashes odd and even - 2 colour (or black)
     def flashAlt(self):
-        self.command.setCmdStatus(False)
+        self.delayfactor = 1
         options = self.command.getOptions()
         colours = self.command.getColours()
-        if (len(colours[1]) < 2): 
-            colours[1] = 0x000000
+        if (len(colours) < 2): 
+            #colours[1] = 0x000000
+            colours.append(0x000000)
 
-        even = 1
+        if (self.chaserStartPos >= len(colours)) :
+            self.chaserStartPos = 0
+
+        even = self.chaserStartPos % 2
         
-        for i in range(self.strip.numPixels()/2):    
+        for i in range(self.strip.numPixels()):    
             if (i %2 == 1):
-                strip.setPixelColor(i, colors[even])
+                self.strip.setPixelColor(i, colours[even])
             else:
-                strip.setPixelColor(i, colors[1-even])
-            self.strip.show()
-            if (self.command.getCmdStatus()):
-                return
-            time.sleep(self.command.getOptions()['delay']/1000.0)
-            even = even - 1
+                self.strip.setPixelColor(i, colours[1-even])
+        self.strip.show()
+            #if (self.command.getCmdStatus()):
+            #    return
+            #time.sleep(self.command.getOptions()['delay']/1000.0)
+        #    even = 1 - even
+        self.chaserStartPos += 1
 
+
+#### Update items below for new operation
 
 
     # Define functions which animate LEDs in various ways.
