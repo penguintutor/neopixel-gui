@@ -52,6 +52,8 @@ sequenceGridX = 3
 sequenceGridY = 4
 numsequenceButtons = sequenceGridX * sequenceGridY
 
+button_font = "Verdana 12"
+
 
 DEFAULTSPEED = 50
 MAXCOLOURS = 10
@@ -152,7 +154,7 @@ class App(Frame):
 
     def initUI(self):
 
-        self.parent.title("RpNpGp - Raspberry Pi Neopixel Gui Package");
+        self.parent.title("pixelstrip.py - Raspberry Pi Neopixel Gui Package");
         self.parent.wm_protocol('WM_DELETE_WINDOW',  self.closeApp)
 
                 
@@ -186,7 +188,7 @@ class App(Frame):
         self.columnconfigure(5, weight=1)
         self.columnconfigure(6, weight=1)                                                           
         
-        self.rowconfigure(1, minsize=20)    # Spacer at top
+        self.rowconfigure(1, minsize=10)    # Spacer at top
         self.rowconfigure(2, minsize=85)    # Tab frame
         self.rowconfigure(3, minsize=40)    # Speed slider
         self.rowconfigure(4, minsize=60)    # Colours (also rowspan to 5)
@@ -211,13 +213,10 @@ class App(Frame):
         self.speedLEDVar = DoubleVar()
         # Set a default value
         self.speedLEDVar.set("50")
-        
 
         currentRow = 1
         currentColumn = 0
         numColumns = 6
-        
-        
         
         self.tabFrame = ttk.Notebook(self)
         # Allow CTRL-Tab between frames
@@ -235,13 +234,13 @@ class App(Frame):
                 cmd, txt = self.sequenceOptions[currentButton]
                 self.seqButtons.append(Radiobutton(self.frames[numframe],
                         text=txt,
-                        font="Verdana 14",
+                        font=button_font,
                         variable=self.sequence,
                         height=3,
                         width=20,
                         indicatoron=0,
                         value=currentButton))
-                self.seqButtons[currentButton].grid(row=currentRow, column=currentColumn, columnspan=2, padx=10, pady=10)
+                self.seqButtons[currentButton].grid(row=currentRow, column=currentColumn, columnspan=2, padx=8, pady=8)
                 currentColumn += 2
                 if currentColumn >= numColumns :
                     currentColumn = 0
@@ -254,9 +253,8 @@ class App(Frame):
         currentRow = 3
        
         # Set to allow between 10 and 500 
-        
         speedLabel = Label(self,
-                    font="Verdana 14",
+                    font=button_font,
                     text="Speed")
         speedLabel.grid (row=currentRow, column=1, sticky='ew', padx=10)
         
@@ -276,12 +274,12 @@ class App(Frame):
         
         #Title for frame
         colourLabel = Label(colourSelectFrame,
-                    font="Verdana 14",
+                    font=button_font,
                     text="Colours Available")
         colourLabel.grid (row=0, column=0, columnspan=2, sticky='ews')
         
         colourLabel2 = Label(colourSelectFrame,
-                    font="Verdana 14",
+                    font=button_font,
                     text="Colours Chosen")
         colourLabel2.grid (row=0, column=3, sticky='ews')
         
@@ -336,17 +334,12 @@ class App(Frame):
                     style="ColButtons.TButton",
                     command=self.rstColour)
         rstColourButton.grid(row=6, column=2)
-        
-        
 
         applyButton = ttk.Button(self, 
                     text="Apply",
                     width = 20,
                     command=self.ApplyChange,)
         applyButton.grid(row=currentRow+1, column=4, columnspan=2, pady=20, padx=40, sticky='nesw')
-
-
-        
         
         # Finished setting up GUI - now issue any message
         if (message[0] != ""):
@@ -465,10 +458,10 @@ def main():
     
     root .option_add('*tearOff', FALSE)
     
-    ttk.Style().configure("TButton", font='Helvetica 16 bold')
+    ttk.Style().configure("TButton", font='Helvetica 14 bold')
     ttk.Style().configure("TNotebook", background='#999999')
     ttk.Style().configure('TabFrame.TFrame', background='#999999')
-    ttk.Style().configure('TNotebook.Tab', font='Helvetica 16 bold')
+    ttk.Style().configure('TNotebook.Tab', font='Helvetica 14 bold')
     ttk.Style().configure('ColButtons.TButton', font='Helvetica 10 bold')
                                                                           
     root.geometry("800x600+100+100")
