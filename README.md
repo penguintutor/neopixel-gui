@@ -3,7 +3,7 @@ Simple graphical interface for controlling neopixel RGB LEDs on a Raspberry Pi
 
 ## Introduction
 
-This project is currently work in progress. More documentation will be provided in future.
+This is a graphical interface for controlling NeoPixels and other RGB PixelStrips. It is created using Python and Pygame.
 
 ## GUI Layout
 
@@ -17,18 +17,16 @@ The Apply button needs to be pressed for the changes to take effect, which allow
 
 ## Supported platform
 
-This is designed to run on a Raspberry Pi and Raspberry Pi 2.
-It has been tested with the [MyPifi Neopixel board](http://smstextblog.blogspot.co.uk/2015/03/afirstly-thank-you-for-purchasing-this.html) and by using a simple MOS-FET switch circuit. Using a MOS-FET requires that the LEDinvert be selected.
-
-## Pre-requisites
-
-Install the neopixel library from: https://github.com/jgarff/rpi_ws281x/tree/rpi2
-
-This needs to be installed for python3
-The final step should be:
-sudo python3 setup.py install
+This is designed to run on a Raspberry Pi with a level-shifter to convert from 3.3V to 5V.
+It has been tested with the [MOS-FET inverting level shifter](http://www.penguintutor.com/electronics/neopixels). Using a MOS-FET requires that the LEDinvert be selected.
 
 ## Install
+
+This is a summary - full details of how to install the software is included in the file INSTALL.md.
+
+First install the Python 3 library from [GitHub rpi-ws281x-python](https://github.com/rpi-ws281x/rpi-ws281x-python). 
+
+You may also need to disable the sound module snd_bcm2835 if not already done.
 
 Download and extract files into a new folder named /home/pi/neopixel
 Copy the appropriate desktop and startmenu files as listed in the INSTALL.md guide. Restart the lxpanel and then the icon should appear on the normal start menu.
@@ -36,8 +34,12 @@ Copy the appropriate desktop and startmenu files as listed in the INSTALL.md gui
 A more detailed install guide is provided in the file INSTALL.md
 
 
+## Changing the sequence
+
+After choosing the appropriate sequence you need to click the Apply button for it to take effect. This allows you to pre-prepare the sequence before making it active.
+
 ## More Information 
 
-More information will be provided on [www.penguintutor.com](http://www.penguintutor.com)
+More information is available at [www.penguintutor.com/projects/pixelstrip](http://www.penguintutor.com/projects/pixelstrip)
 
 

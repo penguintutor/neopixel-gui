@@ -2,9 +2,9 @@
 Type=Application
 Name=NeoPixel Gui
 Comment=RGB LED NeoPixel GUI
-Icon=/home/pi/.local/share/pixmaps/rpnpgpicon.png
+Icon=/home/pi/.local/share/pixmaps/pixelstripicon.png
 Path=/home/pi/neopixel
-Exec=gksudo /home/pi/neopixel/rpnpgp.py
+Exec=sudo /home/pi/neopixel/pixelstrip.py
 Terminal=false
 Categories=DJ;
 

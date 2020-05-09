@@ -1,8 +1,9 @@
-from neopixel import *
+from rpi_ws281x import PixelStrip, Color
+import _rpi_ws281x as ws
 
-# Subclass of Adafruit_NeoPixel - adds the ability to make dynamic changes
+# Subclass of PixelStrip - adds the ability to make dynamic changes
 
-class Dynamic_NeoPixel(Adafruit_NeoPixel):
+class Dynamic_NeoPixel(PixelStrip):
 
     # Update all standard parameters for the LEDs
     def updSettings(self, settings):
