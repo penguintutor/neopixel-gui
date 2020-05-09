@@ -58,7 +58,7 @@ There must be **at least 12 sequences** for the code to run. Any more than 12 wi
 
 Custom sequences can be added by updating the neopixelseq.py file. This is a python file and **any syntax or programming errors may result in the program not running or crashing**.
 
-Note if you add your own sequences and the program fails to run then you will need to terminate the existing processes using the Kill command before trying again. Alternatively running the program from within IDLE will ensure the previous run is properly cleaned up first `gksudo idle3`
+Note if you add your own sequences and the program fails to run then you will need to terminate the existing processes using the Kill command before trying again. 
 
 ### Copying existing sequences
 
@@ -66,7 +66,7 @@ You can copy an existing sequence by copying the entire method. The sequence wil
 
 ### Setting the LED colour
 
-Each LED is set using self.strip.setPixelColor - using the number of the RGB counting from the start of the strip, follwed by the colour as a hexadecimal value. The LED colours will not change at once. Once all the LEDs have been updated then self.strip.show() updates all the LEDs. 
+Each LED is set using self.strip.setPixelColor - using the number of the RGB counting from the start of the strip, followed by the colour as a hexadecimal value. The LED colours will not change at once. Once all the LEDs have been updated then self.strip.show() updates all the LEDs. 
 
 The self.strip.numPixels() method will provide the number of LEDs on the strip.
 
@@ -81,7 +81,7 @@ time.sleep(self.command.getOptions()['delay']/1000.0)
 
 ### Magic number = 4
 
-Where a sequence is repeats over a set number of LEDs other than the number of colours selected by the user then the preferred value is 4. The magic number of 4 is used as it is a factor of all the neopixels rings (12, 16, 24) and it is an easy number to integrate within sequences.
+Where a sequence repeats over a set number of LEDs, other than the number of colours selected by the user, then the preferred value is 4. The magic number of 4 is used as it is a factor of all the neopixels rings (12, 16, 24) and it is an easy number to integrate within sequences.
 
 ### Long running sequences
 
@@ -116,4 +116,4 @@ Any code submitted must be your own work or based upon source code compatible wi
 
 See the user guide for more information on using the application.
 
-More information will also be provided on [www.penguintutor.com](http://www.penguintutor.com)
+More information will also be provided on [www.penguintutor.com/projects/pixelstrip](http://www.penguintutor.com/projects/pixelstrip)

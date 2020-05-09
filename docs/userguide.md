@@ -26,14 +26,8 @@ To launch from the command-line run the following
 
 ```bash
 cd ~/neopixel
-gksudo python3 rpnpgp.py
+sudo ./pixelstrip.py
 ```
-
-## gksudo warning message
-
-When first running you will get a warning message that the application is running with super user privileges without asking for a password. "Granted permission without asking for password". This is required to be able to access the GPIO ports on the Raspberry Pi. If you tick the "Do not display this message again" box then you will not be warned of this again in future.
-
-![gksudo warning message on Raspberry Pi Neopixel application](gksudowarning.png "gksudo warning on the Raspberry Pi")
 
 ## Initial configuration
 
@@ -66,7 +60,7 @@ The buttons are intentionally oversized to allow the application to be used with
 
 The screen is split into a number of areas, relating to different aspects of the LEDs. Most changes will not take effect until the Apply button is pressed, which allows you to set the LEDs using the various settings first.
 
-There is space for 12 buttons which are used to select the light sequence to display. This can be augmented by additional tabs which appear if there are more than 12 sequences available (whichi includes the default configuration). There is a speed controller bar which is used to vary the delay between each step in the LED sequence and the ability to choose between a selection of up to ten colours for output sequence. These values can be changed through the screen and then the change is applied by using the Apply button. The way that the settings are interpretted are based upon the individual sequence chosen.
+There is space for 12 buttons which are used to select the light sequence to display. This can be augmented by additional tabs which appear if there are more than 12 sequences available (which includes the default configuration). There is a speed controller bar which is used to vary the delay between each step in the LED sequence and the ability to choose between a selection of up to ten colours for output sequence. These values can be changed through the screen and then the change is applied by using the Apply button. The way that the settings are interpretted are based upon the individual sequence chosen.
 
 There is also a settings option on the menu which allows changes to the RGB LED driver settings. Most changes to the settings can be made dynamically, although it may be neccessary to restart the application during certain conditions.
 
@@ -155,19 +149,16 @@ If you require the LEDs be turned off then select All Off prior to closing the a
 ## Error messages and known pitfalls or problems
 
 #### Unable to save configuration
-If you receive an error that it's not possible to save the configuration then please check that you are running with sufficient permissions (gksudo is required) and that the disk drive is not full.
-
-#### gksudo warning message. 
-If you receive a warning about running with super user privilages then that is normal. It is required to allow sufficient permissions to send information on the GPIO port. This warning can be disabled by clicking on the appropriate checkbox on the warning message.
+If you receive an error that it's not possible to save the configuration then please check that you are running with sufficient permissions (sudo is required) and that the disk drive is not full.
 
 #### Corrupt or invalid configuration file
 If your configuration file has become corrupted, or you have chosen an invalid GPIO port number then the application may not start. In that case delete the file rpnpgp.cfg from the neopixel directory. The application should then start normally and you will be able to create a new configuration using the config option. 
 
-#### All LEDs come on bright and won't change
+#### All LEDs come on bright and won't change or don't display the correct sequence
 Check that the "Invert Output" setting is correct. It should normally be ticked if using an inverting buffer / transistor switch, otherwise it should be unticked.
 
 #### Program crashes and then all LEDs start flashing
-If the program crashes then it may leave a running thread which is still trying to control the LEDs. If you are familiar with the Linux kill command then you can kill all the rpnpgp processes, otherwise you may need to reboot the computer. This should not happen if you close the application normally. 
+If the program crashes then it may leave a running thread which is still trying to control the LEDs. If you are familiar with the Linux kill command then you can kill all the pixelstrip processes, otherwise you may need to reboot the computer. This should not happen if you close the application normally. 
 
 This is particularly important when creating your own custom sequences which may cause the program to fail, but leave the neopixel thread running.
 
@@ -178,4 +169,4 @@ There is a difference in the colours that are shown on a computer screen and tho
 
 The application can be further customised by adding or removing some of the sequences. These are discussed in the customisation guide, which may require some Python programming.
 
-More information will also be provided on [www.penguintutor.com](http://www.penguintutor.com)
+More information will also be provided on [www.penguintutor.com/projects/pixelstrip](http://www.penguintutor.com/projects/pixelstrip)
